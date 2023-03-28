@@ -6,7 +6,7 @@
 #    By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/03/25 18:22:05 by halvarez         ###   ########.fr        #
+#    Updated: 2023/03/28 14:45:50 by halvarez         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,14 +21,23 @@ DIR		=
 FILES	= main.cpp 
 SRC		+= $(addprefix ${DIR}, ${FILES})
 
+#Subdirectory example (c/p 3 lines)
+CLS_DIR	= ./cls/
+CLS		= cls.cpp cls2/cls2.cpp
+SRC		+= $(addprefix ${CLS_DIR}, ${CLS})
+##
+
 OBJ		= ${SRC:.cpp=.o}
 DEP		= ${OBJ:.o=.d}
 
 CXX		= c++ -Wshadow -std=c++98
+
+#Flag include directory (add -I[DIR])
+CXX		+= -Icls -Icls/cls2
 RM		= rm -rf
 
 #Conditionnal flags depending on building version
-cxxflags.rls	:= -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP
+cxxflags.rls	:= -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP 
 cxxflags.gdb	:= -g3 #-fstandalone-debug
 cxxflags.san	:= -g3 -fsanitize=address #-fstandalone-debug 
 CXXFLAGS		= ${cxxflags.rls} ${cxxflags.${build}}
@@ -60,4 +69,4 @@ re:     fclean
 #Dependencies list
 -include ${DEP}
 
-.PHONY: all clean fclean re bonus
+.PHONY: all clean fclean re bonus run
