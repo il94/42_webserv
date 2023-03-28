@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+         #
+#    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/03/28 14:45:50 by halvarez         ###   ########.fr        #
+#    Updated: 2023/03/28 15:14:45 by ilandols         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@
 build	:= san
 
 #Compilation of the mandatory part
-NAME	= webser
+NAME	= webserv
 
 #Buildings objects
 DIR		=
@@ -22,9 +22,9 @@ FILES	= main.cpp
 SRC		+= $(addprefix ${DIR}, ${FILES})
 
 #Subdirectory example (c/p 3 lines)
-CLS_DIR	= ./cls/
-CLS		= cls.cpp cls2/cls2.cpp
-SRC		+= $(addprefix ${CLS_DIR}, ${CLS})
+# CLS_DIR	= ./cls/
+# CLS		= cls.cpp cls2/cls2.cpp
+# SRC		+= $(addprefix ${CLS_DIR}, ${CLS})
 ##
 
 OBJ		= ${SRC:.cpp=.o}
@@ -33,7 +33,7 @@ DEP		= ${OBJ:.o=.d}
 CXX		= c++ -Wshadow -std=c++98
 
 #Flag include directory (add -I[DIR])
-CXX		+= -Icls -Icls/cls2
+# CXX		+= -Icls -Icls/cls2
 RM		= rm -rf
 
 #Conditionnal flags depending on building version
