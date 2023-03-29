@@ -1,0 +1,10 @@
+=========== WebServ ===========
+-> sockets management
+	->epoll is better than poll or select
+-> parsing HTTP :
+	-> Get / Post method
+	-> GET is more for url, fast and simple
+	-> Post permits to send any volume of data and is more secure
+-> CGI (~execution python / php...)
+-> Cookie
+-> 

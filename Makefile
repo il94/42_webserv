@@ -6,7 +6,7 @@
 #    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/03/28 15:14:45 by ilandols         ###   ########.fr        #
+#    Updated: 2023/03/29 11:37:18 by halvarez         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,14 +17,14 @@ build	:= san
 NAME	= webserv
 
 #Buildings objects
-DIR		=
+DIR		= ./srcs/
 FILES	= main.cpp 
 SRC		+= $(addprefix ${DIR}, ${FILES})
 
 #Subdirectory example (c/p 3 lines)
-# CLS_DIR	= ./cls/
-# CLS		= cls.cpp cls2/cls2.cpp
-# SRC		+= $(addprefix ${CLS_DIR}, ${CLS})
+SRV_DIR	= ${DIR}server/
+SRV		= Server.cpp
+SRC		+= $(addprefix ${SRV_DIR}, ${SRV})
 ##
 
 OBJ		= ${SRC:.cpp=.o}
@@ -33,7 +33,7 @@ DEP		= ${OBJ:.o=.d}
 CXX		= c++ -Wshadow -std=c++98
 
 #Flag include directory (add -I[DIR])
-# CXX		+= -Icls -Icls/cls2
+CXX		+= -Isrcs/server 
 RM		= rm -rf
 
 #Conditionnal flags depending on building version
