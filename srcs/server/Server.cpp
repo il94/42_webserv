@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/29 14:22:44 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/03/30 07:04:43 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,10 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fstream>
+#include <fcntl.h>
+#include <sstream>
+#include <string>
 
 #include "Server.hpp"
 #define PORT 8080
@@ -51,7 +55,18 @@ void	Server::run(void)
 	int			new_socket;
 	long		valread __attribute__((unused));
 	int			addrlen;
-	std::string	hello = "halvarez rules this fucking world !!! 8===D";
+	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
+	int hfd = open("./html/index.html", O_RDONLY );
+	char b[30000];
+
+	read( hfd, b, 30000);
+	std::string html(b);
+
+	std::ostringstream oss;
+    oss << html.size();
+	hello = hello + oss.str() + "\n" + b;
+	
+	std::cout << hello  << std::endl;
 	struct sockaddr_in address;
 	
 	if ( (server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0 )
@@ -70,7 +85,7 @@ void	Server::run(void)
 
 	if (bind( server_fd, (struct sockaddr *)&address, sizeof(address)) < 0 )
 	{
-		std::cerr << "Error: during binding" << std::endl;
+		perror("Error: during binding");
 		exit( 1 );
 	}
 
@@ -89,8 +104,8 @@ void	Server::run(void)
 		}
 		char buffer[30000] = {0};
 		read( new_socket, buffer, 30000);
+		std::cout << buffer << std::endl;
 		write( new_socket, hello.c_str(), hello.size() );
-		std::cout << "========== hello world sent ==========" << std::endl;
 		close( new_socket );
 	}
 	return;
