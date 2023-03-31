@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/31 19:49:20 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/03/31 19:50:14 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)) )
 // Public member functions ================================================== //
 void	Server::run(void)
 {
-	int			server_fd;
+	int			server_fd __attribute__((unused));
 	int			new_socket;
 	long		valread __attribute__((unused));
 	int			addrlen;
