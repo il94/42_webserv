@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/31 19:31:18 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/03/31 20:20:10 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,9 @@ class Server
 //		void				bind(void);
 		void				mkSrvSocket(void);
 
-		void				setSrvFd(const int fd);
+		void				setSrvFd(const int & fd);
 		const int		 &	getSrvFd(void)					const;
+		//int		 			getSrvFd(void)					const;
 		t_sockaddr		 *	getSockAddr(void)				const; 
 
 	private:
