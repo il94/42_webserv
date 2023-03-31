@@ -6,32 +6,38 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/29 21:22:00 by auzun            ###   ########.fr       */
+/*   Updated: 2023/03/31 19:02:25 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <stdio.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
 
 class Server
 {
 	public:
-					Server(void);
-					Server(const Server & srv);
-					~Server(void);
+		typedef struct sockaddr		t_sockaddr;
+		typedef struct sockaddr_in	t_sockaddr_in;
 
-		Server &	operator=(const Server & srv);
+							Server(void);
+							Server(const Server & srv);
+							~Server(void);
 
-		void		run(void);
+		Server			 &	operator=(const Server & srv);
+
+		void				run(void);
+//		void				bind(void);
+		void				mkSrvSocket(void);
+
+		void				setSrvFd(const int fd);
+		const int		 &	getSrvFd(void)					const;
+		t_sockaddr		 *	getSockAddr(void)				const; 
 
 	private:
+		int					_srvFd;
+		t_sockaddr *		_address;
+		//int			_port_srv;
 
 };
 
