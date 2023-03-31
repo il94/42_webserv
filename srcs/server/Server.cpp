@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/31 19:07:55 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/03/31 19:49:20 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,15 +71,10 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)) )
 // Public member functions ================================================== //
 void	Server::run(void)
 {
-	//ft_variables
-	int					new_socket;
-
-	//old variables from server example
-	long				valread __attribute__((unused));
-	int					addrlen;
-	// ====================================================================== //
-
-	// testing values ======================================================= //
+	int			server_fd;
+	int			new_socket;
+	long		valread __attribute__((unused));
+	int			addrlen;
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 	int hfd = open("./html/index.html", O_RDONLY );
 	char b[30000];
@@ -92,23 +87,29 @@ void	Server::run(void)
 	hello = hello + oss.str() + "\n" + b;
 	
 	std::cout << hello  << std::endl;
-	// ====================================================================== //
 	
-	// Creating sockets ===================================================== //
-	this->mkSrvSocket();
+	if ( (server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0 )
+	{
+		std::cerr << "Error: socket creation failed." << std::endl;
+		exit( 1 );
+	}
 
-	if ( listen( this->getSrvFd(), 10 ) < 0 )
+	if (bind( server_fd, this->getSockAddr(), sizeof( t_sockaddr )) < 0 )
+	{
+		perror("Error: during binding");
+		exit( 1 );
+	}
+	//this->mkSrvSocket();
+
+	if ( listen(server_fd, 10) < 0 )
 	{
 		std::cerr << "Error: listening" << std::endl;
 		exit( 1 );
 	}
-	// ====================================================================== //
-
-	// Server loop ========================================================== //
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		if ( (new_socket = accept(this->getSrvFd(), this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
+		if ( (new_socket = accept(server_fd, this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
 		{
 			std::cerr << "Error: accepting connection" <<std::endl;
 			exit( 1 );
@@ -119,7 +120,6 @@ void	Server::run(void)
 		write( new_socket, hello.c_str(), hello.size() );
 		close( new_socket );
 	}
-	// ====================================================================== //
 	return;
 }
 
@@ -127,7 +127,7 @@ void	Server::mkSrvSocket(void)
 {
 	this->setSrvFd( socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ) );
 
-	if ( bind( this->getSrvFd(), this->getSockAddr(), sizeof(Server::t_sockaddr) ) == -1 )
+	if ( bind( this->getSrvFd(), this->getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
 	{
 		std::cerr << "Error: during binding" << std::endl;
 		exit( 1 );
