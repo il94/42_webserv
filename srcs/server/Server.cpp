@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/31 20:28:37 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/01 18:05:29 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <cstdlib>
+#include <cstdio>
 #include <fstream>
 #include <fcntl.h>
 
@@ -38,7 +39,6 @@ Server::Server(void)
 	}
 
 	this->_address = reinterpret_cast<t_sockaddr *>(&address);
-	//this->_address = (t_sockaddr *)(&address);
 	return;
 }
 
@@ -46,7 +46,7 @@ Server::Server(const Server & srv __attribute__((unused)) )
 {
 	int	i = 0;
 
-	this->_srvFd				= srv.getSrvFd();
+	this->_srvfd				= srv.getSrvFd();
 	this->_address->sa_family	= ( srv.getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -71,9 +71,7 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)) )
 // Public member functions ================================================== //
 void	Server::run(void)
 {
-	int			server_fd __attribute__((unused));
 	int			new_socket;
-	long		valread __attribute__((unused));
 	int			addrlen;
 
 	// Testing data ========================================================= //
@@ -91,26 +89,12 @@ void	Server::run(void)
 	std::cout << hello  << std::endl;
 	// ====================================================================== //
 	
-	// Socket creation ====================================================== //
-	if ( (server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0 )
-	{
-		std::cerr << "Error: socket creation failed." << std::endl;
-		exit( 1 );
-	}
+	this->mkSrvSocket();
 
-	if (bind( server_fd, this->getSockAddr(), sizeof( t_sockaddr )) < 0 )
-	{
-		perror("Error: during binding");
-		exit( 1 );
-	}
-	
-	this->setSrvFd( server_fd );
-	//this->mkSrvSocket();
-	// ====================================================================== //
-
+	// Conncetion management ================================================ //
 	if ( listen( this->getSrvFd(), 10) < 0 )
 	{
-		std::cerr << "Error: listening" << std::endl;
+		perror("Error");
 		exit( 1 );
 	}
 	while ( 1 )
@@ -118,7 +102,7 @@ void	Server::run(void)
 		std::cout << "========== waiting for connection ==========" << std::endl;
 		if ( (new_socket = accept( this->getSrvFd(), this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
 		{
-			std::cerr << "Error: accepting connection" <<std::endl;
+			perror("Error");
 			exit( 1 );
 		}
 		char buffer[30000] = {0};
@@ -133,23 +117,34 @@ void	Server::run(void)
 void	Server::mkSrvSocket(void)
 {
 	int	fd;
+	int	opt = 1;
 
-	fd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
+	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
+	if (fd == -1)
+	{
+		perror("Error");
+		exit( 1 );
+	}
+	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
+	{
+		perror("Error");
+		exit( 1 );
+	}
 	if ( bind( fd, this->getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
 	{
-		std::cerr << "Error: during binding" << std::endl;
+		perror("Error");
 		exit( 1 );
 	}
 	this->setSrvFd( fd );
-	return;// ( fd );
+	return;
 }
 
 void	Server::setSrvFd(const int & fd)
 {
-	this->_srvFd = fd;
-	if ( this->_srvFd == -1 )
+	this->_srvfd = fd;
+	if ( this->_srvfd == -1 )
 	{
-		std::cerr << "Error: socket creation failed" << std::endl;
+		std::cerr << "Error: invalid fd value : -1" << std::endl;
 		exit( 1 );
 	}
 	return;
@@ -157,7 +152,7 @@ void	Server::setSrvFd(const int & fd)
 
 const int & 	Server::getSrvFd(void) const
 {
-	return ( this->_srvFd );
+	return ( this->_srvfd );
 }
 
 Server::t_sockaddr *	Server::getSockAddr(void) const
