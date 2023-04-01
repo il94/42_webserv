@@ -6,17 +6,13 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/03/31 23:08:24 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/01 06:07:22 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request(void){};
-
-Request::Request(std::string req): _request(req){};
-
-Request::Request(char * req): _request(req){};
+Request::Request(void): _reqBody(""){};
 
 void	Request::setRequestAtr(std::string req)
 {
@@ -51,3 +47,46 @@ void	Request::setRequestAtr(std::string req)
 	if (bodyPosition != std::string::npos)
 		_reqBody = req.substr(bodyPosition + 2);
 }
+
+void	Request::setQueryM()
+{
+	std::string	queryString;
+
+	if (getMethod() == "GET")
+	{
+		std::string	URL = getURL();
+		size_t	queryPos = URL.find("?");
+		if (queryPos == std::string::npos)
+			return;
+		_data[1] = URL.substr(0, queryPos);
+		queryString = URL.substr(queryPos + 1);
+	}
+	else if (getMethod() == "POST")
+		queryString = _reqBody;
+	else
+		return ;
+	_requestContent = queryString;
+	while (queryString != "")
+	{
+		std::string	subQuery = queryString.substr(0, queryString.find("&"));
+		_queryM[subQuery.substr(0, subQuery.find("=") + 1)] = subQuery.substr(subQuery.find("=") + 1);
+		if (queryString.find("&") != std::string::npos)
+			queryString.substr(queryString.find("&") + 1);
+		else
+			queryString = "";
+	}
+}
+
+std::string Request::getURL() const { return _data[1]; }
+
+std::string Request::getMethod() const { return _data[0]; }
+
+std::string Request::getRequestContent() const { return _requestContent; }
+
+std::string Request::getHTTPVersion() const { return _data[2]; }
+
+std::string Request::getElInHeader(std::string key) const { return _headerM[key]; }
+
+std::string Request::getRequestBody() const { return _reqBody; }
+
+std::string Request::getRequestBody() const { return _queryM; }

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:55 by auzun             #+#    #+#             */
-/*   Updated: 2023/03/31 23:06:15 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/01 06:07:12 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,21 +24,29 @@
 class	Request
 {
 	public:
-		Request(std::string req);
-		Request(char * req);
 		~Request(void);
 
+		std::string	getMethod() const;
+		std::string	getURL() const;
+		std::string	getRequestContent() const;
+		std::string	getHTTPVersion() const;
+		std::string	getElInHeader(std::string key) const;
+		std::string	getRequestBody() const;
+		std::map<std::string, std::string>	getQueryMap() const;
+
+
 		void	setRequestAtr(std::string req);
+		void	setQueryM();
 
 	private:
 		Request(void);
 
 		std::vector<std::string>	_data;
 		std::map<std::string, std::string>	_headerM;
+		std::map<std::string, std::string>	_queryM;
 
+		std::string	_requestContent;
 		std::string	_reqBody;
-		std::string	_request;
-		std::string	_method;
 	
 };
 
