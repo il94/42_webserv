@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/01 18:05:29 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 16:29:00 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Server::Server(const Server & srv __attribute__((unused)) )
 {
 	int	i = 0;
 
-	this->_srvfd				= srv.getSrvFd();
+	this->_srvfd				= srv.getFd( SRV );
 	this->_address->sa_family	= ( srv.getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -59,6 +59,8 @@ Server::Server(const Server & srv __attribute__((unused)) )
 // Destructor =============================================================== ///
 Server::~Server(void)
 {
+	if ( close( this->getFd( SRV ) ) == -1 )
+		perror("Error");
 	return;
 }
 
@@ -92,7 +94,7 @@ void	Server::run(void)
 	this->mkSrvSocket();
 
 	// Conncetion management ================================================ //
-	if ( listen( this->getSrvFd(), 10) < 0 )
+	if ( listen( this->getFd( SRV ), 10) < 0 )
 	{
 		perror("Error");
 		exit( 1 );
@@ -100,7 +102,7 @@ void	Server::run(void)
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		if ( (new_socket = accept( this->getSrvFd(), this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
+		if ( (new_socket = accept( this->getFd( SRV ), this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
 		{
 			perror("Error");
 			exit( 1 );
@@ -135,24 +137,37 @@ void	Server::mkSrvSocket(void)
 		perror("Error");
 		exit( 1 );
 	}
-	this->setSrvFd( fd );
+	this->setFd( SRV, fd );
 	return;
 }
 
-void	Server::setSrvFd(const int & fd)
+void	Server::setFd(const t_fd FD, const int & fd)
 {
-	this->_srvfd = fd;
-	if ( this->_srvfd == -1 )
+	switch ( FD )
 	{
-		std::cerr << "Error: invalid fd value : -1" << std::endl;
-		exit( 1 );
+		case SRV :
+			this->_srvfd = fd;
+			return;
+		case EPL :
+			this->_eplfd = fd;
+			return;
+		default :
+			std::cerr << "Error: invalid fd value : " << fd << std::endl;
+			exit( 1 );
+			return;
 	}
 	return;
 }
 
-const int & 	Server::getSrvFd(void) const
+const int & 	Server::getFd( const t_fd FD ) const
 {
-	return ( this->_srvfd );
+	switch ( FD )
+	{
+		case SRV :
+			return ( this->_srvfd );
+		case EPL :
+			return ( this->_eplfd );
+	}
 }
 
 Server::t_sockaddr *	Server::getSockAddr(void) const

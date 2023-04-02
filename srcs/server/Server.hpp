@@ -6,13 +6,18 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/01 17:40:11 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 16:24:46 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+typedef enum e_fd
+{
+	SRV,
+	EPL
+}			t_fd;
 
 class Server
 {
@@ -29,13 +34,13 @@ class Server
 		void				run(void);
 		void				mkSrvSocket(void);
 
-		void				setSrvFd(const int & fd);
-		const int		 &	getSrvFd(void)					const;
-		t_sockaddr		 *	getSockAddr(void)				const; 
+		void				setFd(const t_fd FD, const int & fd);
+		const int		 &	getFd(const t_fd FD)					const;
+		t_sockaddr		 *	getSockAddr(void)						const; 
 
 	private:
 		int					_srvfd;
-//		int					_epfd;
+		int					_eplfd __attribute__((unused));
 		t_sockaddr		 *	_address;
 
 };
