@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/01 06:07:22 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/02 06:41:56 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ std::string Request::getRequestContent() const { return _requestContent; }
 
 std::string Request::getHTTPVersion() const { return _data[2]; }
 
-std::string Request::getElInHeader(std::string key) const { return _headerM[key]; }
+std::string Request::getElInHeader(std::string key) { return _headerM[key]; }
 
 std::string Request::getRequestBody() const { return _reqBody; }
 
