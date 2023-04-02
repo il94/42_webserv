@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 07:27:57 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/02 22:33:30 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <fstream>
+#include "../../utils/utils.hpp"
 #include "../request/Request.hpp"
 
 class Response
@@ -24,17 +25,35 @@ class Response
 		Response(void);
 		~Response(void);
 
+		/*Methods*/
+		void	GET(Request	&request);
+		/*-------*/
+
+		/*Response Utils*/
 		int	readContent(void);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
-		
-		std::string		getHeader(size_t size, const std::string& path, int code, std::string type);
+		/*---------------*/
 
+		/*Header*/
+		void	setContentType(std::string path);
+		void	setCode(int	code);
+		void	setContentLength(size_t size);
+		std::string	writeHeader(void);
+		std::string	getHeader(size_t size, std::string path, int code);
+		/*------*/
 	
 	private :
+
+		/*Header*/
+		std::string	_contentLength;
+		std::string	_contentType;
+		std::string	_code;
+		/*------*/
+		
 		Request	_request;
 		std::string	_response;
-}
+};
 
 
 #endif
