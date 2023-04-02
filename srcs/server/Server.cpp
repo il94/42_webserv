@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/02 16:29:00 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 18:12:18 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,50 +21,46 @@
 
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 
 #include "Server.hpp"
 #define PORT 8080
 
 // Constructors ============================================================= //
-Server::Server(void)
+Server::Server(void) : _srvfd( -1 ), _eplfd( -1 )
 {
-	static t_sockaddr_in	address;
-
-	address.sin_family		= AF_INET;
-	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_port		= htons( PORT );
-	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
-	{
-		address.sin_zero[i] = '\0';
-	}
-
-	this->_address = reinterpret_cast<t_sockaddr *>(&address);
+	this->_setSockAddr();
+	this->_mkSrvSocket();
+	this->_mkEpoll();
 	return;
 }
 
-Server::Server(const Server & srv __attribute__((unused)) )
+Server::Server(const Server & srv)
 {
 	int	i = 0;
 
-	this->_srvfd				= srv.getFd( SRV );
-	this->_address->sa_family	= ( srv.getSockAddr() )->sa_family;
+	this->_srvfd				= srv._getFd( SRV );
+	this->_eplfd				= srv._getFd( EPL );
+	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
 	while (i < 14)
 	{
-		this->_address->sa_data[i] = ( srv.getSockAddr() )->sa_data[i];
+		this->_address->sa_data[i] = ( srv._getSockAddr() )->sa_data[i];
 		i++;
 	}
 	return;
 }
 
-// Destructor =============================================================== ///
+// Destructor =============================================================== //
 Server::~Server(void)
 {
-	if ( close( this->getFd( SRV ) ) == -1 )
-		perror("Error");
+	if ( this->_srvfd != -1 && close( this->_srvfd ) == -1 )
+		perror("Error closing server fd");
+	if ( this->_eplfd != -1 && close( this->_eplfd ) == -1 )
+		perror("Error closing epoll fd");
 	return;
 }
 
-// Operators ================================================================ ///
+// Operators ================================================================ //
 Server &	Server::operator=(const Server & srv __attribute__((unused)) )
 {
 	return ( *this );
@@ -91,10 +87,9 @@ void	Server::run(void)
 	std::cout << hello  << std::endl;
 	// ====================================================================== //
 	
-	this->mkSrvSocket();
 
 	// Conncetion management ================================================ //
-	if ( listen( this->getFd( SRV ), 10) < 0 )
+	if ( listen( this->_getFd( SRV ), 10) < 0 )
 	{
 		perror("Error");
 		exit( 1 );
@@ -102,7 +97,7 @@ void	Server::run(void)
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		if ( (new_socket = accept( this->getFd( SRV ), this->getSockAddr(), (socklen_t*)&addrlen)) < 0 )
+		if ( (new_socket = accept( this->_getFd( SRV ), this->_getSockAddr(), (socklen_t*)&addrlen)) < 0 )
 		{
 			perror("Error");
 			exit( 1 );
@@ -116,31 +111,48 @@ void	Server::run(void)
 	return;
 }
 
-void	Server::mkSrvSocket(void)
+// Private member functions ================================================= //
+void	Server::_mkSrvSocket(void)
 {
-	int	fd;
+	int	fd	= -1;
 	int	opt = 1;
 
 	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
 	if (fd == -1)
 	{
-		perror("Error");
+		perror("Socket error");
 		exit( 1 );
 	}
 	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
 	{
-		perror("Error");
+		perror("Error setting socket options");
 		exit( 1 );
 	}
-	if ( bind( fd, this->getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
+	if ( bind( fd, this->_getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
 	{
-		perror("Error");
+		perror("Bind error");
 		exit( 1 );
 	}
-	this->setFd( SRV, fd );
+	this->_srvfd = fd;
 	return;
 }
 
+void	Server::_mkEpoll(void)
+{
+	int	fd	= -1;
+
+	fd = epoll_create( 1 );
+	if ( fd == -1 )
+	{
+		perror("Error creating epoll instance");
+		exit( 1 );
+	}
+	this->_eplfd = fd;
+	return;
+}
+
+/*
+//void				setFd(const t_fd FD, const int & fd);
 void	Server::setFd(const t_fd FD, const int & fd)
 {
 	switch ( FD )
@@ -158,8 +170,24 @@ void	Server::setFd(const t_fd FD, const int & fd)
 	}
 	return;
 }
+*/
 
-const int & 	Server::getFd( const t_fd FD ) const
+void	Server::_setSockAddr(void)
+{
+	static t_sockaddr_in	address;
+
+	address.sin_family		= AF_INET;
+	address.sin_addr.s_addr	= INADDR_ANY;
+	address.sin_port		= htons( PORT );
+	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
+	{
+		address.sin_zero[i] = '\0';
+	}
+	this->_address = reinterpret_cast<t_sockaddr *>(&address);
+	return;
+}
+
+const int & 	Server::_getFd( const t_fd FD ) const
 {
 	switch ( FD )
 	{
@@ -170,9 +198,8 @@ const int & 	Server::getFd( const t_fd FD ) const
 	}
 }
 
-Server::t_sockaddr *	Server::getSockAddr(void) const
+Server::t_sockaddr *	Server::_getSockAddr(void) const
 {
 	return ( this->_address );
 }
 
-// Private member functions ================================================= //

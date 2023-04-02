@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/02 16:24:46 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 18:22:08 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Server
 	public:
 		typedef		struct sockaddr			t_sockaddr;
 		typedef 	struct sockaddr_in		t_sockaddr_in;
+		typedef		struct epoll_event		t_epoll_event;
 
 							Server(void);
 							Server(const Server & srv);
@@ -32,16 +33,18 @@ class Server
 		Server			 &	operator=(const Server & srv);
 
 		void				run(void);
-		void				mkSrvSocket(void);
-
-		void				setFd(const t_fd FD, const int & fd);
-		const int		 &	getFd(const t_fd FD)					const;
-		t_sockaddr		 *	getSockAddr(void)						const; 
 
 	private:
 		int					_srvfd;
-		int					_eplfd __attribute__((unused));
+		int					_eplfd; 
 		t_sockaddr		 *	_address;
+		t_epoll_event	 *	_eplev;
+
+		void				_mkSrvSocket(void);
+		void				_mkEpoll(void);
+		void				_setSockAddr(void);
+		const int		 &	_getFd(const t_fd FD)				const;
+		t_sockaddr 		 *	_getSockAddr(void)					const; 
 
 };
 
