@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/02 18:22:08 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 18:28:06 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,9 @@ class Server
 		t_sockaddr		 *	_address;
 		t_epoll_event	 *	_eplev;
 
+		void				_setSockAddr(void);
 		void				_mkSrvSocket(void);
 		void				_mkEpoll(void);
-		void				_setSockAddr(void);
 		const int		 &	_getFd(const t_fd FD)				const;
 		t_sockaddr 		 *	_getSockAddr(void)					const; 
 

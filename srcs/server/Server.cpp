@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/02 18:12:18 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/02 18:29:01 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ Server::Server(const Server & srv)
 		this->_address->sa_data[i] = ( srv._getSockAddr() )->sa_data[i];
 		i++;
 	}
+	//-----------> don't forget to cpy epoll_event <-----------
 	return;
 }
 
@@ -112,6 +113,21 @@ void	Server::run(void)
 }
 
 // Private member functions ================================================= //
+void	Server::_setSockAddr(void)
+{
+	static t_sockaddr_in	address;
+
+	address.sin_family		= AF_INET;
+	address.sin_addr.s_addr	= INADDR_ANY;
+	address.sin_port		= htons( PORT );
+	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
+	{
+		address.sin_zero[i] = '\0';
+	}
+	this->_address = reinterpret_cast<t_sockaddr *>(&address);
+	return;
+}
+
 void	Server::_mkSrvSocket(void)
 {
 	int	fd	= -1;
@@ -139,7 +155,8 @@ void	Server::_mkSrvSocket(void)
 
 void	Server::_mkEpoll(void)
 {
-	int	fd	= -1;
+	static t_epoll_event	eplev;
+	int						fd	= -1;
 
 	fd = epoll_create( 1 );
 	if ( fd == -1 )
@@ -148,42 +165,6 @@ void	Server::_mkEpoll(void)
 		exit( 1 );
 	}
 	this->_eplfd = fd;
-	return;
-}
-
-/*
-//void				setFd(const t_fd FD, const int & fd);
-void	Server::setFd(const t_fd FD, const int & fd)
-{
-	switch ( FD )
-	{
-		case SRV :
-			this->_srvfd = fd;
-			return;
-		case EPL :
-			this->_eplfd = fd;
-			return;
-		default :
-			std::cerr << "Error: invalid fd value : " << fd << std::endl;
-			exit( 1 );
-			return;
-	}
-	return;
-}
-*/
-
-void	Server::_setSockAddr(void)
-{
-	static t_sockaddr_in	address;
-
-	address.sin_family		= AF_INET;
-	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_port		= htons( PORT );
-	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
-	{
-		address.sin_zero[i] = '\0';
-	}
-	this->_address = reinterpret_cast<t_sockaddr *>(&address);
 	return;
 }
 
@@ -203,3 +184,23 @@ Server::t_sockaddr *	Server::_getSockAddr(void) const
 	return ( this->_address );
 }
 
+/*
+	//void				setFd(const t_fd FD, const int & fd);
+	void	Server::setFd(const t_fd FD, const int & fd)
+	{
+		switch ( FD )
+		{
+			case SRV :
+				this->_srvfd = fd;
+				return;
+			case EPL :
+				this->_eplfd = fd;
+				return;
+			default :
+				std::cerr << "Error: invalid fd value : " << fd << std::endl;
+				exit( 1 );
+				return;
+		}
+		return;
+	}
+*/
