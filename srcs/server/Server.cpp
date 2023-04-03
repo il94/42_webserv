@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/03 06:04:22 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/03 09:50:27 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,16 +58,6 @@ void	Server::run(void)
 	int			new_socket;
 	long		valread __attribute__((unused));
 	int			addrlen;
-	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
-	int hfd = open("./html/index.html", O_RDONLY );
-	char b[30000];
-
-	read( hfd, b, 30000);
-	std::string html(b);
-
-	std::ostringstream oss;
-    oss << html.size();
-	hello = hello + oss.str() + "\n" + b;
 	
 	struct sockaddr_in address;
 	
@@ -113,22 +103,9 @@ void	Server::run(void)
 		Response	response(req);
 		response.GET();
 		std::cout << buffer << std::endl;
-		std::cout << req.getURL() << std::endl;
 		std::cout << response.getResponse() << std::endl;
-		if (response.fileExist(req.getURL()))
-		{
-			write( new_socket, response.getResponse().c_str(), hello.size() );
-			std::cout << "file exist" << std::endl;
-		}
-		else
-			std::cout << "file dont exist" << req.getURL() << std::endl;
+		write( new_socket, response.getResponse().c_str(), response.getResponse().size() );
 		close( new_socket );
-		if (!response.fileExist("html/index.html"))
-		{
-			std::cout << "y a pas chakal" << std::endl;
-		}
-		else
-			std::cout << "y a chakal" << std::endl; 
 	}
 	return;
 }
