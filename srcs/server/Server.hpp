@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/03 10:18:51 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/03 14:37:15 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ class Server
 		void				_setEpollEvent(void);
 		void				_mkEpoll(void);
 		const int		 &	_getFd(const t_fd FD)				const;
-		t_sockaddr 		 *	_getSockAddr(void)					const; 
+		t_sockaddr 		 *	_getSockAddr(void)					const;
+		t_epoll_event	 *  _getEpollEvent(void)				const;
 
 };
 
