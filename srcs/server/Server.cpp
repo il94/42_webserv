@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/03 15:59:28 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/03 20:18:34 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ Server::Server(void) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NUL
 {
 	this->_setSockAddr();
 	this->_mkSrvSocket();
+	this->_setEpollEvent();
 	this->_mkEpoll();
 	return;
 }
@@ -103,6 +104,7 @@ void	Server::run(void)
 	int				nbEvents	__attribute__((unused)) = -1;
 	int				i									= 0;
 	int				bytes		__attribute__((unused))	= 0;
+	char			buffer[1000] = {0};
 	//t_epoll_event	cliEvents[ MAX_EVENTS ];
 
 	// Testing data ========================================================= //
@@ -117,22 +119,24 @@ void	Server::run(void)
     oss << html.size();
 	hello = hello + oss.str() + "\n" + b;
 	
-	std::cout << hello  << std::endl;
+	//std::cout << hello  << std::endl;
 	// ====================================================================== //
 
 	// Connection management ================================================ //
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		nbEvents = epoll_wait( this->_getFd( EPL ), this->_getEpollEvent(), MAX_EVENTS, 30000);
+		nbEvents = epoll_wait( this->_getFd( EPL ), this->_eplev, MAX_EVENTS, 30000);
 		std::cout << "============================================" << std::endl;
 		i = 0;
 		while ( i < nbEvents )
 		{
 			//bytes = recv();
+			recv( this->_getFd( SRV ), buffer, 1000, 0 );
 			send( this->_getFd( SRV ), hello.c_str(), hello.size(), 0 );
 			i++;
 		}
+		*buffer = '\0';
 		//close( cliSocket );
 	}
 	// ====================================================================== //
@@ -187,7 +191,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN | EPOLLERR | EPOLLHUP;
+	eplev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;
@@ -204,13 +208,6 @@ void	Server::_mkEpoll(void)
 		perror("epoll_create");
 		exit( 1 );
 	}
-	if ( epoll_ctl( this->_getFd( EPL ), EPOLL_CTL_ADD, this->_getFd( SRV ), this->_eplev ) == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("epoll_ctl");
-		exit( 1 );
-	}
-
 	this->_eplfd = fd;
 	return;
 }
@@ -223,6 +220,8 @@ const int & 	Server::_getFd( const t_fd FD ) const
 			return ( this->_srvfd );
 		case EPL :
 			return ( this->_eplfd );
+		default :
+			throw;
 	}
 }
 
