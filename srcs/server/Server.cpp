@@ -6,28 +6,29 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/02 18:38:28 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/03 10:46:08 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <cstdlib>
-#include <cstdio>
 #include <fstream>
-#include <fcntl.h>
+//#include <string>
+//#include <cstdio>
 
+#include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 
+#include <fcntl.h>
 #include "Server.hpp"
+
 #define PORT 8080
 
 // Constructors ============================================================= //
-Server::Server(void) : _srvfd( -1 ), _eplfd( -1 )
+Server::Server(void) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
 	this->_setSockAddr();
 	this->_mkSrvSocket();
@@ -35,10 +36,12 @@ Server::Server(void) : _srvfd( -1 ), _eplfd( -1 )
 	return;
 }
 
-Server::Server(const Server & srv)
+Server::Server(const Server & srv) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
 	int	i = 0;
 
+	if (this->_address == NULL)
+		this->_setSockAddr();
 	this->_srvfd				= srv._getFd( SRV );
 	this->_eplfd				= srv._getFd( EPL );
 	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
@@ -47,7 +50,10 @@ Server::Server(const Server & srv)
 		this->_address->sa_data[i] = ( srv._getSockAddr() )->sa_data[i];
 		i++;
 	}
-	//-----------> don't forget to cpy epoll_event <-----------
+	if (this->_eplev == NULL)
+		this->_setEpollEvent();
+	this->_eplev->events = srv._eplev->events;
+	this->_eplev->data.fd = srv._getFd( SRV );
 	return;
 }
 
@@ -86,10 +92,8 @@ void	Server::run(void)
 	hello = hello + oss.str() + "\n" + b;
 	
 	std::cout << hello  << std::endl;
-	// ====================================================================== //
-	
 
-	// Conncetion management ================================================ //
+	// Connection management ================================================ //
 	if ( listen( this->_getFd( SRV ), 10) < 0 )
 	{
 		perror("Error");
@@ -153,10 +157,19 @@ void	Server::_mkSrvSocket(void)
 	return;
 }
 
-void	Server::_mkEpoll(void)
+void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
-	int						fd	= -1;
+
+	eplev.events = EPOLLIN | EPOLLERR | EPOLLHUP;
+	eplev.data.fd = this->_getFd( SRV );
+	this->_eplev = &eplev;
+	return;
+}
+
+void	Server::_mkEpoll(void)
+{
+	int	fd	= -1;
 
 	fd = epoll_create( 1 );
 	if ( fd == -1 )
@@ -164,6 +177,12 @@ void	Server::_mkEpoll(void)
 		perror("Error creating epoll instance");
 		exit( 1 );
 	}
+	if ( epoll_ctl( this->_getFd( EPL ), EPOLL_CTL_ADD, this->_getFd( SRV ), this->_eplev ) == -1 )
+	{
+		perror("Error adding server socket into epoll instance");
+		exit( 1 );
+	}
+
 	this->_eplfd = fd;
 	return;
 }
