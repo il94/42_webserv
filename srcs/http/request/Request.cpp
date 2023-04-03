@@ -6,13 +6,15 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 06:41:56 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/03 00:20:31 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request(void): _reqBody(""){};
+Request::Request(void): _reqBody(""){}
+
+Request::~Request(void){}
 
 void	Request::setRequestAtr(std::string req)
 {
@@ -28,9 +30,13 @@ void	Request::setRequestAtr(std::string req)
 		return ;/*send exception*/
 	if (_data[2].find("HTTP/1.1") == std::string::npos)
 		return ; /*send exception de http version is invalid*/
-
+	if (_data[1][0] == '/')
+	{
+		_data[1] = _data[1].substr(_data[1].find("/") + 1, _data[1].size() - 1);
+		std::cout << "y a probleme " << std::endl;
+	}
+	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
-	std::string			tmp;
 	while (std::getline(stream, tmp))
 	{
 		if (tmp == "")
@@ -88,5 +94,3 @@ std::string Request::getHTTPVersion() const { return _data[2]; }
 std::string Request::getElInHeader(std::string key) { return _headerM[key]; }
 
 std::string Request::getRequestBody() const { return _reqBody; }
-
-std::string Request::getRequestBody() const { return _queryM; }

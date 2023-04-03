@@ -6,21 +6,25 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 22:38:37 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/03 06:03:50 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void) {};
+Response::Response(void) {}
 
-Response::~Response(void) {};
+Response::Response(Request request): _request(request) {}
+
+Response::~Response(void) {}
 
 /*Methods*/
-void	Response::GET(Request	&request)
+void	Response::GET(void)
 {
-	_response = readContent();
-	_response = getHeader(_response.size(), request.getURL(), 200) + "\r\n" + _response;
+	if (_request.getMethod() != "GET")
+		return ;
+	readContent();
+	_response = getHeader(_response.size(), _request.getURL(), 200) + "\r\n" + _response;
 }
 /*-------*/
 
@@ -31,6 +35,8 @@ int	Response::readContent(void)
 	std::stringstream	buffer;
 	std::string	path = _request.getURL();
 
+	_response = "";
+
 	if (fileExist(path))
 	{
 		file.open(path.c_str(), std::ifstream::in);
@@ -38,7 +44,6 @@ int	Response::readContent(void)
 		{
 			return (-1);
 		}
-		
 		buffer << file.rdbuf();
 		_response = buffer.str();
 		file.close();
@@ -128,3 +133,5 @@ void	Response::setContentType(std::string path)
 
 }
 /*------*/
+
+std::string	Response::getResponse() {return _response;}

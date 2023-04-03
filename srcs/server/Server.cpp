@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/30 16:17:50 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/03 06:04:22 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 #include <string>
 
 #include "Server.hpp"
+#include "../http/request/Request.hpp"
+#include "../http/response/Response.hpp"
+
 #define PORT 8080
 
 // Constructors ============================================================= //
@@ -66,7 +69,6 @@ void	Server::run(void)
     oss << html.size();
 	hello = hello + oss.str() + "\n" + b;
 	
-	std::cout << hello  << std::endl;
 	struct sockaddr_in address;
 	
 	if ( (server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0 )
@@ -104,9 +106,29 @@ void	Server::run(void)
 		}
 		char buffer[30000] = {0};
 		read( new_socket, buffer, 30000);
+		
+		Request		req;
+		req.setRequestAtr(buffer);
+		req.setQueryM();
+		Response	response(req);
+		response.GET();
 		std::cout << buffer << std::endl;
-		write( new_socket, hello.c_str(), hello.size() );
+		std::cout << req.getURL() << std::endl;
+		std::cout << response.getResponse() << std::endl;
+		if (response.fileExist(req.getURL()))
+		{
+			write( new_socket, response.getResponse().c_str(), hello.size() );
+			std::cout << "file exist" << std::endl;
+		}
+		else
+			std::cout << "file dont exist" << req.getURL() << std::endl;
 		close( new_socket );
+		if (!response.fileExist("html/index.html"))
+		{
+			std::cout << "y a pas chakal" << std::endl;
+		}
+		else
+			std::cout << "y a chakal" << std::endl; 
 	}
 	return;
 }

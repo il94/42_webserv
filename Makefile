@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
+#    By: auzun <auzun@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/03/30 16:09:39 by halvarez         ###   ########.fr        #
+#    Updated: 2023/04/02 22:53:19 by auzun            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,21 @@ SRC		+= $(addprefix ${DIR}, ${FILES})
 #Subdirectory example (c/p 3 lines)
 SRV_DIR	= ${DIR}server/
 SRV		= Server.cpp
+
+HTTP_DIR = ${DIR}http/
+
+REQUEST_DIR = ${HTTP_DIR}request/
+REQUEST_SRC		= Request.cpp
+
+RESPONSE_DIR = ${HTTP_DIR}response/
+RESPONSE_SRC	= Response.cpp
+
+UTILS_DIR = ${DIR}utils/
+UTILS_SRS		= string.cpp
+
+SRC		+= $(addprefix ${UTILS_DIR}, ${UTILS_SRS})
+SRC		+= $(addprefix ${RESPONSE_DIR}, ${RESPONSE_SRC})
+SRC		+= $(addprefix ${REQUEST_DIR}, ${REQUEST_SRC})
 SRC		+= $(addprefix ${SRV_DIR}, ${SRV})
 ##
 

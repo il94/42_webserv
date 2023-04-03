@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:55 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 06:42:05 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/02 23:07:36 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 class	Request
 {
 	public:
+		Request(void);
 		~Request(void);
 
 		std::string	getMethod() const;
@@ -39,8 +40,6 @@ class	Request
 		void	setQueryM();
 
 	private:
-		Request(void);
-
 		std::vector<std::string>	_data;
 		std::map<std::string, std::string>	_headerM;
 		std::map<std::string, std::string>	_queryM;

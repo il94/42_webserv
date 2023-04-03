@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 22:33:30 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/02 23:17:58 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,14 @@ class Response
 {
 	public :
 		Response(void);
+		Response(Request request);
 		~Response(void);
 
 		/*Methods*/
-		void	GET(Request	&request);
+		void	GET(void);
 		/*-------*/
+
+		std::string	getResponse();
 
 		/*Response Utils*/
 		int	readContent(void);
@@ -51,7 +54,7 @@ class Response
 		std::string	_code;
 		/*------*/
 		
-		Request	_request;
+		Request		_request;
 		std::string	_response;
 };
 
