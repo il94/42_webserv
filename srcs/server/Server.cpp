@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/03 20:18:34 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/05 18:47:19 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
-
 #include <fcntl.h>
+
 #include "Server.hpp"
 
 #define PORT		8080
@@ -63,15 +63,9 @@ Server::Server(const Server & srv) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL 
 Server::~Server(void)
 {
 	if ( this->_srvfd != -1 && close( this->_srvfd ) == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("close");
-	}
+		this->_srvError(__func__, __LINE__, "accept");
 	if ( this->_eplfd != -1 && close( this->_eplfd ) == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("close");
-	}
+		this->_srvError(__func__, __LINE__, "accept");
 	return;
 }
 
@@ -105,7 +99,8 @@ void	Server::run(void)
 	int				i									= 0;
 	int				bytes		__attribute__((unused))	= 0;
 	char			buffer[1000] = {0};
-	//t_epoll_event	cliEvents[ MAX_EVENTS ];
+	int				addrlen		__attribute__((unused));
+	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
 
 	// Testing data ========================================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
@@ -123,17 +118,24 @@ void	Server::run(void)
 	// ====================================================================== //
 
 	// Connection management ================================================ //
+	if ( listen( this->_getFd( SRV ), 100 ) == -1 )
+		this->_srvError(__func__, __LINE__, "accept");
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		nbEvents = epoll_wait( this->_getFd( EPL ), this->_eplev, MAX_EVENTS, 30000);
+		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 30000);
 		std::cout << "============================================" << std::endl;
+			cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&cliSocket) );
+		if ( cliSocket == -1 )
+			this->_srvError(__func__, __LINE__, "accept");
+
 		i = 0;
 		while ( i < nbEvents )
 		{
 			//bytes = recv();
-			recv( this->_getFd( SRV ), buffer, 1000, 0 );
-			send( this->_getFd( SRV ), hello.c_str(), hello.size(), 0 );
+			std::cout << "epoll_event[i].data.fd = " << cliEvents[i].data.fd << std::endl;
+			recv( cliSocket, buffer, 1000, 0 );
+			send( cliSocket, hello.c_str(), hello.size(), 0 );
 			i++;
 		}
 		*buffer = '\0';
@@ -166,23 +168,14 @@ void	Server::_mkSrvSocket(void)
 
 	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
 	if (fd == -1)
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("socket");
-		exit( 1 );
-	}
+		this->_srvError(__func__, __LINE__, "accept");
+
 	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("setsockopt");
-		exit( 1 );
-	}
+		this->_srvError(__func__, __LINE__, "accept");
+
 	if ( bind( fd, this->_getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("bind");
-		exit( 1 );
-	}
+		this->_srvError(__func__, __LINE__, "accept");
+
 	this->_srvfd = fd;
 	return;
 }
@@ -203,11 +196,8 @@ void	Server::_mkEpoll(void)
 
 	fd = epoll_create( 1 );
 	if ( fd == -1 )
-	{
-		std::cerr << __func__ << ":" << __LINE__ << ":";
-		perror("epoll_create");
-		exit( 1 );
-	}
+		this->_srvError(__func__, __LINE__, "epoll_create");
+
 	this->_eplfd = fd;
 	return;
 }
@@ -233,6 +223,14 @@ Server::t_sockaddr *	Server::_getSockAddr(void) const
 Server::t_epoll_event *	Server::_getEpollEvent(void) const
 {
 	return ( this->_eplev );
+}
+
+void	Server::_srvError(const char *func, const int line, const char *msg) const
+{
+	std::cerr << func << ":" << line - 1 << ":";
+	perror( msg );
+	//exit( 1 );
+	return;
 }
 
 /*
