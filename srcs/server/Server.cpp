@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/05 18:47:19 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/06 09:59:23 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,9 +96,9 @@ void	Server::run(void)
 {
 	int				cliSocket	__attribute__((unused)) = -1;
 	int				nbEvents	__attribute__((unused)) = -1;
-	int				i									= 0;
+	int				i			__attribute__((unused))	= 0;
 	int				bytes		__attribute__((unused))	= 0;
-	char			buffer[1000] = {0};
+	char			buffer[1000] __attribute__((unused)) = {0};
 	int				addrlen		__attribute__((unused));
 	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
 
@@ -125,10 +125,12 @@ void	Server::run(void)
 		std::cout << "========== waiting for connection ==========" << std::endl;
 		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 30000);
 		std::cout << "============================================" << std::endl;
-			cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&cliSocket) );
+		cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
 		if ( cliSocket == -1 )
 			this->_srvError(__func__, __LINE__, "accept");
-
+		recv( cliSocket, buffer, 1000, 0 );
+		send( cliSocket, hello.c_str(), hello.size(), 0 );
+		/*
 		i = 0;
 		while ( i < nbEvents )
 		{
@@ -139,7 +141,8 @@ void	Server::run(void)
 			i++;
 		}
 		*buffer = '\0';
-		//close( cliSocket );
+		*/
+		close( cliSocket );
 	}
 	// ====================================================================== //
 	return;
