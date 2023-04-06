@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/06 09:59:23 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/06 18:33:37 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,9 +96,8 @@ void	Server::run(void)
 {
 	int				cliSocket	__attribute__((unused)) = -1;
 	int				nbEvents	__attribute__((unused)) = -1;
-	int				i			__attribute__((unused))	= 0;
-	int				bytes		__attribute__((unused))	= 0;
-	char			buffer[1000] __attribute__((unused)) = {0};
+	//int				bytes		__attribute__((unused))	= 0;
+	//char			buffer[1000] __attribute__((unused)) = {0};
 	int				addrlen		__attribute__((unused));
 	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
 
@@ -123,13 +122,14 @@ void	Server::run(void)
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
-		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 30000);
+		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
 		std::cout << "============================================" << std::endl;
 		cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
 		if ( cliSocket == -1 )
 			this->_srvError(__func__, __LINE__, "accept");
-		recv( cliSocket, buffer, 1000, 0 );
+	//	recv( cliSocket, buffer, 1000, 0 );
 		send( cliSocket, hello.c_str(), hello.size(), 0 );
+		std::cout << "nbEvents = " << nbEvents << std::endl;
 		/*
 		i = 0;
 		while ( i < nbEvents )
@@ -187,7 +187,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;
@@ -200,8 +200,9 @@ void	Server::_mkEpoll(void)
 	fd = epoll_create( 1 );
 	if ( fd == -1 )
 		this->_srvError(__func__, __LINE__, "epoll_create");
-
 	this->_eplfd = fd;
+	if ( epoll_ctl( this->_getFd( EPL ), EPOLL_CTL_ADD, this->_getFd( SRV ), this->_eplev ) == -1)
+		this->_srvError(__func__, __LINE__, "epoll_ctl");
 	return;
 }
 
