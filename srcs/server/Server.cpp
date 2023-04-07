@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/06 18:33:37 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/07 10:08:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <fstream>
-//#include <string>
-//#include <cstdio>
 
 #include <unistd.h>
 #include <netinet/in.h>
@@ -29,7 +27,7 @@
 #define MAX_EVENTS	5
 
 // Constructors ============================================================= //
-Server::Server(void) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(void) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
 	this->_setSockAddr();
 	this->_mkSrvSocket();
@@ -38,7 +36,7 @@ Server::Server(void) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NUL
 	return;
 }
 
-Server::Server(const Server & srv) : _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(const Server & srv) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
 	int	i = 0;
 
@@ -123,26 +121,32 @@ void	Server::run(void)
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
 		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
-		std::cout << "============================================" << std::endl;
-		cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
-		if ( cliSocket == -1 )
-			this->_srvError(__func__, __LINE__, "accept");
-	//	recv( cliSocket, buffer, 1000, 0 );
-		send( cliSocket, hello.c_str(), hello.size(), 0 );
-		std::cout << "nbEvents = " << nbEvents << std::endl;
-		/*
-		i = 0;
-		while ( i < nbEvents )
+		std::cout << "========== connection accepted =============" << std::endl;
+		for (int i = 0; i < nbEvents; i++)
 		{
-			//bytes = recv();
-			std::cout << "epoll_event[i].data.fd = " << cliEvents[i].data.fd << std::endl;
-			recv( cliSocket, buffer, 1000, 0 );
-			send( cliSocket, hello.c_str(), hello.size(), 0 );
-			i++;
+			if ( cliEvents[i].data.fd == this->_getFd( SRV ) )
+			{
+				cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
+				if ( cliSocket == -1 )
+					this->_srvError(__func__, __LINE__, "accept");
+				if ( cliEvents[i].events & EPOLLIN )
+				{
+					// writing stuff
+					send( cliSocket, hello.c_str(), hello.size(), 0 );
+				}
+				else if ( cliEvents[i].events & EPOLLOUT )
+				{
+					// reading stuff
+					std::cout << "reading stuff dgb" << std::endl;
+				}
+				else
+				{
+					std::cout << "else stuff dbg" << std::endl;
+					// I don't know yet
+				}
+			}
+			close( cliSocket );
 		}
-		*buffer = '\0';
-		*/
-		close( cliSocket );
 	}
 	// ====================================================================== //
 	return;
@@ -155,7 +159,7 @@ void	Server::_setSockAddr(void)
 
 	address.sin_family		= AF_INET;
 	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_port		= htons( PORT );
+	address.sin_port		= htons( this->_getPort() );
 	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
 	{
 		address.sin_zero[i] = '\0';
@@ -237,23 +241,13 @@ void	Server::_srvError(const char *func, const int line, const char *msg) const
 	return;
 }
 
-/*
-	//void				setFd(const t_fd FD, const int & fd);
-	void	Server::setFd(const t_fd FD, const int & fd)
-	{
-		switch ( FD )
-		{
-			case SRV :
-				this->_srvfd = fd;
-				return;
-			case EPL :
-				this->_eplfd = fd;
-				return;
-			default :
-				std::cerr << "Error: invalid fd value : " << fd << std::endl;
-				exit( 1 );
-				return;
-		}
-		return;
-	}
-*/
+void	Server::_setPort(const int port)
+{
+	this->_port = port;
+	return;
+}
+
+const int &	Server::_getPort(void) const
+{
+	return ( this->_port );
+}

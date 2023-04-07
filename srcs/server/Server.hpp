@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/06 18:51:26 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/07 10:08:27 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Server
 		void				run(void);
 
 	private:
+		int					_port;
 		int					_srvfd;
 		int					_eplfd; 
 		t_sockaddr		 *	_address;
@@ -50,6 +51,8 @@ class Server
 		const int		 &	_getFd(const t_fd FD)				const;
 		t_sockaddr 		 *	_getSockAddr(void)					const;
 		t_epoll_event	 *  _getEpollEvent(void)				const;
+		void				_setPort(const int port);
+		const int 		 &	_getPort(void) 						const;
 
 };
 
