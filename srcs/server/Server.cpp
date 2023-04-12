@@ -6,13 +6,14 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 15:59:42 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 16:49:20 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 
 #include <unistd.h>
@@ -122,9 +123,8 @@ void	Server::run(void)
 	this->_log("waiting for connection");
 	while ( 1 )
 	{
-		nbEvents = 0;
 		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
-		for (int i = 0; i < nbEvents; i++)
+		for (int i = 0; i < nbEvents; ++i)
 		{
 			if ( cliEvents[i].data.fd == this->_getFd( SRV ) )
 			{
@@ -137,26 +137,18 @@ void	Server::run(void)
 				{
 					this->_log("sending data to client");
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
-					exit( 0 );
-					// writing stuff
 				}
 				else if ( cliEvents[i].events & EPOLLOUT )
 				{
-					std::cout << "reading stuff dgb" << std::endl;
-					// reading stuff
+					this->_log("receiving request from client");
 				}
 				else
 				{
-					std::cout << "else stuff dbg" << std::endl;
-					// I don't know yet
+					this->_log("I don't know what happens");
 				}
 			}
 			else
 				this->_log("connection refused");
-			/*
-			if ( epoll_ctl(this->_getFd( EPL ), EPOLL_CTL_DEL, cliEvents[i].data.fd, NULL) == -1 )
-				this->_srvError(__func__, __LINE__, "listen");
-			*/
 			close( cliSocket );
 			this->_log("waiting for connection");
 		}
@@ -202,7 +194,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET;
+	eplev.events = EPOLLIN;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;
