@@ -6,26 +6,49 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/29 14:20:38 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/11 14:26:35 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+
 #include <string>
+#include <vector>
+
+#include <algorithm>
 
 #include "Server.hpp"
 
-// #include "cls.hpp"
-// #include "cls2.hpp"
+// std::vector<Server>	configFile( std::string path );
+std::vector<std::string>				fileToVector( std::string path );
+std::vector<std::vector <std::string> > splitFileConfig(std::string path);
 
-int	main()
+int	main(int ac, char **av)
 {
-	Server server __attribute__((unused));
-	// int i;
-	
-	server.run();
-	// cls test __attribute__((unused));
-	// cls2 test2 __attribute__((unused));
+	if (av[0] and av[1])
+	{
+		std::cout << "Config File mode" << std::endl;
+		std::vector<std::vector <std::string> > configs = splitFileConfig(av[1]);
 
+		std::vector< Server >	servers(configs.size());
+
+		std::cout << "=============================" << std::endl;
+		for (size_t	i = 0; i < servers.size(); i++)
+		{
+			servers[i].setConfig(configs[i]);
+			std::cout << "=============================" << std::endl;
+		}
+		
+		// getConfigs();
+	}
+	else
+	{
+		std::cout << "Default mode" << std::endl;
+		Server	server("default");
+	}
+
+
+	// std::for_each(fileContent.begin(), fileContent.end(), print_test<std::string>);
+	
 	return 0;
 }
