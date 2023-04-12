@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/07 10:08:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 11:43:19 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,19 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <fcntl.h>
+#include <netdb.h>
 
 #include "Server.hpp"
 
-#define PORT		8080
+#define PORT		80
 #define MAX_EVENTS	5
 
 // Constructors ============================================================= //
-Server::Server(void) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(void) : _name( "ft_server" )_data(), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
+	this->_data["port"]		= 8080;
+	this->_data["epoll_fd"]	= -1;
+	this->_data["srv_fd"]	= -1;
 	this->_setSockAddr();
 	this->_mkSrvSocket();
 	this->_setEpollEvent();
@@ -42,8 +46,8 @@ Server::Server(const Server & srv) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), 
 
 	if (this->_address == NULL)
 		this->_setSockAddr();
-	this->_srvfd				= srv._getFd( SRV );
-	this->_eplfd				= srv._getFd( EPL );
+	this->_srvfd				= dup ( srv._getFd( SRV ) );
+	this->_eplfd				= dup ( srv._getFd( EPL ) );
 	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -74,8 +78,8 @@ Server &	Server::operator=(const Server & srv)
 
 	if (this->_address == NULL)
 		this->_setSockAddr();
-	this->_srvfd				= srv._getFd( SRV );
-	this->_eplfd				= srv._getFd( EPL );
+	this->_srvfd				= dup ( srv._getFd( SRV ) );
+	this->_eplfd				= dup ( srv._getFd( EPL ) );
 	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -94,10 +98,10 @@ void	Server::run(void)
 {
 	int				cliSocket	__attribute__((unused)) = -1;
 	int				nbEvents	__attribute__((unused)) = -1;
-	//int				bytes		__attribute__((unused))	= 0;
-	//char			buffer[1000] __attribute__((unused)) = {0};
 	int				addrlen		__attribute__((unused));
 	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
+	//struct	hostent *h;
+	//char name[] = "halvarez";
 
 	// Testing data ========================================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
@@ -115,13 +119,14 @@ void	Server::run(void)
 	// ====================================================================== //
 
 	// Connection management ================================================ //
+	//h = gethostbyname( name );
+	//std::cout << h->h_name <<std::endl;
 	if ( listen( this->_getFd( SRV ), 100 ) == -1 )
-		this->_srvError(__func__, __LINE__, "accept");
+		this->_srvError(__func__, __LINE__, "listen");
 	while ( 1 )
 	{
 		std::cout << "========== waiting for connection ==========" << std::endl;
 		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
-		std::cout << "========== connection accepted =============" << std::endl;
 		for (int i = 0; i < nbEvents; i++)
 		{
 			if ( cliEvents[i].data.fd == this->_getFd( SRV ) )
@@ -129,15 +134,17 @@ void	Server::run(void)
 				cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
 				if ( cliSocket == -1 )
 					this->_srvError(__func__, __LINE__, "accept");
+				else
+					std::cout << "========== connection accepted =============" << std::endl;
 				if ( cliEvents[i].events & EPOLLIN )
 				{
-					// writing stuff
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
+					// writing stuff
 				}
 				else if ( cliEvents[i].events & EPOLLOUT )
 				{
-					// reading stuff
 					std::cout << "reading stuff dgb" << std::endl;
+					// reading stuff
 				}
 				else
 				{
@@ -175,13 +182,11 @@ void	Server::_mkSrvSocket(void)
 
 	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
 	if (fd == -1)
-		this->_srvError(__func__, __LINE__, "accept");
-
+		this->_srvError(__func__, __LINE__, "socket");
 	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
-		this->_srvError(__func__, __LINE__, "accept");
-
+		this->_srvError(__func__, __LINE__, "setsockopt");
 	if ( bind( fd, this->_getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
-		this->_srvError(__func__, __LINE__, "accept");
+		this->_srvError(__func__, __LINE__, "bind");
 
 	this->_srvfd = fd;
 	return;

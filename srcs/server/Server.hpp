@@ -6,12 +6,14 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/07 10:08:27 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 11:39:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
+
+#include <map>
 
 typedef enum e_fd
 {
@@ -22,9 +24,10 @@ typedef enum e_fd
 class Server
 {
 	public:
-		typedef		struct sockaddr			t_sockaddr;
-		typedef 	struct sockaddr_in		t_sockaddr_in;
-		typedef		struct epoll_event		t_epoll_event;
+		typedef		struct sockaddr				t_sockaddr;
+		typedef 	struct sockaddr_in			t_sockaddr_in;
+		typedef		struct epoll_event			t_epoll_event;
+		typedef		std::map<std::string, int>	t_map;
 
 							Server(void);
 							Server(const Server & srv);
@@ -35,6 +38,8 @@ class Server
 		void				run(void);
 
 	private:
+		std::string			_name;
+		t_map				_data;
 		int					_port;
 		int					_srvfd;
 		int					_eplfd; 
