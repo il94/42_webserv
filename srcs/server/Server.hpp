@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 11:39:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 14:29:46 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ class Server
 		typedef		struct sockaddr				t_sockaddr;
 		typedef 	struct sockaddr_in			t_sockaddr_in;
 		typedef		struct epoll_event			t_epoll_event;
-		typedef		std::map<std::string, int>	t_map;
 
 							Server(void);
 							Server(const Server & srv);
@@ -39,7 +38,6 @@ class Server
 
 	private:
 		std::string			_name;
-		t_map				_data;
 		int					_port;
 		int					_srvfd;
 		int					_eplfd; 
@@ -49,6 +47,7 @@ class Server
 		void				_srvError(const char *func,
 										const int line,
 										const char *msg)		const;
+		void				_log(const char *msg)				const;
 		void				_setSockAddr(void);
 		void				_mkSrvSocket(void);
 		void				_setEpollEvent(void);
@@ -58,6 +57,8 @@ class Server
 		t_epoll_event	 *  _getEpollEvent(void)				const;
 		void				_setPort(const int port);
 		const int 		 &	_getPort(void) 						const;
+		void				_setName(const std::string name);
+		const std::string &	_getName(void)						const;
 
 };
 

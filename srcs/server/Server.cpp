@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 11:43:19 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 15:59:42 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,12 @@
 
 #include "Server.hpp"
 
-#define PORT		80
+#define PORT		8080
 #define MAX_EVENTS	5
 
 // Constructors ============================================================= //
-Server::Server(void) : _name( "ft_server" )_data(), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
 {
-	this->_data["port"]		= 8080;
-	this->_data["epoll_fd"]	= -1;
-	this->_data["srv_fd"]	= -1;
 	this->_setSockAddr();
 	this->_mkSrvSocket();
 	this->_setEpollEvent();
@@ -40,14 +37,14 @@ Server::Server(void) : _name( "ft_server" )_data(), _port( PORT ), _srvfd( -1 ),
 	return;
 }
 
-Server::Server(const Server & srv) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(const Server & srv) : _name( srv._getName() ), _srvfd( dup( srv._getFd( SRV ) ) ), _eplfd( dup( srv._getFd( EPL ) ) ), _address( NULL ), _eplev( NULL )
 {
 	int	i = 0;
 
 	if (this->_address == NULL)
 		this->_setSockAddr();
-	this->_srvfd				= dup ( srv._getFd( SRV ) );
-	this->_eplfd				= dup ( srv._getFd( EPL ) );
+	this->_srvfd				= dup( srv._getFd( SRV ) );
+	this->_eplfd				= dup( srv._getFd( EPL ) );
 	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -65,9 +62,9 @@ Server::Server(const Server & srv) : _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), 
 Server::~Server(void)
 {
 	if ( this->_srvfd != -1 && close( this->_srvfd ) == -1 )
-		this->_srvError(__func__, __LINE__, "accept");
+		this->_srvError(__func__, __LINE__, "close srvfd");
 	if ( this->_eplfd != -1 && close( this->_eplfd ) == -1 )
-		this->_srvError(__func__, __LINE__, "accept");
+		this->_srvError(__func__, __LINE__, "close eplfd");
 	return;
 }
 
@@ -78,8 +75,9 @@ Server &	Server::operator=(const Server & srv)
 
 	if (this->_address == NULL)
 		this->_setSockAddr();
-	this->_srvfd				= dup ( srv._getFd( SRV ) );
-	this->_eplfd				= dup ( srv._getFd( EPL ) );
+	this->_name					= srv._getName();
+	this->_srvfd				= dup( srv._getFd( SRV ) );
+	this->_eplfd				= dup( srv._getFd( EPL ) );
 	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
 	while (i < 14)
 	{
@@ -119,13 +117,12 @@ void	Server::run(void)
 	// ====================================================================== //
 
 	// Connection management ================================================ //
-	//h = gethostbyname( name );
-	//std::cout << h->h_name <<std::endl;
 	if ( listen( this->_getFd( SRV ), 100 ) == -1 )
 		this->_srvError(__func__, __LINE__, "listen");
+	this->_log("waiting for connection");
 	while ( 1 )
 	{
-		std::cout << "========== waiting for connection ==========" << std::endl;
+		nbEvents = 0;
 		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
 		for (int i = 0; i < nbEvents; i++)
 		{
@@ -135,10 +132,12 @@ void	Server::run(void)
 				if ( cliSocket == -1 )
 					this->_srvError(__func__, __LINE__, "accept");
 				else
-					std::cout << "========== connection accepted =============" << std::endl;
+					this->_log("connection established");
 				if ( cliEvents[i].events & EPOLLIN )
 				{
+					this->_log("sending data to client");
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
+					exit( 0 );
 					// writing stuff
 				}
 				else if ( cliEvents[i].events & EPOLLOUT )
@@ -152,7 +151,14 @@ void	Server::run(void)
 					// I don't know yet
 				}
 			}
+			else
+				this->_log("connection refused");
+			/*
+			if ( epoll_ctl(this->_getFd( EPL ), EPOLL_CTL_DEL, cliEvents[i].data.fd, NULL) == -1 )
+				this->_srvError(__func__, __LINE__, "listen");
+			*/
 			close( cliSocket );
+			this->_log("waiting for connection");
 		}
 	}
 	// ====================================================================== //
@@ -196,7 +202,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
+	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;
@@ -246,6 +252,13 @@ void	Server::_srvError(const char *func, const int line, const char *msg) const
 	return;
 }
 
+void	Server::_log(const char *msg) const
+{
+	std::cout << "\t" << this->_getName() << "[" << this->_getPort() << "] : ";
+	std::cout << msg << std::endl;
+	return;
+}
+
 void	Server::_setPort(const int port)
 {
 	this->_port = port;
@@ -255,4 +268,15 @@ void	Server::_setPort(const int port)
 const int &	Server::_getPort(void) const
 {
 	return ( this->_port );
+}
+
+void	Server::_setName(const std::string name)
+{
+	this->_name = name;
+	return;
+}
+
+const std::string &	Server::_getName(void) const
+{
+	return ( this->_name );
 }
