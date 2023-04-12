@@ -6,7 +6,7 @@
 #    By: auzun <auzun@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/04/02 22:53:19 by auzun            ###   ########.fr        #
+#    Updated: 2023/04/12 00:44:00 by auzun            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,12 +30,16 @@ HTTP_DIR = ${DIR}http/
 REQUEST_DIR = ${HTTP_DIR}request/
 REQUEST_SRC		= Request.cpp
 
+CGI_DIR = ${DIR}cgi/
+CGI_SRC		= CGI.cpp
+
 RESPONSE_DIR = ${HTTP_DIR}response/
 RESPONSE_SRC	= Response.cpp
 
 UTILS_DIR = ${DIR}utils/
 UTILS_SRS		= string.cpp
 
+SRC		+= $(addprefix ${CGI_DIR}, ${CGI_SRC})
 SRC		+= $(addprefix ${UTILS_DIR}, ${UTILS_SRS})
 SRC		+= $(addprefix ${RESPONSE_DIR}, ${RESPONSE_SRC})
 SRC		+= $(addprefix ${REQUEST_DIR}, ${REQUEST_SRC})

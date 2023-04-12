@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/03 06:03:50 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/05 21:06:55 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,15 +103,9 @@ std::string	Response::writeHeader(void)
 	return (header);
 }
 
-void	Response::setCode(int code)
-{
-	_code = to_string(code);
-}
+void	Response::setCode(int code) { _code = to_string(code); }
 
-void	Response::setContentLength(size_t size)
-{
-	_contentLength = to_string(size);
-}
+void	Response::setContentLength(size_t size) { _contentLength = to_string(size); }
 
 void	Response::setContentType(std::string path)
 {
