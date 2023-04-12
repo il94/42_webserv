@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 16:49:20 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/12 16:51:32 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void	Server::run(void)
 	//struct	hostent *h;
 	//char name[] = "halvarez";
 
-	// Testing data ========================================================= //
+	// Testing data = will be removed ======================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 	int hfd = open("./html/index.html", O_RDONLY );
 	char b[30000];
