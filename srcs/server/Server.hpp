@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/29 21:22:00 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/14 00:56:36 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,26 @@
 #include <netinet/in.h>
 #include <string.h>
 
+#include <map>
+#include <vector>
+
+#include "../config_file/Config.hpp"
+
 class Server
 {
 	public:
 					Server(void);
+					Server( const std::string & );
 					Server(const Server & srv);
 					~Server(void);
 
 		Server &	operator=(const Server & srv);
 
 		void		run(void);
+		void		setConfig(std::vector< std::string > & srv);
 
 	private:
-
+		Config	config;
 };
 
 #endif

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: auzun <auzun@student.42.fr>                +#+  +:+       +#+         #
+#    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/04/12 00:44:00 by auzun            ###   ########.fr        #
+#    Updated: 2023/04/14 00:50:59 by ilandols         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,6 +44,11 @@ SRC		+= $(addprefix ${UTILS_DIR}, ${UTILS_SRS})
 SRC		+= $(addprefix ${RESPONSE_DIR}, ${RESPONSE_SRC})
 SRC		+= $(addprefix ${REQUEST_DIR}, ${REQUEST_SRC})
 SRC		+= $(addprefix ${SRV_DIR}, ${SRV})
+
+CF_DIR	= ${DIR}config_file/
+CF		= configFile.cpp Config.cpp
+SRC		+= $(addprefix ${CF_DIR}, ${CF})
+
 ##
 
 OBJ		= ${SRC:.cpp=.o}
@@ -63,13 +68,13 @@ CXXFLAGS		= ${cxxflags.rls} ${cxxflags.${build}}
 export			CXXFLAGS
 
 %.o : %.cpp
-		${CXX} ${CXXFLAGS} -c $< -o $@
+		${CXX} -c $< -o $@
 
 #Mandatory rules
 all:    ${NAME}
 
 ${NAME}:${OBJ}
-		${CXX} ${CXXFLAGS} ${OBJ} -o ${NAME}
+		${CXX} ${OBJ} -o ${NAME}
 
 #Execution rule
 run:	all

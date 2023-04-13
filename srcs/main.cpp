@@ -6,28 +6,48 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/13 22:29:33 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/14 00:53:45 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+
 #include <string>
+#include <vector>
+
+#include <algorithm>
 
 #include "Server.hpp"
 #include "../cgi/CGI.hpp"
 
-// #include "cls.hpp"
-// #include "cls2.hpp"
+// std::vector<Server>	configFile( std::string path );
+std::vector<std::string>				fileToVector( std::string path );
+std::vector<std::vector <std::string> > splitFileConfig(std::string path);
 
-int	main()
+int	main(int ac, char **av)
 {
-	Server server __attribute__((unused));
-	// int i;
-	CGI	test;
-	// std::cout << "1212" << std::endl << test.execCGI("test_script/bin/a.out") << std::endl;
-	server.run();
-	// cls test __attribute__((unused));
-	// cls2 test2 __attribute__((unused));
+	if (av[0] and av[1])
+	{
+		std::cout << "Config File mode" << std::endl;
+		std::vector<std::vector <std::string> > configs = splitFileConfig(av[1]);
 
+		std::vector< Server >	servers(configs.size());
+
+		std::cout << "=============================" << std::endl;
+		for (size_t	i = 0; i < servers.size(); i++)
+		{
+			servers[i].setConfig(configs[i]);
+			std::cout << "=============================" << std::endl;
+		}
+		servers[0].run();
+	}
+	else
+	{
+		std::cout << "Default mode" << std::endl;
+		Server	server("default");
+	}
+
+	// std::for_each(fileContent.begin(), fileContent.end(), print_test<std::string>);
+	
 	return 0;
 }

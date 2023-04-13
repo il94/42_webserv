@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/13 22:32:47 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/14 00:56:20 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,19 @@ Server::Server(void)
 	return;
 }
 
+Server::Server( const std::string &src )
+{
+	if (src == "default")
+	{
+		/* générer un serveur par défaut */
+	}
+	return;
+}
+
+
 Server::Server(const Server & srv __attribute__((unused)) )
 {
+	*this = srv;
 	return;
 }
 
@@ -48,10 +59,41 @@ Server::~Server(void)
 // Operators ================================================================ ///
 Server &	Server::operator=(const Server & srv __attribute__((unused)) )
 {
+	config = srv.config;
 	return ( *this );
 }
 
 // Member functions ========================================================= ///
+
+void		Server::setConfig(std::vector< std::string > & srv)
+{
+	this->config.setFileContent(srv);
+	
+	/*==================================*/
+	
+	config.setPort(config.extractPort());
+	config.setHost(config.extractHost());
+	config.setSocket(config.extractSocket());
+	config.setName(config.extractName());
+	config.setErrorPages(config.extractErrorPages());
+	config.setMaxBodySize(config.extractMaxBodySize());
+	
+
+	/*==================================*/
+
+	config.setAllowedMethods(config.extractAllowedMethods());
+	
+	config.setRoot(config.extractRoot());
+	config.setIndex(config.extractIndex());
+	
+	/*==================================*/
+	
+	config.printConfig();
+	
+	/*==================================*/
+	
+}
+
 void	Server::run(void)
 {
 	int			server_fd;
@@ -114,4 +156,3 @@ void	Server::run(void)
 	}
 	return;
 }
-
