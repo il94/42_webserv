@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/13 14:16:50 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/13 22:16:03 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,14 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	config.setErrorPages(config.extractErrorPages());
 	config.setMaxBodySize(config.extractMaxBodySize());
 	
+	
+
 	/*==================================*/
 
 	config.setAllowedMethods(config.extractAllowedMethods());
+	
+	config.setRoot(config.extractRoot());
+	config.setIndex(config.extractIndex());
 	
 	/*==================================*/
 	

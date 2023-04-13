@@ -13,7 +13,7 @@ void	print_test(T str)
 	std::cout << str << std::endl;
 }
 
-class Config : public std::map<std::string, std::string>
+class Config
 {
 	public :
 
@@ -42,6 +42,11 @@ class Config : public std::map<std::string, std::string>
 
 	std::vector<std::string>	extractAllowedMethods( void );
 
+	std::string	extractRoot( void );
+	std::string	extractIndex( void );
+
+
+
 	/* Accessors */
 	void	setFileContent( std::vector<std::string> & );
 
@@ -54,6 +59,9 @@ class Config : public std::map<std::string, std::string>
 
 	void	setAllowedMethods( const std::vector<std::string> & );
 
+	void	setRoot( const std::string & );
+	void	setIndex( const std::string & );
+
 
 	std::string	getPort( void );
 	std::string	getHost( void );
@@ -63,6 +71,10 @@ class Config : public std::map<std::string, std::string>
 	std::string	getMaxBodySize( void );
 
 	std::vector<std::string>	getAllowedMethods( void );
+
+	std::string	getRoot( void );
+	std::string	getIndex( void );
+
 
 
 	private :
@@ -85,7 +97,8 @@ class Config : public std::map<std::string, std::string>
 
 	std::vector<std::string>	_allowedMethods; // allowed_method [method name]
 	// HTTP redirection
-	// std::string	_rootedPath; //root [path]
+	std::string	_root; //root [path]
+	std::string	_index; //index [path]
 	// std::vector<std::string>	_contentPath; //location...
 	/**/
 	// std::string	_directoryRequest;	//error_directory_page [path_file.html]
