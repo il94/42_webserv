@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/03 09:50:27 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/13 22:32:47 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,12 @@ void	Server::run(void)
 		}
 		char buffer[30000] = {0};
 		read( new_socket, buffer, 30000);
-		
+
+		std::cout << "==========&&&&&&&&&&&&&&&&==========" << std::endl;
+		std::cout << buffer << std::endl;
+		std::cout << "==========&&&&&&&&&&&&&&&&==========" << std::endl;
+
+
 		Request		req;
 		req.setRequestAtr(buffer);
 		req.setQueryM();
