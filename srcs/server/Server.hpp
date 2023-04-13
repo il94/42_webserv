@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/11 15:30:38 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/14 00:56:36 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Server
 
 		Server &	operator=(const Server & srv);
 
-		// void		run(void);
+		void		run(void);
 		void		setConfig(std::vector< std::string > & srv);
 
 	private:

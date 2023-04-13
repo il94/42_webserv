@@ -6,7 +6,7 @@
 #    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/04/07 16:03:32 by ilandols         ###   ########.fr        #
+#    Updated: 2023/04/14 00:50:59 by ilandols         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,6 +24,25 @@ SRC		+= $(addprefix ${DIR}, ${FILES})
 #Subdirectory example (c/p 3 lines)
 SRV_DIR	= ${DIR}server/
 SRV		= Server.cpp
+
+HTTP_DIR = ${DIR}http/
+
+REQUEST_DIR = ${HTTP_DIR}request/
+REQUEST_SRC		= Request.cpp
+
+CGI_DIR = ${DIR}cgi/
+CGI_SRC		= CGI.cpp
+
+RESPONSE_DIR = ${HTTP_DIR}response/
+RESPONSE_SRC	= Response.cpp
+
+UTILS_DIR = ${DIR}utils/
+UTILS_SRS		= string.cpp
+
+SRC		+= $(addprefix ${CGI_DIR}, ${CGI_SRC})
+SRC		+= $(addprefix ${UTILS_DIR}, ${UTILS_SRS})
+SRC		+= $(addprefix ${RESPONSE_DIR}, ${RESPONSE_SRC})
+SRC		+= $(addprefix ${REQUEST_DIR}, ${REQUEST_SRC})
 SRC		+= $(addprefix ${SRV_DIR}, ${SRV})
 
 CF_DIR	= ${DIR}config_file/
