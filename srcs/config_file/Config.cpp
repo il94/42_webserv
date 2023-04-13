@@ -32,9 +32,9 @@ std::vector<std::string>	Config::multipleFindInFileContent(const std::string &sr
 
 	for (size_t i = 0; i < _fileContent.size(); i++)
 	{
-		index = _fileContent[i - 1].find(src);
+		index = _fileContent[i].find(src);
 		if (index != -1)
-			result.push_back(_fileContent[i - 1].substr(index + src.size() + 1, _fileContent[i - 1].find(';') - (index + src.size() + 1)));
+			result.push_back(_fileContent[i].substr(index + src.size() + 1, _fileContent[i].find(';') - (index + src.size() + 1)));
 	}
 	return (result);
 }
@@ -60,7 +60,7 @@ void	Config::printConfig( void )
 	std::cout << "HOST = " << getHost() << std::endl;
 	std::cout << "SOCKET = " << getSocket() << std::endl;
 	std::cout << "NAME = " << getName() << std::endl;
-	for (std::map<int, std::string>::iterator it = getErrorPages().begin(); it != getErrorPages().end(); *it++)
+	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
 		std::cout << "ERROR PAGE " << it->first << " = " << it->second << std::endl;
 	std::cout << "MAX BODY SIZE  = " << getMaxBodySize() << std::endl;
 }
@@ -112,29 +112,37 @@ std::string	Config::extractName( void )
 		return (result);
 }
 
-std::map<int, std::string>	Config::extractErrorPages( void )
+std::map<std::string, std::string>	Config::extractErrorPages( void )
 {
-	std::map<int, std::string>	result;
+	std::map<std::string, std::string>	result;
 	std::vector<std::string>	content;
 
 	content = multipleFindInFileContent("error_page");
 
-	std::for_each(content.begin(), content.end(), print_test<std::string>);
-
 	if (content.empty() == true)
-	{
-		result.insert(std::pair<int, std::string>(404, "404.html"));
-		return (result);
-	}
+		result.insert(std::pair<std::string, std::string>("404", "404.html"));
 	else
 	{
-		int			code;
-		std::string	value;
-
-		for (size_t	i = 0; i < )
-
-		return (result);
+		std::pair<std::string, std::string>	element;
+		for (std::vector<std::string>::iterator it = content.begin(); it != content.end(); *it++)
+		{
+			element.first = it->substr(0, it->find('/') - 1);
+			element.second = it->substr(it->find('/'), ';');
+			result.insert(element);
+		}
 	}
+	return (result);
+}
+
+std::string	Config::extractMaxBodySize( void )
+{
+	std::string	result;
+
+	result = findInFileContent("client_max_body_size");
+	if (result == "default")
+		return ("1M");
+	else
+		return (result);
 }
 
 /*================================ Accessors =================================*/
@@ -159,7 +167,7 @@ void	Config::setName(const std::string &src){
 	_name = src;
 }
 
-void	Config::setErrorPages(const std::map<int, std::string> &src){
+void	Config::setErrorPages(const std::map<std::string, std::string> &src){
 	_errorPages = src;
 }
 
@@ -169,7 +177,7 @@ void	Config::setMaxBodySize(const std::string &src){
 
 
 
-std::string	Config::getPort ( void ){
+std::string	Config::getPort( void ){
 	return (_port);
 }
 
@@ -185,10 +193,10 @@ std::string	Config::getName( void ){
 	return (_name);
 }
 
-std::map<int, std::string>	Config::getErrorPages( void ){
+std::map<std::string, std::string>	Config::getErrorPages( void ){
 	return (_errorPages);
 }
 
-std::string	Config::getMaxBodySize (void ){
+std::string	Config::getMaxBodySize( void ){
 	return (_maxBodySize);
 }

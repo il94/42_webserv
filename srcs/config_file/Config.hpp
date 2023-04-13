@@ -37,8 +37,8 @@ class Config : public std::map<std::string, std::string>
 	std::string	extractHost( void );
 	std::string	extractSocket( void );
 	std::string	extractName( void );
-	std::map<int, std::string>	extractErrorPages( void );
-	// std::string	extractMaxBodySize( void );
+	std::map<std::string, std::string>	extractErrorPages( void );
+	std::string	extractMaxBodySize( void );
 
 
 	/* Accessors */
@@ -48,15 +48,15 @@ class Config : public std::map<std::string, std::string>
 	void	setHost( const std::string & );
 	void	setSocket( const std::string & );
 	void	setName( const std::string & );
-	void	setErrorPages( const std::map<int, std::string> & );
+	void	setErrorPages( const std::map<std::string, std::string> & );
 	void	setMaxBodySize( const std::string & );
 
-	std::string	getPort (void );
+	std::string	getPort( void );
 	std::string	getHost( void );
 	std::string	getSocket( void );
 	std::string	getName( void );
-	std::map<int, std::string>	getErrorPages( void );
-	std::string	getMaxBodySize ( void );
+	std::map<std::string, std::string>	getErrorPages( void );
+	std::string	getMaxBodySize( void );
 
 
 	private :
@@ -72,7 +72,7 @@ class Config : public std::map<std::string, std::string>
 
 	std::string	_name; //server_name [name]
 	// default host:port
-	std::map<int, std::string>	_errorPages; //error_page [path_file.html]
+	std::map<std::string, std::string>	_errorPages; //error_page [path_file.html]
 	std::string	_maxBodySize; //client_max_body_size [value + unit = 00M]
 
 	/*=====================================*/
