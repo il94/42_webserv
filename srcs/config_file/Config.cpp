@@ -71,6 +71,8 @@ void	Config::printConfig( void )
 	std::cout << "MAX BODY SIZE  = " << getMaxBodySize() << std::endl;
 	for (std::vector<std::string>::iterator it = _allowedMethods.begin(); it != _allowedMethods.end(); it++)
 		std::cout << "ALLOWED METHOD = " << *it << std::endl;
+	std::cout << "ROOT = " << getRoot() << std::endl;
+	std::cout << "INDEX = " << getIndex() << std::endl;
 }
 
 
@@ -168,6 +170,28 @@ std::vector<std::string>	Config::extractAllowedMethods( void )
 	return (result);
 }
 
+std::string	Config::extractRoot( void )
+{
+	std::string	result;
+
+	result = findInFileContent("root");
+	if (result == "default")
+		return ("/html");
+	else
+		return (result);
+}
+
+std::string	Config::extractIndex( void )
+{
+	std::string	result;
+
+	result = findInFileContent("index");
+	if (result == "default")
+		return ("index.html");
+	else
+		return (result);
+}
+
 /*================================ Accessors =================================*/
 
 void	Config::setFileContent(std::vector<std::string> &src){
@@ -202,6 +226,16 @@ void	Config::setAllowedMethods(const std::vector<std::string> &src){
 	_allowedMethods = src;
 }
 
+void	Config::setRoot(const std::string &src){
+	_root = src;
+}
+
+void	Config::setIndex(const std::string &src){
+	_index = src;
+}
+
+
+
 
 
 std::string	Config::getPort( void ){
@@ -230,4 +264,12 @@ std::string	Config::getMaxBodySize( void ){
 
 std::vector<std::string>	Config::getAllowedMethods( void ){
 	return (_allowedMethods);
+}
+
+std::string	Config::getRoot( void ){
+	return (_root);
+}
+
+std::string	Config::getIndex( void ){
+	return (_index);
 }
