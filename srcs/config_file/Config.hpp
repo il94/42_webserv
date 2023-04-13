@@ -40,6 +40,7 @@ class Config : public std::map<std::string, std::string>
 	std::map<std::string, std::string>	extractErrorPages( void );
 	std::string	extractMaxBodySize( void );
 
+	std::vector<std::string>	extractAllowedMethods( void );
 
 	/* Accessors */
 	void	setFileContent( std::vector<std::string> & );
@@ -51,12 +52,17 @@ class Config : public std::map<std::string, std::string>
 	void	setErrorPages( const std::map<std::string, std::string> & );
 	void	setMaxBodySize( const std::string & );
 
+	void	setAllowedMethods( const std::vector<std::string> & );
+
+
 	std::string	getPort( void );
 	std::string	getHost( void );
 	std::string	getSocket( void );
 	std::string	getName( void );
 	std::map<std::string, std::string>	getErrorPages( void );
 	std::string	getMaxBodySize( void );
+
+	std::vector<std::string>	getAllowedMethods( void );
 
 
 	private :
@@ -77,7 +83,7 @@ class Config : public std::map<std::string, std::string>
 
 	/*=====================================*/
 
-	// std::string	_httpMethods[3]; // default GET, POST and DELETE ????
+	std::vector<std::string>	_allowedMethods; // allowed_method [method name]
 	// HTTP redirection
 	// std::string	_rootedPath; //root [path]
 	// std::vector<std::string>	_contentPath; //location...

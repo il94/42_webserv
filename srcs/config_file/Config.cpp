@@ -19,7 +19,13 @@ Config::~Config(){
 Config& Config::operator=(const Config &src)
 {
 	_fileContent = src._fileContent;
-	// config = src.config;
+	_port = src._port;
+	_host = src._host;
+	_socket = src._socket;
+	_name = src._name;
+	_errorPages = src._errorPages;
+	_maxBodySize = src._maxBodySize;
+	_allowedMethods = src._allowedMethods;
 	return (*this);
 }
 
@@ -63,6 +69,8 @@ void	Config::printConfig( void )
 	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
 		std::cout << "ERROR PAGE " << it->first << " = " << it->second << std::endl;
 	std::cout << "MAX BODY SIZE  = " << getMaxBodySize() << std::endl;
+	for (std::vector<std::string>::iterator it = _allowedMethods.begin(); it != _allowedMethods.end(); it++)
+		std::cout << "ALLOWED METHOD = " << *it << std::endl;
 }
 
 
@@ -145,6 +153,21 @@ std::string	Config::extractMaxBodySize( void )
 		return (result);
 }
 
+std::vector<std::string>	Config::extractAllowedMethods( void )
+{
+	std::vector<std::string>	result;
+
+	result = multipleFindInFileContent("allowed_method");
+
+	if (result.empty() == true)
+	{
+		result.push_back("GET");
+		result.push_back("POST");
+		result.push_back("DELETE");
+	}
+	return (result);
+}
+
 /*================================ Accessors =================================*/
 
 void	Config::setFileContent(std::vector<std::string> &src){
@@ -175,6 +198,10 @@ void	Config::setMaxBodySize(const std::string &src){
 	_maxBodySize = src;
 }
 
+void	Config::setAllowedMethods(const std::vector<std::string> &src){
+	_allowedMethods = src;
+}
+
 
 
 std::string	Config::getPort( void ){
@@ -199,4 +226,8 @@ std::map<std::string, std::string>	Config::getErrorPages( void ){
 
 std::string	Config::getMaxBodySize( void ){
 	return (_maxBodySize);
+}
+
+std::vector<std::string>	Config::getAllowedMethods( void ){
+	return (_allowedMethods);
 }
