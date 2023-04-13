@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 14:29:46 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/13 17:51:37 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,18 @@ typedef enum e_fd
 	EPL
 }			t_fd;
 
+typedef enum e_flag
+{
+	EMPTY = 0,
+	ERROR = 1 << 0
+}	t_flag;
+
 class Server
 {
 	public:
-		typedef		struct sockaddr				t_sockaddr;
-		typedef 	struct sockaddr_in			t_sockaddr_in;
-		typedef		struct epoll_event			t_epoll_event;
+		typedef		struct sockaddr			t_sockaddr;
+		typedef 	struct sockaddr_in		t_sockaddr_in;
+		typedef		struct epoll_event		t_epoll_event;
 
 							Server(void);
 							Server(const Server & srv);
@@ -43,10 +49,10 @@ class Server
 		int					_eplfd; 
 		t_sockaddr		 *	_address;
 		t_epoll_event	 *	_eplev;
+		t_flag				_flag;
 
-		void				_srvError(const char *func,
-										const int line,
-										const char *msg)		const;
+		void				_srvError(const char *func, const int line,
+										const char *msg);
 		void				_log(const char *msg)				const;
 		void				_setSockAddr(void);
 		void				_mkSrvSocket(void);

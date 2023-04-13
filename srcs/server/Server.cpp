@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/12 16:51:32 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/13 18:40:49 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 #define MAX_EVENTS	5
 
 // Constructors ============================================================= //
-Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL )
+Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL ), _flag( EMPTY )
 {
 	this->_setSockAddr();
 	this->_mkSrvSocket();
@@ -38,7 +38,7 @@ Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( 
 	return;
 }
 
-Server::Server(const Server & srv) : _name( srv._getName() ), _srvfd( dup( srv._getFd( SRV ) ) ), _eplfd( dup( srv._getFd( EPL ) ) ), _address( NULL ), _eplev( NULL )
+Server::Server(const Server & srv) : _name( srv._getName() ), _srvfd( dup( srv._getFd( SRV ) ) ), _eplfd( dup( srv._getFd( EPL ) ) ), _address( NULL ), _eplev( NULL ), _flag ( EMPTY )
 {
 	int	i = 0;
 
@@ -99,8 +99,6 @@ void	Server::run(void)
 	int				nbEvents	__attribute__((unused)) = -1;
 	int				addrlen		__attribute__((unused));
 	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
-	//struct	hostent *h;
-	//char name[] = "halvarez";
 
 	// Testing data = will be removed ======================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
@@ -120,10 +118,10 @@ void	Server::run(void)
 	// Connection management ================================================ //
 	if ( listen( this->_getFd( SRV ), 100 ) == -1 )
 		this->_srvError(__func__, __LINE__, "listen");
-	this->_log("waiting for connection");
-	while ( 1 )
+	this->_log("listening");
+	while ( this->_flag != ERROR )
 	{
-		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, 5000);
+		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, -1);
 		for (int i = 0; i < nbEvents; ++i)
 		{
 			if ( cliEvents[i].data.fd == this->_getFd( SRV ) )
@@ -133,12 +131,12 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
-				if ( cliEvents[i].events & EPOLLIN )
+				if ( cliEvents[i].events & EPOLLIN & ~EPOLLHUP )
 				{
 					this->_log("sending data to client");
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
 				}
-				else if ( cliEvents[i].events & EPOLLOUT )
+				else if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
 				{
 					this->_log("receiving request from client");
 				}
@@ -150,7 +148,7 @@ void	Server::run(void)
 			else
 				this->_log("connection refused");
 			close( cliSocket );
-			this->_log("waiting for connection");
+			this->_log("listening");
 		}
 	}
 	// ====================================================================== //
@@ -178,7 +176,7 @@ void	Server::_mkSrvSocket(void)
 	int	fd	= -1;
 	int	opt = 1;
 
-	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
+	fd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
 	if (fd == -1)
 		this->_srvError(__func__, __LINE__, "socket");
 	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
@@ -194,7 +192,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN;
+	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;
@@ -236,9 +234,10 @@ Server::t_epoll_event *	Server::_getEpollEvent(void) const
 	return ( this->_eplev );
 }
 
-void	Server::_srvError(const char *func, const int line, const char *msg) const
+void	Server::_srvError(const char *func, const int line, const char *msg)
 {
 	std::cerr << func << ":" << line - 1 << ":";
+	this->_flag = ERROR;
 	perror( msg );
 	//exit( 1 );
 	return;
