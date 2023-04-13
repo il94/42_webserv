@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Formulaire de contact</title>
+</head>
+<body>
+	<h1>Formulaire de contact</h1>
+	<form method="POST" action="/cgi-bin/contact.py">
+		<label for="nom">Nom :</label>
+		<input type="text" name="nom" id="nom" required>
+		<br>
+		<label for="email">E-mail :</label>
+		<input type="email" name="email" id="email" required>
+		<br>
+		<label for="message">Message :</label>
+		<textarea name="message" id="message" required></textarea>
+			<br>
+		<input type="submit" value="Envoyer">
+	</form>
+</body>
+</html>

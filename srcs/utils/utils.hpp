@@ -1,36 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CGI.hpp                                            :+:      :+:    :+:   */
+/*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/11 22:09:47 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/12 21:58:57 by auzun            ###   ########.fr       */
+/*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
+/*   Updated: 2023/04/02 22:11:27 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CGI_HPP
-# define CGI_HPP
+#ifndef UTILS_HPP
+# define UTILS_HPP
 
-# include "../http/request/Request.hpp"
-# include <unistd.h>
-# include <string.h>
-# include <sys/wait.h>
-# include <stdlib.h>
+#include <sstream>
 
-# define	CGI_BUFSIZE 42424
+std::string	to_string(size_t n);
 
-class CGI
-{
-	public:
-		CGI();
-		CGI(Request &request);
-		~CGI();
 
-		std::string	execCGI(std::string scriptName);
-	private:
-		std::string		_body;
-};
-
-# endif
+#endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/03/30 16:17:50 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/13 22:32:47 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 #include <string>
 
 #include "Server.hpp"
+#include "../http/request/Request.hpp"
+#include "../http/response/Response.hpp"
+
 #define PORT 8080
 
 // Constructors ============================================================= //
@@ -55,18 +58,7 @@ void	Server::run(void)
 	int			new_socket;
 	long		valread __attribute__((unused));
 	int			addrlen;
-	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
-	int hfd = open("./html/index.html", O_RDONLY );
-	char b[30000];
-
-	read( hfd, b, 30000);
-	std::string html(b);
-
-	std::ostringstream oss;
-    oss << html.size();
-	hello = hello + oss.str() + "\n" + b;
 	
-	std::cout << hello  << std::endl;
 	struct sockaddr_in address;
 	
 	if ( (server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0 )
@@ -104,8 +96,20 @@ void	Server::run(void)
 		}
 		char buffer[30000] = {0};
 		read( new_socket, buffer, 30000);
+
+		std::cout << "==========&&&&&&&&&&&&&&&&==========" << std::endl;
 		std::cout << buffer << std::endl;
-		write( new_socket, hello.c_str(), hello.size() );
+		std::cout << "==========&&&&&&&&&&&&&&&&==========" << std::endl;
+
+
+		Request		req;
+		req.setRequestAtr(buffer);
+		req.setQueryM();
+		Response	response(req);
+		response.GET();
+		std::cout << buffer << std::endl;
+		std::cout << response.getResponse() << std::endl;
+		write( new_socket, response.getResponse().c_str(), response.getResponse().size() );
 		close( new_socket );
 	}
 	return;
