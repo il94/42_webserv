@@ -23,7 +23,7 @@ build	:= san
 #==============================================================================#
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP
+CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory

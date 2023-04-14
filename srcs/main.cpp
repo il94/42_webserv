@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 01:41:19 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/14 14:11:08 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,9 @@
 #include "cgi/CGI.hpp"
 #include "utils/utils.hpp"
 
-int	main(int ac, char **av)
+int	main(/*int ac, char **av*/)
 {
+	
 	(void)ac;
 	
 	if (av[0] and av[1])
@@ -45,6 +46,10 @@ int	main(int ac, char **av)
 		std::cout << "Default mode" << std::endl;
 		Server	server("default");
 	}
+	
+	Server	srv;
+
+	srv.run();
 
 	// std::for_each(fileContent.begin(), fileContent.end(), displayString<std::string>);
 	

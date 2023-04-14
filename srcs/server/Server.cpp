@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:43:44 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/14 14:10:02 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,14 +157,14 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
+				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
+				{
+					this->_log("receiving request from client");
+				}
 				if ( cliEvents[i].events & EPOLLIN & ~EPOLLHUP )
 				{
 					this->_log("sending data to client");
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
-				}
-				else if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
-				{
-					this->_log("receiving request from client");
 				}
 				else
 				{
@@ -177,6 +177,9 @@ void	Server::run(void)
 			this->_log("listening");
 		}
 	}
+
+	getName()
+
 	// ====================================================================== //
 	return;
 }
