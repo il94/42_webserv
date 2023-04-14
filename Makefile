@@ -9,7 +9,7 @@ NAME = webserv
 #==============================================================================#
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror
+CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory
@@ -59,6 +59,7 @@ SRC = main.cpp \
 #==============================================================================#
 
 OBJ = $(addprefix $(OBJ_DIR), $(SRC:.cpp=.o))
+DEP = $(addprefix $(OBJ_DIR), $(SRC:.o=.d))
 
 #==============================================================================#
 #                                   MAKEFILE                                   #
@@ -90,5 +91,11 @@ fclean : clean
 re : fclean
 	$(MAKE_SILENT) all
 
-.PHONY : all clean fclean re
+exec:	all
+		./${NAME}
+
+#Dependencies list
+-include ${DEP}
+
+.PHONY : all clean fclean re exec
 .SILENT :
