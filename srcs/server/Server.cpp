@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:36:00 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/14 10:43:44 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,15 @@ Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( 
 	this->_mkSrvSocket();
 	this->_setEpollEvent();
 	this->_mkEpoll();
+	return;
+}
+
+Server::Server( const std::string &src )
+{
+	if (src == "default")
+	{
+		/* générer un serveur par défaut */
+	}
 	return;
 }
 

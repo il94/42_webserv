@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:39:40 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/14 10:43:45 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ class Server
 		typedef		struct epoll_event		t_epoll_event;
 
 							Server(void);
-							Server(const Server & srv);
+							Server(const Server & src);
+							Server(const std::string & srv);
 							~Server(void);
 
 		Server			 &	operator=(const Server & srv);
