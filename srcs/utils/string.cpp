@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   string.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 22:10:42 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/14 01:41:38 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,4 +18,44 @@ std::string	to_string(size_t n)
 
 	tmp << n;
 	return tmp.str();
+}
+
+std::vector<std::string> fileToVector( std::string path )
+{
+	std::ifstream	toRead(path.c_str());
+
+	if	(!toRead.good())
+	{
+		std::cout << "Invalid path file" << std::endl;
+		quick_exit(EXIT_FAILURE);
+	}
+
+	std::string 				buffer;
+	std::vector<std::string>	result;
+
+	while (std::getline(toRead, buffer))
+		result.push_back(buffer);
+	toRead.close();
+	return (result);
+}
+
+std::vector<std::vector <std::string> > splitFileConfig(std::string path)
+{
+	std::vector<std::vector <std::string> > result;
+
+	std::vector<std::string>			fileContent = fileToVector(path);
+	std::vector<std::string>			element;
+	std::vector<std::string>::iterator	start;
+	std::vector<std::string>::iterator	end;
+
+	for (start = std::find(fileContent.begin(), fileContent.end(), "server {"); start != fileContent.end(); start = std::find(start, fileContent.end(), "server {"))
+	{
+		end = std::find(start, fileContent.end(), "}");
+		element.clear();
+		for (++start; start != end; start++)
+			element.push_back(*start);
+		result.push_back(element);
+		start = ++end;
+	}
+	return (result);
 }

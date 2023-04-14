@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 00:56:36 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/14 01:13:58 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <map>
 #include <vector>
 
-#include "../config_file/Config.hpp"
+#include "../config/Config.hpp"
 
 class Server
 {

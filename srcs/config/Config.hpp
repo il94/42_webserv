@@ -7,11 +7,7 @@
 #include <map>
 #include <vector>
 
-template <typename T>
-void	print_test(T str)
-{
-	std::cout << str << std::endl;
-}
+#include <algorithm>
 
 class Config
 {
@@ -81,7 +77,6 @@ class Config
 
 	/* Attributes */
 	std::vector<std::string>			_fileContent;
-	// std::map<std::string, std::string>	config;
 
 	std::string	_port; //listen [IP + Port = 000.0.0.0:0000]
 	std::string	_host; //listen [IP + Port = 000.0.0.0:0000]

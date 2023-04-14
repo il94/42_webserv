@@ -1,7 +1,5 @@
 #include "Config.hpp"
 
-#include <algorithm>
-
 /*=============================== Constructors ===============================*/
 
 Config::Config(){

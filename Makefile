@@ -1,96 +1,94 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/04/14 00:50:59 by ilandols         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+#==============================================================================#
+#                                   TARGETS                                    #
+#==============================================================================#
 
-#Default build version called with make rule = release
-build	:= #an
+NAME = webserv
 
-#Compilation of the mandatory part
-NAME	= webserv
+#==============================================================================#
+#                                   COMMANDS                                   #
+#==============================================================================#
 
-#Buildings objects
-DIR		= ./srcs/
-FILES	= main.cpp 
-SRC		+= $(addprefix ${DIR}, ${FILES})
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror
+MKDIR = mkdir -p
+RM = rm -f
+MAKE_SILENT = make --no-print-directory
 
-#Subdirectory example (c/p 3 lines)
-SRV_DIR	= ${DIR}server/
-SRV		= Server.cpp
+#==============================================================================#
+#                                    COLORS                                    #
+#==============================================================================#
 
-HTTP_DIR = ${DIR}http/
+PURPLE = \033[35m
+GREEN = \033[32m
+YELLOW = \033[33m
+END = \033[0m
 
-REQUEST_DIR = ${HTTP_DIR}request/
-REQUEST_SRC		= Request.cpp
+#==============================================================================#
+#                                    PATHS                                     #
+#==============================================================================#
 
-CGI_DIR = ${DIR}cgi/
-CGI_SRC		= CGI.cpp
+SRC_DIR = srcs/
+HEADER_DIR = include/
+OBJ_DIR = obj/
 
-RESPONSE_DIR = ${HTTP_DIR}response/
-RESPONSE_SRC	= Response.cpp
+#==============================================================================#
+#                                   SOURCES                                    #
+#==============================================================================#
 
-UTILS_DIR = ${DIR}utils/
-UTILS_SRS		= string.cpp
+SRC = main.cpp \
+		\
+		cgi/CGI.cpp \
+		\
+		config/Config.cpp \
+		\
+		http/request/Request.cpp http/response/Response.cpp \
+		\
+		server/Server.cpp \
+		\
+		utils/string.cpp \
+		\
 
-SRC		+= $(addprefix ${CGI_DIR}, ${CGI_SRC})
-SRC		+= $(addprefix ${UTILS_DIR}, ${UTILS_SRS})
-SRC		+= $(addprefix ${RESPONSE_DIR}, ${RESPONSE_SRC})
-SRC		+= $(addprefix ${REQUEST_DIR}, ${REQUEST_SRC})
-SRC		+= $(addprefix ${SRV_DIR}, ${SRV})
+#==============================================================================#
+#                                   HEADERS                                    #
+#==============================================================================#
 
-CF_DIR	= ${DIR}config_file/
-CF		= configFile.cpp Config.cpp
-SRC		+= $(addprefix ${CF_DIR}, ${CF})
+# HEAD = $(SRC:.cpp=.hpp)
 
-##
+#==============================================================================#
+#                                   OBJECTS                                    #
+#==============================================================================#
 
-OBJ		= ${SRC:.cpp=.o}
-DEP		= ${OBJ:.o=.d}
+OBJ = $(addprefix $(OBJ_DIR), $(SRC:.cpp=.o))
 
-CXX		= c++ -Wshadow -std=c++98
+#==============================================================================#
+#                                   MAKEFILE                                   #
+#==============================================================================#
 
-#Flag include directory (add -I[DIR])
-CXX		+= -Isrcs/server 
-RM		= rm -rf
+all : $(NAME)
 
-#Conditionnal flags depending on building version
-cxxflags.rls	:= -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP 
-cxxflags.gdb	:= -g3 #-fstandalone-debug
-cxxflags.san	:= -g3 -fsanitize=address #-fstandalone-debug 
-CXXFLAGS		= ${cxxflags.rls} ${cxxflags.${build}}
-export			CXXFLAGS
+$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp Makefile $(HEAD)
+	mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.o : %.cpp
-		${CXX} -c $< -o $@
+$(NAME) : $(OBJ) 
+	echo "$(YELLOW)Making Webserv$(END)"
+	$(CXX) $(OBJ) -o $(NAME)
+	echo "$(GREEN)Done$(END)"
 
-#Mandatory rules
-all:    ${NAME}
+bonus : all
 
-${NAME}:${OBJ}
-		${CXX} ${OBJ} -o ${NAME}
+clean :
+	echo "$(PURPLE)Cleaning Webserv's objects...$(END)"
+	$(RM)r $(OBJ_DIR)
+	echo "$(GREEN)Done$(END)"
 
-#Execution rule
-run:	all
-		./${NAME}
+fclean : clean
+	echo "$(PURPLE)Cleaning Webserv...$(END)"
+	$(RM) $(NAME)
+	echo "$(GREEN)Done$(END)"
 
-#Cleaning rules
-clean:
-		${RM} ${OBJ} ${DEP}
+re : fclean
+	$(MAKE_SILENT) all
 
-fclean: clean
-		${RM} ${NAME}
-
-re:     fclean
-		${MAKE} all
-
-#Dependencies list
--include ${DEP}
-
-.PHONY: all clean fclean re bonus run
+.PHONY : all clean fclean re
+.SILENT :
