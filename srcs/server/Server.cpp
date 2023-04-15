@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 14:10:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/15 22:15:18 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,6 +157,24 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
+				Request	req;
+				Response response;
+				if (cliSocket)
+				{
+					char buf[10000];
+					int ret = read(cliSocket, buf, 10000);
+					if (ret > 0)
+					{ 
+						std::cout << buf << std::endl;
+						req.setRequestAtr(buf);
+						req.setQueryM();
+						if (req.getMethod() == "GET")
+						{
+							response.setRequest(req);
+							response.GET();
+						}
+					}
+				}
 				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
 				{
 					this->_log("receiving request from client");
@@ -164,7 +182,7 @@ void	Server::run(void)
 				if ( cliEvents[i].events & EPOLLIN & ~EPOLLHUP )
 				{
 					this->_log("sending data to client");
-					send( cliSocket, hello.c_str(), hello.size(), 0 );
+					send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 				}
 				else
 				{
@@ -178,7 +196,7 @@ void	Server::run(void)
 		}
 	}
 
-	getName()
+	_getName();
 
 	// ====================================================================== //
 	return;
