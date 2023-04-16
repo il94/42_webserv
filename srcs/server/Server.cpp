@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/15 22:15:18 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/15 23:13:30 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,6 +172,10 @@ void	Server::run(void)
 						{
 							response.setRequest(req);
 							response.GET();
+						}
+						else if (req.getMethod() == "POST")
+						{
+							std::cout << "./html/cgi/test/" << req.getURL() << std::endl;
 						}
 					}
 				}

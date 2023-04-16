@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/15 22:15:02 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/16 03:27:06 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,14 @@ void	Response::GET(void)
 		return ;
 	readContent();
 	_response = getHeader(_response.size(), _request.getURL(), 200) + "\r\n" + _response;
+}
+
+void	Response::POST(void)
+{
+	if (_request.getMethod() != "POST")
+		return ;
+	CGI cgi(_request);
+	_response = cgi.execCGI("/html/cgit_test/" + _request.getURL());
 }
 /*-------*/
 

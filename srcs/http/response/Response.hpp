@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/15 22:14:18 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/15 22:27:11 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <fstream>
+#include "../../cgi/CGI.hpp"
 #include "../../utils/utils.hpp"
 #include "../request/Request.hpp"
 
@@ -28,6 +29,7 @@ class Response
 
 		/*Methods*/
 		void	GET(void);
+		void	POST(void);
 		/*-------*/
 
 		void	setRequest(Request &request);

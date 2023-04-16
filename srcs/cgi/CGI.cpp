@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/12 21:57:54 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/16 03:26:17 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,52 @@ CGI::CGI()
 {
 }
 
-CGI::CGI(Request &request): _body(request.getRequestBody())
+CGI::CGI(Request &request): _request(request), _body(request.getRequestBody())
 {
 }
 
 CGI::~CGI(){}
 
-std::string	CGI::execCGI(std::string scriptName)
+void	CGI::setArgs(std::string path)
+{
+	_args.push_back((char *)"/bin/bash");
+	_args.push_back((char *)path.c_str());
+	_args.push_back(NULL);
+}
+
+void	CGI::setEnv()
+{
+	std::map<std::string, std::string>	header = _request.getHeaderM();
+	header["REQUEST_METHOD"] = _request.getMethod();
+	header["SERVER_PROTOCOL"] = "HTTP/1.1";
+
+	_env = new char *[header.size() + 1];
+	int	j = 0;
+	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
+	{
+		std::string	tmp = i->first + "=" + i->second;
+		_env[j] = new char[tmp.size() + 1];
+		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());
+		j++;
+	}
+	_env[j] = NULL;
+}
+
+void	CGI::setQueryString()
+{
+	_querystring = (char *)_request.getRequestContent().c_str();
+}
+
+
+std::string	CGI::execCGI(std::string scriptPath)
 {
 	int			pid;
 	int			pipefd[2];
 	std::string	sendedBody = "";
+
+	setArgs(scriptPath);
+	setEnv();
+	setQueryString();
 
 	if (pipe(pipefd) < 0)
 	{
@@ -52,7 +87,8 @@ std::string	CGI::execCGI(std::string scriptName)
 			std::cerr << "Dup2 failed" << std::endl;
 			exit(1); // exit fatal...
 		}
-		execve(scriptName.c_str(), nll, NULL);
+		char	**args = &_args[0];
+		execve(args[0], args, _env);
 		close(pipefd[1]);
 		close(pipefd[0]);
 		std::cerr << "Execve failed" << std::endl;
@@ -61,7 +97,10 @@ std::string	CGI::execCGI(std::string scriptName)
 	{
 		char	buffer[CGI_BUFSIZE] = {0};
 		if (pipefd[1] > -1)
+		{
+			write(pipefd[1], _querystring, strlen(_querystring));
 			close(pipefd[1]);
+		}
 		waitpid(-1, NULL, 0);
 		int ret = 1;
 		while (ret > 0)

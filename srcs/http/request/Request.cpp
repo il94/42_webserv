@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/05 20:59:44 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/16 03:14:22 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void	Request::setRequestAtr(std::string req)
 	{
 		_data[1] = _data[1].substr(_data[1].find("/") + 1, _data[1].size() - 1);
 	}
+
 	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
 	while (std::getline(stream, tmp))
@@ -55,7 +56,7 @@ void	Request::setRequestAtr(std::string req)
 
 void	Request::setQueryM()
 {
-	std::string	queryString;
+	std::string	queryString = "";
 
 	if (getMethod() == "GET")
 	{
@@ -71,12 +72,13 @@ void	Request::setQueryM()
 	else
 		return ;
 	_requestContent = queryString;
+
 	while (queryString != "")
 	{
 		std::string	subQuery = queryString.substr(0, queryString.find("&"));
-		_queryM[subQuery.substr(0, subQuery.find("=") + 1)] = subQuery.substr(subQuery.find("=") + 1);
+		_queryM[subQuery.substr(0, subQuery.find("="))] = subQuery.substr(subQuery.find("=") + 1);
 		if (queryString.find("&") != std::string::npos)
-			queryString.substr(queryString.find("&") + 1);
+			queryString = queryString.substr(queryString.find("&") + 1);
 		else
 			queryString = "";
 	}
@@ -91,5 +93,7 @@ std::string Request::getRequestContent() const { return _requestContent; }
 std::string Request::getHTTPVersion() const { return _data[2]; }
 
 std::string Request::getElInHeader(std::string key) { return _headerM[key]; }
+
+std::map<std::string, std::string>	Request::getHeaderM() { return _headerM; }
 
 std::string Request::getRequestBody() const { return _reqBody; }
