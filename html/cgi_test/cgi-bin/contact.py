@@ -1,8 +1,21 @@
 #!/usr/bin/env python
 
+
+# import sys
+
+# print("Content-type: text/html\n\n")
+# print("<html><head><title>Réponse du serveur</title></head><body>")
+# print("<h1>Réponse du serveur</h1>")
+# print("<p>Les données reçues sont :</p>")
+# data = sys.stdin.read()
+# print("<blockquote>{}</blockquote>".format(data))
+
+
 import cgi
 
 print("Content-type: text/html\n\n")
+with open("mon_fichier.txt", "w") as f:
+    f.write("Contenu du fichier.")
 print("<html><head><title>Réponse du serveur</title></head><body>")
 print("<h1>Réponse du serveur</h1>")
 

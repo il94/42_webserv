@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/15 23:13:30 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/16 03:35:32 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,17 +165,18 @@ void	Server::run(void)
 					int ret = read(cliSocket, buf, 10000);
 					if (ret > 0)
 					{ 
-						std::cout << buf << std::endl;
 						req.setRequestAtr(buf);
 						req.setQueryM();
+						response.setRequest(req);
 						if (req.getMethod() == "GET")
 						{
-							response.setRequest(req);
 							response.GET();
 						}
 						else if (req.getMethod() == "POST")
 						{
-							std::cout << "./html/cgi/test/" << req.getURL() << std::endl;
+							response.POST();
+							std::cout << "RESPONSE" << std::endl << response.getResponse() << std::endl;
+
 						}
 					}
 				}

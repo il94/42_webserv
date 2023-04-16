@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/16 03:14:22 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/16 03:49:12 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ void	Request::setQueryM()
 {
 	std::string	queryString = "";
 
+	_requestContent = "";
 	if (getMethod() == "GET")
 	{
 		std::string	URL = getURL();
@@ -72,7 +73,6 @@ void	Request::setQueryM()
 	else
 		return ;
 	_requestContent = queryString;
-
 	while (queryString != "")
 	{
 		std::string	subQuery = queryString.substr(0, queryString.find("&"));
