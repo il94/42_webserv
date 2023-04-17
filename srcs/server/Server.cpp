@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 13:52:32 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 14:36:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,12 +158,13 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
+				/*
 				std::cout << "\t\tepoll_events = " << cliEvents[i].events << std::endl;
-				if ( cliEvents[i].events & EPOLLOUT )
 				if (cliSocket)
 				{
 					char buf[10000];
 					int ret = read(cliSocket, buf, 10000);
+					std::cout << "reading" << std::endl;
 					if (ret > 0)
 					{ 
 						std::cout << buf << std::endl;
@@ -176,13 +177,15 @@ void	Server::run(void)
 						}
 					}
 				}
-				if ( cliEvents[i].events & EPOLLOUT )
+				*/
+				if ( cliEvents[i].events & EPOLLOUT ) //only if client request data, like the end of a download
 				{
 					this->_log("receiving request from client");
 				}
-				if ( cliEvents[i].events & EPOLLIN )
+				if ( cliEvents[i].events & EPOLLIN ) //receive client request here
 				{
 					this->_log("sending data to client");
+					//send( cliSocket, hello.c_str(), hello.size(), 0 );
 					send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 				}
 				else
@@ -197,7 +200,7 @@ void	Server::run(void)
 		}
 	}
 
-	//_getName();
+	_getName();
 	// ====================================================================== //
 	return;
 }
@@ -223,7 +226,7 @@ void	Server::_mkSrvSocket(void)
 	int	fd	= -1;
 	int	opt = 1;
 
-	fd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
+	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
 	if (fd == -1)
 		this->_srvError(__func__, __LINE__, "socket");
 	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
