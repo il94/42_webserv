@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/17 16:03:57 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 00:33:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ std::string	Response::getHeader(size_t size, std::string path, int code)
 	std::string	header;
 
 	setContentLength(size);
-	setContentType(path);
+	if (path != "")
+		setContentType(path);
 	setCode(code);
 	header = writeHeader();
 	return (header);

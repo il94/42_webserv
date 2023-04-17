@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/17 15:54:50 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 00:33:37 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,14 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-
+	
 	_env = new char *[header.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
 	{
 		std::string	tmp = i->first + "=" + i->second;
 		_env[j] = new char[tmp.size() + 1];
-		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());
+		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());		
 		j++;
 	}
 	_env[j] = NULL;
