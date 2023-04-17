@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 13:49:24 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 13:52:32 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,8 @@ void	Server::run(void)
 	int				cliSocket	= -1;
 	int				nbEvents	= -1;
 	int				addrlen;
+	Request			req;
+	Response		response;
 	t_epoll_event	cliEvents[ MAX_EVENTS ];
 
 	// Testing data = will be removed ======================================= //
@@ -156,12 +158,8 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
-<<<<<<< HEAD
 				std::cout << "\t\tepoll_events = " << cliEvents[i].events << std::endl;
 				if ( cliEvents[i].events & EPOLLOUT )
-=======
-				Request	req;
-				Response response;
 				if (cliSocket)
 				{
 					char buf[10000];
@@ -178,8 +176,7 @@ void	Server::run(void)
 						}
 					}
 				}
-				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
->>>>>>> 0a91faaefa21578abc2258a5826d37c45d1b54d6
+				if ( cliEvents[i].events & EPOLLOUT )
 				{
 					this->_log("receiving request from client");
 				}
@@ -200,11 +197,7 @@ void	Server::run(void)
 		}
 	}
 
-<<<<<<< HEAD
-=======
-	_getName();
-
->>>>>>> 0a91faaefa21578abc2258a5826d37c45d1b54d6
+	//_getName();
 	// ====================================================================== //
 	return;
 }
