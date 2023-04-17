@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 14:10:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 13:42:03 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ Server::~Server(void)
 // Operators ================================================================ //
 Server &	Server::operator=(const Server & srv)
 {
-	config = srv.config;
+	_config = srv._config;
 	return ( *this );
 }
 
@@ -91,28 +91,28 @@ Server &	Server::operator=(const Server & srv)
 
 void		Server::setConfig(std::vector< std::string > & srv)
 {
-	this->config.setFileContent(srv);
+	this->_config.setFileContent(srv);
 	
 	/*==================================*/
 	
-	config.setPort(config.extractPort());
-	config.setHost(config.extractHost());
-	config.setSocket(config.extractSocket());
-	config.setName(config.extractName());
-	config.setErrorPages(config.extractErrorPages());
-	config.setMaxBodySize(config.extractMaxBodySize());
+	_config.setPort(_config.extractPort());
+	_config.setHost(_config.extractHost());
+	_config.setSocket(_config.extractSocket());
+	_config.setName(_config.extractName());
+	_config.setErrorPages(_config.extractErrorPages());
+	_config.setMaxBodySize(_config.extractMaxBodySize());
 	
 
 	/*==================================*/
 
-	config.setAllowedMethods(config.extractAllowedMethods());
+	_config.setAllowedMethods(_config.extractAllowedMethods());
 	
-	config.setRoot(config.extractRoot());
-	config.setIndex(config.extractIndex());
+	_config.setRoot(_config.extractRoot());
+	_config.setIndex(_config.extractIndex());
 	
 	/*==================================*/
 	
-	config.printConfig();
+	_config.printConfig();
 	
 	/*==================================*/
 	
@@ -121,10 +121,10 @@ void		Server::setConfig(std::vector< std::string > & srv)
 // Public member functions ================================================== //
 void	Server::run(void)
 {
-	int				cliSocket	__attribute__((unused)) = -1;
-	int				nbEvents	__attribute__((unused)) = -1;
-	int				addrlen		__attribute__((unused));
-	t_epoll_event	cliEvents[ MAX_EVENTS ] __attribute__((unused));
+	int				cliSocket	= -1;
+	int				nbEvents	= -1;
+	int				addrlen;
+	t_epoll_event	cliEvents[ MAX_EVENTS ];
 
 	// Testing data = will be removed ======================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
@@ -138,7 +138,6 @@ void	Server::run(void)
     oss << html.size();
 	hello = hello + oss.str() + "\n" + b;
 	
-	//std::cout << hello  << std::endl;
 	// ====================================================================== //
 
 	// Connection management ================================================ //
@@ -157,11 +156,12 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
-				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
+				std::cout << "\t\tepoll_events = " << cliEvents[i].events << std::endl;
+				if ( cliEvents[i].events & EPOLLOUT )
 				{
 					this->_log("receiving request from client");
 				}
-				if ( cliEvents[i].events & EPOLLIN & ~EPOLLHUP )
+				if ( cliEvents[i].events & EPOLLIN )
 				{
 					this->_log("sending data to client");
 					send( cliSocket, hello.c_str(), hello.size(), 0 );
@@ -177,8 +177,6 @@ void	Server::run(void)
 			this->_log("listening");
 		}
 	}
-
-	getName()
 
 	// ====================================================================== //
 	return;
@@ -221,7 +219,7 @@ void	Server::_setEpollEvent(void)
 {
 	static t_epoll_event	eplev;
 
-	eplev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
+	eplev.events = EPOLLIN | EPOLLOUT;// | EPOLLHUP;
 	eplev.data.fd = this->_getFd( SRV );
 	this->_eplev = &eplev;
 	return;

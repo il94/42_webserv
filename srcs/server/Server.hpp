@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:43:45 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 13:27:35 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Server
 		void				setConfig(std::vector< std::string > & srv);
 
 	private:
-		Config				config;
+		Config				_config;
 		std::string			_name;
 		int					_port;
 		int					_srvfd;
