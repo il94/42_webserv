@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/05 21:06:55 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/15 22:15:02 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,4 +128,5 @@ void	Response::setContentType(std::string path)
 }
 /*------*/
 
+void	Response::setRequest(Request &request) {_request = request;}
 std::string	Response::getResponse() {return _response;}

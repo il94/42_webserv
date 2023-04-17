@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/02 23:17:58 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/15 22:14:18 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Response
 		void	GET(void);
 		/*-------*/
 
+		void	setRequest(Request &request);
 		std::string	getResponse();
 
 		/*Response Utils*/

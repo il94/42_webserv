@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 13:42:03 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 13:49:24 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,15 +156,37 @@ void	Server::run(void)
 					this->_srvError(__func__, __LINE__, "accept");
 				else
 					this->_log("connection established");
+<<<<<<< HEAD
 				std::cout << "\t\tepoll_events = " << cliEvents[i].events << std::endl;
 				if ( cliEvents[i].events & EPOLLOUT )
+=======
+				Request	req;
+				Response response;
+				if (cliSocket)
+				{
+					char buf[10000];
+					int ret = read(cliSocket, buf, 10000);
+					if (ret > 0)
+					{ 
+						std::cout << buf << std::endl;
+						req.setRequestAtr(buf);
+						req.setQueryM();
+						if (req.getMethod() == "GET")
+						{
+							response.setRequest(req);
+							response.GET();
+						}
+					}
+				}
+				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )
+>>>>>>> 0a91faaefa21578abc2258a5826d37c45d1b54d6
 				{
 					this->_log("receiving request from client");
 				}
 				if ( cliEvents[i].events & EPOLLIN )
 				{
 					this->_log("sending data to client");
-					send( cliSocket, hello.c_str(), hello.size(), 0 );
+					send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 				}
 				else
 				{
@@ -178,6 +200,11 @@ void	Server::run(void)
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	_getName();
+
+>>>>>>> 0a91faaefa21578abc2258a5826d37c45d1b54d6
 	// ====================================================================== //
 	return;
 }
