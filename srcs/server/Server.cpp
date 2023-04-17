@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:43:44 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/17 18:23:40 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,6 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	
 	config.setPort(config.extractPort());
 	config.setHost(config.extractHost());
-	config.setSocket(config.extractSocket());
 	config.setName(config.extractName());
 	config.setErrorPages(config.extractErrorPages());
 	config.setMaxBodySize(config.extractMaxBodySize());
@@ -107,6 +106,7 @@ void		Server::setConfig(std::vector< std::string > & srv)
 
 	config.setAllowedMethods(config.extractAllowedMethods());
 	
+	config.setListing(config.extractListing());
 	config.setRoot(config.extractRoot());
 	config.setIndex(config.extractIndex());
 	

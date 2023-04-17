@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 01:41:19 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/17 19:32:31 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int	main(int ac, char **av)
 	{
 		std::cout << "Default mode" << std::endl;
 		Server	server("default");
+		server.run();
 	}
 
 	// std::for_each(fileContent.begin(), fileContent.end(), displayString<std::string>);

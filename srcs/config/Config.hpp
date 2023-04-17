@@ -23,53 +23,55 @@ class Config
 
 	/* Methods */
 	
-	std::string	findInFileContent( const std::string & );
+	std::string					findInFileContent( const std::string & );
 	std::vector<std::string>	multipleFindInFileContent( const std::string & );
-	void		printConfig( void );
+	void						printConfig( void );
 
 
 
-	std::string	extractPort ( void );
-	std::string	extractHost( void );
-	std::string	extractSocket( void );
-	std::string	extractName( void );
+	short								extractPort ( void );
+	std::string							extractHost( void );
+	std::string							extractName( void );
 	std::map<std::string, std::string>	extractErrorPages( void );
-	std::string	extractMaxBodySize( void );
+	long								extractMaxBodySize( void );
 
 	std::vector<std::string>	extractAllowedMethods( void );
 
 	std::string	extractRoot( void );
 	std::string	extractIndex( void );
+	bool		extractListing( void );
 
 
 
 	/* Accessors */
 	void	setFileContent( std::vector<std::string> & );
 
-	void	setPort( const std::string & );
+	void	setPort( const short & );
 	void	setHost( const std::string & );
-	void	setSocket( const std::string & );
 	void	setName( const std::string & );
 	void	setErrorPages( const std::map<std::string, std::string> & );
-	void	setMaxBodySize( const std::string & );
+	void	setMaxBodySize( const long & );
 
 	void	setAllowedMethods( const std::vector<std::string> & );
 
 	void	setRoot( const std::string & );
 	void	setIndex( const std::string & );
+	void	setListing( const bool & );
 
 
-	std::string	getPort( void );
+
+
+	short		getPort( void );
 	std::string	getHost( void );
-	std::string	getSocket( void );
 	std::string	getName( void );
 	std::map<std::string, std::string>	getErrorPages( void );
-	std::string	getMaxBodySize( void );
+	long		getMaxBodySize( void );
 
 	std::vector<std::string>	getAllowedMethods( void );
 
 	std::string	getRoot( void );
 	std::string	getIndex( void );
+	bool		getListing( void );
 
 
 
@@ -77,16 +79,15 @@ class Config
 
 	/* Attributes */
 	std::vector<std::string>			_fileContent;
+	bool								_error;
 
-	std::string	_port; //listen [IP + Port = 000.0.0.0:0000]
+	short		_port; //listen [IP + Port = 000.0.0.0:0000]
 	std::string	_host; //listen [IP + Port = 000.0.0.0:0000]
-		// OU
-	std::string	_socket; //listen [IP + Port = 000.0.0.0:0000]
 
 	std::string	_name; //server_name [name]
 	// default host:port
 	std::map<std::string, std::string>	_errorPages; //error_page [path_file.html]
-	std::string	_maxBodySize; //client_max_body_size [value + unit = 00M]
+	long 		_maxBodySize; //client_max_body_size [value + unit = 00M]
 
 	/*=====================================*/
 
@@ -94,9 +95,10 @@ class Config
 	// HTTP redirection
 	std::string	_root; //root [path]
 	std::string	_index; //index [path]
+	bool		_listing; //autoindex [on/off]
+	std::string	_directoryRequest;	//error_directory_page [path_file.html]
 	// std::vector<std::string>	_contentPath; //location...
 	/**/
-	// std::string	_directoryRequest;	//error_directory_page [path_file.html]
 
 	/*=====================================*/
 

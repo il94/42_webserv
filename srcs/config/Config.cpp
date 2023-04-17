@@ -19,7 +19,6 @@ Config& Config::operator=(const Config &src)
 	_fileContent = src._fileContent;
 	_port = src._port;
 	_host = src._host;
-	_socket = src._socket;
 	_name = src._name;
 	_errorPages = src._errorPages;
 	_maxBodySize = src._maxBodySize;
@@ -62,29 +61,29 @@ void	Config::printConfig( void )
 {
 	std::cout << "PORT = " << getPort() << std::endl;
 	std::cout << "HOST = " << getHost() << std::endl;
-	std::cout << "SOCKET = " << getSocket() << std::endl;
 	std::cout << "NAME = " << getName() << std::endl;
 	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
 		std::cout << "ERROR PAGE " << it->first << " = " << it->second << std::endl;
-	std::cout << "MAX BODY SIZE  = " << getMaxBodySize() << std::endl;
+	std::cout << "MAX BODY SIZE = " << getMaxBodySize() << std::endl;
 	for (std::vector<std::string>::iterator it = _allowedMethods.begin(); it != _allowedMethods.end(); it++)
 		std::cout << "ALLOWED METHOD = " << *it << std::endl;
 	std::cout << "ROOT = " << getRoot() << std::endl;
 	std::cout << "INDEX = " << getIndex() << std::endl;
+	std::cout << "LISTING = " << getListing() << std::endl;
 }
 
 
 
 
-std::string	Config::extractPort( void )
+short	Config::extractPort( void )
 {
 	std::string	result;
 
 	result = findInFileContent("listen");
 	if (result == "default")
-		return ("8000");
+		return (8000);
 	else
-		return (result.substr(result.find(':') + 1, result.size()));
+		return (std::atoi((result.substr(result.find(':') + 1, result.size()).c_str())));
 }
 
 std::string	Config::extractHost( void )
@@ -96,17 +95,6 @@ std::string	Config::extractHost( void )
 		return ("127.0.0.1");
 	else
 		return (result.substr(0, result.find(':')));
-}
-
-std::string	Config::extractSocket( void )
-{
-	std::string	result;
-
-	result = findInFileContent("listen");
-	if (result == "default")
-		return ("127.0.0.1:8080");
-	else
-		return (result);
 }
 
 std::string	Config::extractName( void )
@@ -123,34 +111,53 @@ std::string	Config::extractName( void )
 std::map<std::string, std::string>	Config::extractErrorPages( void )
 {
 	std::map<std::string, std::string>	result;
-	std::vector<std::string>	content;
+	std::vector<std::string>			content;
 
 	content = multipleFindInFileContent("error_page");
 
-	if (content.empty() == true)
-		result.insert(std::pair<std::string, std::string>("404", "404.html"));
-	else
+	result.insert(std::pair<std::string, std::string>("404", "/default_files/404.html"));
+	result.insert(std::pair<std::string, std::string>("500", "/default_files/500.html"));
+	result.insert(std::pair<std::string, std::string>("501", "/default_files/501.html"));
+	result.insert(std::pair<std::string, std::string>("502", "/default_files/502.html"));
+	std::pair<std::string, std::string>	element;
+	for (std::vector<std::string>::iterator it = content.begin(); it != content.end(); *it++)
 	{
-		std::pair<std::string, std::string>	element;
-		for (std::vector<std::string>::iterator it = content.begin(); it != content.end(); *it++)
+		if (result.find(it->substr(0, it->find('/') - 1)) == result.end())
 		{
 			element.first = it->substr(0, it->find('/') - 1);
 			element.second = it->substr(it->find('/'), ';');
 			result.insert(element);
 		}
+		else
+			result[it->substr(0, it->find('/') - 1)] = it->substr(it->find('/'), ';');
 	}
 	return (result);
 }
 
-std::string	Config::extractMaxBodySize( void )
+long	Config::extractMaxBodySize( void )
 {
-	std::string	result;
+	long		result;
+	std::string	tmp;
 
-	result = findInFileContent("client_max_body_size");
-	if (result == "default")
-		return ("1M");
+	tmp = findInFileContent("client_max_body_size");
+	if (tmp == "default")
+		return (1000000);
 	else
-		return (result);
+	{
+		result = std::atol(tmp.c_str());
+		std::string::iterator	it = tmp.end();
+		it--;
+		if (*it == 'G')
+			return (result * 1000000000);
+		else if (*it == 'M')
+			return (result * 1000000);
+		else
+		{
+			std::cout << "ERROR MAX BODY SIZE" << std::endl;
+			_error = true;
+			return (0);
+		}
+	}
 }
 
 std::vector<std::string>	Config::extractAllowedMethods( void )
@@ -174,9 +181,16 @@ std::string	Config::extractRoot( void )
 
 	result = findInFileContent("root");
 	if (result == "default")
-		return ("/html");
+	{
+		_listing = true;
+		result = "/";
+	}
 	else
-		return (result);
+	{
+		if (result[0] != '/')
+			result = '/' + result;
+	}
+	return (result);
 }
 
 std::string	Config::extractIndex( void )
@@ -185,9 +199,23 @@ std::string	Config::extractIndex( void )
 
 	result = findInFileContent("index");
 	if (result == "default")
-		return ("index.html");
+		return ("/index.html");
 	else
+	{
+		if (result[0] != '/')
+			result = '/' + result;
 		return (result);
+	}
+}
+
+bool	Config::extractListing( void )
+{
+	std::string	result;
+
+	result = findInFileContent("autoindex");
+	if (result == "on")
+		return (true);
+	return (false);
 }
 
 /*================================ Accessors =================================*/
@@ -196,16 +224,12 @@ void	Config::setFileContent(std::vector<std::string> &src){
 	_fileContent = src;
 }
 
-void	Config::setPort(const std::string &src){
+void	Config::setPort(const short &src){
 	_port = src;
 }
 
 void	Config::setHost(const std::string &src){
 	_host = src;
-}
-
-void	Config::setSocket(const std::string &src){
-	_socket = src;
 }
 
 void	Config::setName(const std::string &src){
@@ -216,7 +240,7 @@ void	Config::setErrorPages(const std::map<std::string, std::string> &src){
 	_errorPages = src;
 }
 
-void	Config::setMaxBodySize(const std::string &src){
+void	Config::setMaxBodySize(const long &src){
 	_maxBodySize = src;
 }
 
@@ -232,20 +256,20 @@ void	Config::setIndex(const std::string &src){
 	_index = src;
 }
 
+void	Config::setListing(const bool &src){
+	_index = src;
+}
 
 
 
 
-std::string	Config::getPort( void ){
+
+short	Config::getPort( void ){
 	return (_port);
 }
 
 std::string	Config::getHost( void ){
 	return (_host);
-}
-
-std::string	Config::getSocket( void ){
-	return (_socket);
 }
 
 std::string	Config::getName( void ){
@@ -256,7 +280,7 @@ std::map<std::string, std::string>	Config::getErrorPages( void ){
 	return (_errorPages);
 }
 
-std::string	Config::getMaxBodySize( void ){
+long		Config::getMaxBodySize( void ){
 	return (_maxBodySize);
 }
 
@@ -270,4 +294,8 @@ std::string	Config::getRoot( void ){
 
 std::string	Config::getIndex( void ){
 	return (_index);
+}
+
+bool	Config::getListing( void ){
+	return (_listing);
 }
