@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/16 03:49:12 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/17 15:52:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,10 @@ void	Request::setQueryM()
 		queryString = URL.substr(queryPos + 1);
 	}
 	else if (getMethod() == "POST")
+	{
 		queryString = _reqBody;
+		queryString = queryString.substr(2 , queryString.size() - 1);
+	}
 	else
 		return ;
 	_requestContent = queryString;

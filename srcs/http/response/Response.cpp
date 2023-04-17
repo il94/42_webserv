@@ -6,15 +6,15 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/16 03:42:49 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/17 16:03:57 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void) {}
+Response::Response(void): _contentLength(""), _contentType("") {}
 
-Response::Response(Request request): _request(request) {}
+Response::Response(Request request): _contentLength(""), _contentType(""), _request(request) {}
 
 Response::~Response(void) {}
 
@@ -33,6 +33,7 @@ void	Response::POST(void)
 		return ;
 	CGI cgi(_request);
 	_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+	_response = getHeader(_response.size(), "", 200) + _response;
 }
 /*-------*/
 
