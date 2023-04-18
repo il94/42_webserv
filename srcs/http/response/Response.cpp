@@ -6,16 +6,17 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 05:53:22 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 21:52:19 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void): _contentLength(""), _contentType(""), _code(200) {}
+Response::Response(void): _contentLength(""), _contentType(""), _code(200), _response("") {}
 
-Response::Response(Request & request, Config & config) : 
-	_contentLength(""), _contentType(""), _code(200), _request(request), _config(config){}
+Response::Response(Request & request, Config & config) :
+	_contentLength(""), _contentType(""), _code(200),
+		_request(request), _config(config), _response(""){}
 
 Response::~Response(void) {}
 
@@ -47,6 +48,23 @@ void	Response::POST(void)
 	}
 	_response = getHeader(_response.size(), "") + _response;
 }
+
+void	Response::DELETE(void)
+{
+	if (fileExist(_request.getURL()))
+	{
+		if (remove(_request.getURL().c_str()) == 0)
+			_code = 204;
+		else
+			_code = 403;
+	}
+	else
+		_code = 404;
+	if (_code == 404 || _code == 403)
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+	_response = getHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+}
+
 /*-------*/
 
 /*Response Utils*/
@@ -139,7 +157,7 @@ std::string	Response::getHeader(size_t size, std::string path)
 
 std::string	Response::writeHeader(void)
 {
-	std::string	header = "HTTP/1.1 " + to_string(_code) + " " + "ok" + "\r\n";
+	std::string	header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
 	if (!_contentLength.empty())
 		header += "Content-Length: " + _contentLength + "\r\n";
@@ -148,12 +166,31 @@ std::string	Response::writeHeader(void)
 	return (header);
 }
 
+void	Response::initStatusMsg()
+{
+	_statusMsg[100] = "Continue";
+	_statusMsg[200] = "ok";
+	_statusMsg[204] = "No Content";
+	_statusMsg[400] = "Bad Request";
+	_statusMsg[403] = "Forbidden";
+	_statusMsg[404] = "Not Found";
+}
+
+std::string	Response::getStatuMsg()
+{
+	if (_statusMsg.find(_code) == _statusMsg.end())
+		return ("Unknown Code");
+	return (_statusMsg[_code]);
+}
+
 void	Response::setCode(int code) { _code = code; }
 
 void	Response::setContentLength(size_t size) { _contentLength = to_string(size); }
 
 void	Response::setContentType(std::string path)
 {
+	if (_contentType != "")
+		return ;
 	std::string	type = path.substr(path.find(".") + 1);
 	if (type == "html")
 		_contentType = "text/html";
