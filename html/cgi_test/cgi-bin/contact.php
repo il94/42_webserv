@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 
 <?php
-echo("Content-Type: text/html\n\n\n");
+echo("Content-Type: text/html\r\n\r\n");
 
 echo "<html><head><title>Reponse du serveur</title></head><body>\n";
 echo "<h1>Reponse du serveur</h1>\n";

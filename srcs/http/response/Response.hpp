@@ -6,14 +6,14 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 21:47:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 22:33:50 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef	RESPONSE_HPP
 # define RESPONSE_HPP
 
-#include <iostream>
+# include "../../../include/webserv.hpp"
 #include <sys/stat.h>
 #include <fstream>
 #include "../../cgi/CGI.hpp"

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 21:52:19 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 23:12:17 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,32 @@ void	Response::POST(void)
 	{
 		CGI cgi(_request);
 		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
+			_response.erase(0, 1);
+		size_t	bodyPosition = _response.find("\r\n\r\n");
+		size_t	boundary = std::string::npos;
+
+		std::string			tmp;
+		std::istringstream	stream(_response);
+		
+		while (std::getline(stream, tmp))
+		{
+			if (tmp == "")
+				break;
+			boundary = tmp.find(":");
+			if (boundary != std::string::npos)
+			{
+				if (boundary > bodyPosition)
+					break;
+				std::string	key(tmp, 0, boundary);
+				std::string	value(tmp, boundary + 2);
+				if (key == "Status")
+					_code = std::atoi(value.c_str());
+				else if (key == "Content-Type")
+					_contentType = value;
+			}
+		}
+		_response = _response.substr(bodyPosition + 2);
 	}
 	else
 	{
@@ -157,6 +183,7 @@ std::string	Response::getHeader(size_t size, std::string path)
 
 std::string	Response::writeHeader(void)
 {
+	initStatusMsg();
 	std::string	header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
 	if (!_contentLength.empty())

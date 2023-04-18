@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 05:49:29 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 22:13:41 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,12 @@ void	Request::setRequestAtr(const std::string & req)
 
 	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
+	size_t	boundary = std::string::npos;
 	while (std::getline(stream, tmp))
 	{
 		if (tmp == "")
 			break;
-		size_t	boundary = tmp.find(":");
+		boundary = tmp.find(":");
 		if (boundary != std::string::npos)
 		{
 			std::string	key(tmp, 0, boundary);
