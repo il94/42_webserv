@@ -256,6 +256,11 @@ std::map<std::string, std::string>	Config::getErrorPages( void ){
 	return (_errorPages);
 }
 
+std::string	Config::getErrorPages(std::string key){
+	return (_errorPages[key]);
+}
+
+
 std::string	Config::getMaxBodySize( void ){
 	return (_maxBodySize);
 }

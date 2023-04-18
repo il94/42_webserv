@@ -64,6 +64,7 @@ class Config
 	std::string	getSocket( void );
 	std::string	getName( void );
 	std::map<std::string, std::string>	getErrorPages( void );
+	std::string	getErrorPages(std::string key);
 	std::string	getMaxBodySize( void );
 
 	std::vector<std::string>	getAllowedMethods( void );

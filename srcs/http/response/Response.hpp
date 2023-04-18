@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/15 22:27:11 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 05:38:21 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,13 @@
 #include "../../cgi/CGI.hpp"
 #include "../../utils/utils.hpp"
 #include "../request/Request.hpp"
+#include "../../config/Config.hpp"
 
 class Response
 {
 	public :
 		Response(void);
-		Response(Request request);
+		Response(Request & request, Config & config);
 		~Response(void);
 
 		/*Methods*/
@@ -37,6 +38,7 @@ class Response
 
 		/*Response Utils*/
 		int	readContent(void);
+		std::string	readErrorPage(const std::string & path);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
 		/*---------------*/
@@ -46,7 +48,7 @@ class Response
 		void	setCode(int	code);
 		void	setContentLength(size_t size);
 		std::string	writeHeader(void);
-		std::string	getHeader(size_t size, std::string path, int code);
+		std::string	getHeader(size_t size, std::string path);
 		/*------*/
 	
 	private :
@@ -54,10 +56,11 @@ class Response
 		/*Header*/
 		std::string	_contentLength;
 		std::string	_contentType;
-		std::string	_code;
+		int			_code;
 		/*------*/
 		
 		Request		_request;
+		Config		_config;
 		std::string	_response;
 };
 

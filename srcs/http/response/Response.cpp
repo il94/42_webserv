@@ -6,15 +6,16 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 00:33:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/18 05:53:22 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void): _contentLength(""), _contentType("") {}
+Response::Response(void): _contentLength(""), _contentType(""), _code(200) {}
 
-Response::Response(Request request): _contentLength(""), _contentType(""), _request(request) {}
+Response::Response(Request & request, Config & config) : 
+	_contentLength(""), _contentType(""), _code(200), _request(request), _config(config){}
 
 Response::~Response(void) {}
 
@@ -23,17 +24,28 @@ void	Response::GET(void)
 {
 	if (_request.getMethod() != "GET")
 		return ;
-	readContent();
-	_response = getHeader(_response.size(), _request.getURL(), 200) + "\r\n" + _response;
+	if (_code == 200)
+		_code = readContent();
+	else
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+	_response = getHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
 }
 
 void	Response::POST(void)
 {
 	if (_request.getMethod() != "POST")
 		return ;
-	CGI cgi(_request);
-	_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
-	_response = getHeader(_response.size(), "", 200) + _response;
+	if (fileExist("./html/cgi_test/" + _request.getURL()))
+	{
+		CGI cgi(_request);
+		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+	}
+	else
+	{
+		_code = 204;
+		_response = "";
+	}
+	_response = getHeader(_response.size(), "") + _response;
 }
 /*-------*/
 
@@ -51,15 +63,39 @@ int	Response::readContent(void)
 		file.open(path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
-			return (-1);
+			_response = readErrorPage(_config.getErrorPages("403"));
+			return (403);
 		}
 		buffer << file.rdbuf();
 		_response = buffer.str();
 		file.close();
-		return (0);
 	}
-	return (-1);
+	else
+	{
+		_response = readErrorPage(_config.getErrorPages("404"));
+		return (404);
+	}
+	return (200);
 }
+
+std::string	Response::readErrorPage(const std::string & path)
+{
+	std::ifstream	file;
+	std::stringstream	buffer;
+
+	if (fileExist(path))
+	{
+		file.open(path.c_str(), std::ifstream::in);
+		if (!file.is_open())
+			return ("<!DOCTYPE html>\n<html><title>404</title><body> Cant open error page !</body></html>\n");
+		buffer << file.rdbuf();
+		file.close();
+		_contentType = "text/html";
+		return (buffer.str());
+	}
+	return ("<!DOCTYPE html>\n<html><title>404</title><body>Error page does not exist </body></html>\n");
+}
+
 
 int	Response::writeContent(std::string content)
 {
@@ -90,21 +126,20 @@ int	Response::fileExist(std::string path)
 /*---------------*/
 
 /*Header*/
-std::string	Response::getHeader(size_t size, std::string path, int code)
+std::string	Response::getHeader(size_t size, std::string path)
 {
 	std::string	header;
 
 	setContentLength(size);
 	if (path != "")
 		setContentType(path);
-	setCode(code);
 	header = writeHeader();
 	return (header);
 }
 
 std::string	Response::writeHeader(void)
 {
-	std::string	header = "HTTP/1.1 " + _code + " " + "ok" + "\r\n";
+	std::string	header = "HTTP/1.1 " + to_string(_code) + " " + "ok" + "\r\n";
 
 	if (!_contentLength.empty())
 		header += "Content-Length: " + _contentLength + "\r\n";
@@ -113,7 +148,7 @@ std::string	Response::writeHeader(void)
 	return (header);
 }
 
-void	Response::setCode(int code) { _code = to_string(code); }
+void	Response::setCode(int code) { _code = code; }
 
 void	Response::setContentLength(size_t size) { _contentLength = to_string(size); }
 
