@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/21 04:57:24 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/21 11:39:17 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	Response::POST(void)
 		_code = 204;
 		_response = "";
 	}
-	if (_code != 200)
+	if (_code == 500)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = getHeader(_response.size(), "") + _response;
 }
