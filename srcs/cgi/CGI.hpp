@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:47 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/16 04:04:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/21 04:52:50 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,7 @@ class CGI
 		CGI(Request &request);
 		~CGI();
 
-		void	setArgs(std::string path);
 		void	setEnv();
-		void	setQueryString();
-
 		std::string	execCGI(std::string scriptName);
 	private:
 		Request			_request;
