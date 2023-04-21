@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 23:12:17 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/21 04:57:24 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ void	Response::POST(void)
 		_code = 204;
 		_response = "";
 	}
+	if (_code != 200)
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = getHeader(_response.size(), "") + _response;
 }
 
@@ -201,6 +203,7 @@ void	Response::initStatusMsg()
 	_statusMsg[400] = "Bad Request";
 	_statusMsg[403] = "Forbidden";
 	_statusMsg[404] = "Not Found";
+	_statusMsg[500] = "Internal Server Error";
 }
 
 std::string	Response::getStatuMsg()
