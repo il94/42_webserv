@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 18:23:40 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/21 12:29:16 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,9 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	
 
 	/*==================================*/
+
+	// config.setLocations(config.splitServerConfig());
+	// config.setLocations(config.extractLocations());
 
 	config.setAllowedMethods(config.extractAllowedMethods());
 	

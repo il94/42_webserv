@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "Location.hpp"
+
 class Config
 {
 	public :
@@ -35,7 +37,10 @@ class Config
 	std::map<std::string, std::string>	extractErrorPages( void );
 	long								extractMaxBodySize( void );
 
-	std::vector<std::string>	extractAllowedMethods( void );
+	std::vector<Location>				extractLocations( void );
+
+
+	std::vector<std::string>			extractAllowedMethods( void );
 
 	std::string	extractRoot( void );
 	std::string	extractIndex( void );
@@ -52,6 +57,9 @@ class Config
 	void	setErrorPages( const std::map<std::string, std::string> & );
 	void	setMaxBodySize( const long & );
 
+	void	setLocations( const std::vector<Location> & );
+
+
 	void	setAllowedMethods( const std::vector<std::string> & );
 
 	void	setRoot( const std::string & );
@@ -67,6 +75,9 @@ class Config
 	std::map<std::string, std::string>	getErrorPages( void );
 	long		getMaxBodySize( void );
 
+	std::vector<Location>	getLocations( void );
+
+
 	std::vector<std::string>	getAllowedMethods( void );
 
 	std::string	getRoot( void );
@@ -81,17 +92,19 @@ class Config
 	std::vector<std::string>			_fileContent;
 	bool								_error;
 
-	short		_port; //listen [IP + Port = 000.0.0.0:0000]
-	std::string	_host; //listen [IP + Port = 000.0.0.0:0000]
+	short		_port; //listen
+	std::string	_host; //listen
 
-	std::string	_name; //server_name [name]
+	std::string	_name; //server_name
 	// default host:port
-	std::map<std::string, std::string>	_errorPages; //error_page [path_file.html]
-	long 		_maxBodySize; //client_max_body_size [value + unit = 00M]
+	std::map<std::string, std::string>	_errorPages; //error_page
+	long 		_maxBodySize; //client_max_body_size
 
 	/*=====================================*/
 
-	std::vector<std::string>	_allowedMethods; // allowed_method [method name]
+	std::vector<Location>		_locations;
+
+	std::vector<std::string>	_allowedMethods; // allowed_method
 	// HTTP redirection
 	std::string	_root; //root [path]
 	std::string	_index; //index [path]

@@ -28,20 +28,6 @@ Config& Config::operator=(const Config &src)
 
 /*================================= Methods ==================================*/
 
-std::vector<std::string>	Config::multipleFindInFileContent(const std::string &src)
-{
-	std::vector<std::string>	result;
-	int							index = -1;
-
-	for (size_t i = 0; i < _fileContent.size(); i++)
-	{
-		index = _fileContent[i].find(src);
-		if (index != -1)
-			result.push_back(_fileContent[i].substr(index + src.size() + 1, _fileContent[i].find(';') - (index + src.size() + 1)));
-	}
-	return (result);
-}
-
 std::string	Config::findInFileContent(const std::string &src)
 {
 	std::string	result;
@@ -57,6 +43,20 @@ std::string	Config::findInFileContent(const std::string &src)
 	return (result);
 }
 
+std::vector<std::string>	Config::multipleFindInFileContent(const std::string &src)
+{
+	std::vector<std::string>	result;
+	int							index = -1;
+
+	for (size_t i = 0; i < _fileContent.size(); i++)
+	{
+		index = _fileContent[i].find(src);
+		if (index != -1)
+			result.push_back(_fileContent[i].substr(index + src.size() + 1, _fileContent[i].find(';') - (index + src.size() + 1)));
+	}
+	return (result);
+}
+
 void	Config::printConfig( void )
 {
 	std::cout << "PORT = " << getPort() << std::endl;
@@ -65,6 +65,17 @@ void	Config::printConfig( void )
 	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
 		std::cout << "ERROR PAGE " << it->first << " = " << it->second << std::endl;
 	std::cout << "MAX BODY SIZE = " << getMaxBodySize() << std::endl;
+
+	// for (size_t i = 0; i < getLocations().size(); i++)
+	// {
+	// 	std::cout << "LOCATION " << _locations[i].getPath() << std::endl;
+	// 	// for (Location::iterator it = _locations[i].begin(); it != _locations[i].end(); it++)
+	// 	// {
+	// 	// 	std::cout << *it << std::endl;
+	// 	// }
+	// }
+	
+
 	for (std::vector<std::string>::iterator it = _allowedMethods.begin(); it != _allowedMethods.end(); it++)
 		std::cout << "ALLOWED METHOD = " << *it << std::endl;
 	std::cout << "ROOT = " << getRoot() << std::endl;
@@ -72,7 +83,108 @@ void	Config::printConfig( void )
 	std::cout << "LISTING = " << getListing() << std::endl;
 }
 
+bool	closeBrace(std::string src)
+{
+	std::string::iterator it = src.begin();
 
+	while (it != src.end() and (*it == ' ' or *it == '\t'))
+		it++;
+	return (*it == '}');
+}
+
+// std::vector<Location>	Config::extractLocations( void )
+// {
+// 	std::vector<Location>	result;
+// 	Location				element;
+
+// 	std::vector<std::string>::iterator	start;
+// 	std::vector<std::string>::iterator	end;
+
+// 	std::string::iterator	it;
+
+// 	for (start = _fileContent.begin(); start != _fileContent.end(); start++)
+// 	{
+// 		it = start->begin();
+// 		element.clear();
+// 		while (*it == ' ' or *it == '\t')
+// 			it++;
+// 		if (start->substr(std::distance(start->begin(), it), sizeof("location")) == "location ")
+// 		{
+// 			it += sizeof("location");
+// 			while (*it == ' ' or *it == '\t')
+// 				it++;
+// 			if (it != start->end())
+// 			{
+// 				element.setPath( start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it) )));
+// 				it += element.getPath().size();
+// 				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
+// 				{
+// 					start++;
+// 					while (not closeBrace(*start))
+// 					{
+// 						element.push_back(*start);
+// 						start++;
+// 					}
+// 					if (element.empty() == false)
+// 						result.push_back(element);
+// 					std::cout << "PRINT = " <<   element.getPath() << std::endl;
+// 					std::cout << "PRINT = " <<   element[0] << std::endl;
+// 					std::cout << "PRINT2 = " <<   result[0].getPath() << std::endl;
+// 					std::cout << "PRINT2 = " <<   result[0][0] << std::endl;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return (result);
+// }
+
+// std::vector<Location>	Config::extractLocations( void )
+// {
+
+// 	std::vector<Location>	result;
+// 	Location				element;
+
+
+// 	std::vector<std::string>::iterator	start;
+// 	std::vector<std::string>::iterator	end;
+
+// 	std::string::iterator	it;
+
+// 	for (start = _fileContent.begin(); start != _fileContent.end(); start++)
+// 	{
+// 		it = start->begin();
+// 		element.clear();
+// 		while (*it == ' ' or *it == '\t')
+// 			it++;
+// 		if (start->substr(std::distance(start->begin(), it), sizeof("location")) == "location ")
+// 		{
+// 			it += sizeof("location");
+// 			while (*it == ' ' or *it == '\t')
+// 				it++;
+// 			if (it != start->end())
+// 			{
+// 				element.setPath( start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it) )));
+// 				it += element.getPath().size();
+// 				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
+// 				{
+// 					start++;
+// 					while (not closeBrace(*start))
+// 					{
+// 						element.push_back(*start);
+// 						start++;
+// 					}
+// 					if (element.empty() == false)
+// 						result.push_back(element);
+// 					std::cout << "PRINT = " <<   element.getPath() << std::endl;
+// 					std::cout << "PRINT = " <<   element[0] << std::endl;
+// 					std::cout << "PRINT2 = " <<   result[0].getPath() << std::endl;
+// 					std::cout << "PRINT2 = " <<   result[0][0] << std::endl;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return (result);
+// }
 
 
 short	Config::extractPort( void )
@@ -244,6 +356,10 @@ void	Config::setMaxBodySize(const long &src){
 	_maxBodySize = src;
 }
 
+void	Config::setLocations(const std::vector<Location> &src){
+	_locations = src;
+}
+
 void	Config::setAllowedMethods(const std::vector<std::string> &src){
 	_allowedMethods = src;
 }
@@ -282,6 +398,10 @@ std::map<std::string, std::string>	Config::getErrorPages( void ){
 
 long		Config::getMaxBodySize( void ){
 	return (_maxBodySize);
+}
+
+std::vector<Location>	Config::getLocations( void ){
+	return (_locations);
 }
 
 std::vector<std::string>	Config::getAllowedMethods( void ){
