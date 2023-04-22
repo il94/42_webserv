@@ -19,6 +19,13 @@ Location::~Location(){
 Location& Location::operator=(const Location &src)
 {
 	_content = src._content;
+	_path = src._path;
+
+	_allowedMethods = src._allowedMethods;
+	_redirection = src._redirection;
+	_root = src._root;
+	_index = src._index;
+	_listing = src._listing;
 	return (*this);
 }
 
@@ -27,22 +34,51 @@ Location& Location::operator=(const Location &src)
 void	Location::display( void )
 {
 	displayVector(getAllowedMethods(), "\tALLOWED METHODS");
+	displayPair(getRedirection(), "\tREDIRECTION");
 	displayElement(getRoot(), "\tROOT");
-	displayElement(getIndex(), "\tINDEX");
+	displayVector(getIndex(), "\tINDEX");
 	displayElement(getListing(), "\tLISTING");
+	displayVector(getAllowedCGI(), "\tALLOWED CGI");
 }
 
-std::vector<std::string>	Location::extractAllowedMethods( void )
+std::vector<std::string>	Location::extractAllowedMethods( void ) //verifier methodes invalides
 {
 	std::vector<std::string>	result;
 
 	result = multipleFindInFileContent(_content, "allowed_method");
 
-	if (result.empty() == true)
+	if (result.empty())
 	{
 		result.push_back("GET");
 		result.push_back("POST");
 		result.push_back("DELETE");
+	}
+	return (result);
+}
+
+std::pair<int, std::string>	Location::extractRedirection( void )
+{
+	std::pair<int, std::string>	result;
+	std::string					element;
+
+	element = findInFileContent(_content, "return");
+
+	if (element.empty())
+	{
+		result.first = 301;
+		// result.second = ???
+	}
+	else
+	{
+		if (element.find(element.substr(0, element.find(' '))) != -1 or element.find(element.substr(0, element.find('\t'))) != -1)
+		{
+			result.first = std::atoi(element.substr(0, element.find(' ')).c_str());
+			result.second = element.substr(element.rfind(' ') + 1);
+		}
+		else
+		{
+			// ERROR
+		}
 	}
 	return (result);
 }
@@ -52,32 +88,9 @@ std::string	Location::extractRoot( void )
 	std::string	result;
 
 	result = findInFileContent(_content, "root");
-	if (result == "default")
-	{
-		_listing = true;
-		result = "/";
-	}
-	else
-	{
-		if (result[0] != '/')
-			result = '/' + result;
-	}
+	if (result.empty())
+		result = getPath();
 	return (result);
-}
-
-std::string	Location::extractIndex( void )
-{
-	std::string	result;
-
-	result = findInFileContent(_content, "index");
-	if (result == "default")
-		return ("/index.html");
-	else
-	{
-		if (result[0] != '/')
-			result = '/' + result;
-		return (result);
-	}
 }
 
 bool	Location::extractListing( void )
@@ -85,51 +98,125 @@ bool	Location::extractListing( void )
 	std::string	result;
 
 	result = findInFileContent(_content, "autoindex");
-	if (result == "on")
-		return (true);
-	return (false);
+	return (result.empty() or result == "on");
+}
+
+std::vector<std::string>	Location::extractIndex( void )
+{
+	std::vector<std::string>	result;
+
+	result = multipleFindInFileContent(_content, "index");
+	if (result.empty())
+	{
+		if (getPath().back() == '/')
+			result.push_back(getPath() + "index.html");
+		else
+			result.push_back(getPath() + '/' + "index.html");
+	}
+	else
+	{
+		for (std::vector<std::string>::iterator it = result.begin(); it != result.end(); it++)
+		{
+			if (getPath().back() == '/')
+				it->insert(0, getPath());
+			else
+				it->insert(0, getPath() + '/');
+		}
+	}
+
+	return (result);
+}
+
+
+
+std::vector<std::string>	Location::extractAllowedCGI( void ) //verifier methodes invalides
+{
+	std::vector<std::string>	result;
+
+	result = multipleFindInFileContent(_content, "allowed_CGI");
+
+	if (result.empty())
+	{
+		result.push_back(".py");
+		result.push_back(".php");
+	}
+	return (result);
 }
 
 /*================================ Accessors =================================*/
 
-void	Location::setContent( const std::vector<std::string> &src ){
+void	Location::setContent(const std::vector<std::string> &src){
 	_content = src;
 }
 
+void	Location::setPath( const std::string &src ){
+	_path = src;
+}
+
+
+
 void	Location::setAllowedMethods(const std::vector<std::string> &src){
 	_allowedMethods = src;
+}
+
+void	Location::setRedirection(const std::pair<int, std::string> &src){
+	_redirection = src;
 }
 
 void	Location::setRoot(const std::string &src){
 	_root = src;
 }
 
-void	Location::setIndex(const std::string &src){
+void	Location::setIndex(const std::vector<std::string> &src){
 	_index = src;
 }
 
 void	Location::setListing(const bool &src){
-	_index = src;
+	_listing = src;
 }
 
-std::vector<std::string> Location::getContent( void ){
+
+
+void	Location::setAllowedCGI(const std::vector<std::string> &src){
+	_allowedCGI = src;
+}
+
+
+
+std::vector<std::string> 	Location::getContent( void ){
 	return (_content);
 }
+
+std::string					Location::getPath( void ){
+	return (_path);
+}
+
+
 
 std::vector<std::string>	Location::getAllowedMethods( void ){
 	return (_allowedMethods);
 }
 
-std::string	Location::getRoot( void ){
+std::pair<int, std::string>	Location::getRedirection( void ){
+	return (_redirection);
+}
+
+std::string					Location::getRoot( void ){
 	return (_root);
 }
 
-std::string	Location::getIndex( void ){
+std::vector<std::string>	Location::getIndex( void ){
 	return (_index);
 }
 
-bool	Location::getListing( void ){
+bool						Location::getListing( void ){
 	return (_listing);
+}
+
+
+
+std::vector<std::string>	Location::getAllowedCGI( void ){
+	return (_allowedCGI);
 }
 
 

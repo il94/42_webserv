@@ -12,6 +12,11 @@
 #include "Location.hpp"
 #include "../utils/utils.hpp"
 
+#define DEFAULT_PORT 8000
+#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_NAME "default_server"
+#define DEFAULT_MAX_BODY_SIZE 1000000
+
 class Config
 {
 	public :
@@ -62,7 +67,7 @@ class Config
 	std::vector<std::string>			_host;			//listen
 
 	std::string							_name;			//server_name
-														// default host:port
+														//default host:port
 	std::map<std::string, std::string>	_errorPages;	//error_page
 	long 								_maxBodySize;	//client_max_body_size
 

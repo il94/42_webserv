@@ -80,6 +80,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 			{
 				std::pair<std::string, Location>	element;
 				element.first = start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1)) - std::distance(start->begin(), it));
+				element.second.setPath(element.first);
 				it += element.first.size();
 				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
 				{
@@ -104,8 +105,8 @@ std::vector<int>	Config::extractPort( void ) //verif si inferieur a 1024
 	std::vector<std::string>	content;
 
 	content = multipleFindInFileContent(_content, "listen");
-	if (content.empty() == true)
-		result.push_back(8000);
+	if (content.empty())
+		result.push_back(DEFAULT_PORT);
 	else
 	{
 		for (std::vector<std::string>::iterator it = content.begin(); it < content.end(); it++)
@@ -121,7 +122,7 @@ std::vector<std::string>	Config::extractHost( void )
 
 	content = multipleFindInFileContent(_content, "listen");
 	if (content.empty() == true)
-		result.push_back("127.0.0.1");
+		result.push_back(DEFAULT_HOST);
 	else
 	{
 		for (std::vector<std::string>::iterator it = content.begin(); it < content.end(); it++)
@@ -135,34 +136,28 @@ std::string	Config::extractName( void )
 	std::string	result;
 
 	result = findInFileContent(_content, "server_name");
-	if (result == "default")
-		return ("default_server");
-	else
-		return (result);
+	if (result.empty())
+		result = DEFAULT_NAME;
+	return (result);
 }
 
-std::map<std::string, std::string>	Config::extractErrorPages( void )
+std::map<std::string, std::string>	Config::extractErrorPages( void ) //ajouter toutes les pages necessaires
 {
 	std::map<std::string, std::string>	result;
 	std::vector<std::string>			content;
-
-	content = multipleFindInFileContent(_content, "error_page");
 
 	result.insert(std::pair<std::string, std::string>("404", "/default_files/404.html"));
 	result.insert(std::pair<std::string, std::string>("500", "/default_files/500.html"));
 	result.insert(std::pair<std::string, std::string>("501", "/default_files/501.html"));
 	result.insert(std::pair<std::string, std::string>("502", "/default_files/502.html"));
+
+	content = multipleFindInFileContent(_content, "error_page");
+
 	std::pair<std::string, std::string>	element;
 	for (std::vector<std::string>::iterator it = content.begin(); it != content.end(); *it++)
 	{
-		if (result.find(it->substr(0, it->find('/') - 1)) == result.end())
-		{
-			element.first = it->substr(0, it->find('/') - 1);
-			element.second = it->substr(it->find('/'), ';');
-			result.insert(element);
-		}
-		else
-			result[it->substr(0, it->find('/') - 1)] = it->substr(it->find('/'), ';');
+		if (result.find(it->substr(0, it->find(' '))) != result.end())
+			result[it->substr(0, it->find(' '))] = it->substr(it->find(' ') + 1, ';');
 	}
 	return (result);
 }
@@ -173,24 +168,25 @@ long	Config::extractMaxBodySize( void )
 	std::string	tmp;
 
 	tmp = findInFileContent(_content, "client_max_body_size");
-	if (tmp == "default")
-		return (1000000);
+	if (tmp.empty())
+		result = 1000000;
 	else
 	{
 		result = std::atol(tmp.c_str());
 		std::string::iterator	it = tmp.end();
 		it--;
 		if (*it == 'G')
-			return (result * 1000000000);
+			result *= 1000000000;
 		else if (*it == 'M')
-			return (result * 1000000);
+			result *= 1000000;
 		else
 		{
 			std::cout << "ERROR MAX BODY SIZE" << std::endl;
 			_error = true;
-			return (0);
+			result = 0;
 		}
 	}
+	return (result);
 }
 
 /*================================ Accessors =================================*/
@@ -226,9 +222,11 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
 		it->second.setAllowedMethods(it->second.extractAllowedMethods());
+		it->second.setRedirection(it->second.extractRedirection());
 		it->second.setRoot(it->second.extractRoot());
 		it->second.setIndex(it->second.extractIndex());
 		it->second.setListing(it->second.extractListing());
+		it->second.setAllowedCGI(it->second.extractAllowedCGI());
 	}
 }
 

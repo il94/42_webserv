@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/22 15:59:48 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 19:46:09 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,12 @@ template <typename T>
 void	displayElement(const T &element, const std::string &name)
 {
 	std::cout << name + " = " << element << std::endl;
+}
+
+template <typename T>
+void	displayPair(const T &pair, const std::string &name)
+{
+	std::cout << name + " " << pair.first << " = " << pair.second << std::endl;
 }
 
 template <typename T>

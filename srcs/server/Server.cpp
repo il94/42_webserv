@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/22 16:22:51 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 18:20:54 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	/*==================================*/
 
 	_config.setLocations(_config.extractLocations());
+		// std::cout << "index = " << _config.getLocations()["/gfd"]._index << std::endl;
 	
 	/*==================================*/
 	
