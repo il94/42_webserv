@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/20 19:24:44 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 16:40:06 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,14 @@ int	main(int ac, char **av)
 	if (av[0] and av[1])
 	{
 		std::cout << "Config File mode" << std::endl;
-		std::vector<std::vector <std::string> > configs = splitFileConfig(av[1]);
+		std::vector<std::vector <std::string> > _configs = splitFileConfig(av[1]);
 
-		std::vector< Server >	servers(configs.size());
+		std::vector< Server >	servers(_configs.size());
 
 		std::cout << "=============================" << std::endl;
 		for (size_t	i = 0; i < servers.size(); i++)
 		{
-			servers[i].setConfig(configs[i]);
+			servers[i].setConfig(_configs[i]);
 			std::cout << "=============================" << std::endl;
 		}
 		// servers[0].run();

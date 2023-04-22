@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/14 01:41:38 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 16:10:48 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,35 @@ std::vector<std::vector <std::string> > splitFileConfig(std::string path)
 			element.push_back(*start);
 		result.push_back(element);
 		start = ++end;
+	}
+	return (result);
+}
+
+std::string	findInFileContent(const std::vector<std::string> &file, const std::string &src)
+{
+	std::string	result;
+	int			index = -1;
+	size_t		i = 0;
+
+	for (i = 0; i < file.size() and index == -1 ; i++)
+		index = file[i].find(src);
+	if (index == -1)
+		return ("default");
+
+	result = file[i - 1].substr(index + src.size() + 1, file[i - 1].find(';') - (index + src.size() + 1));
+	return (result);
+}
+
+std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &file, const std::string &src)
+{
+	std::vector<std::string>	result;
+	int							index = -1;
+
+	for (size_t i = 0; i < file.size(); i++)
+	{
+		index = file[i].find(src);
+		if (index != -1)
+			result.push_back(file[i].substr(index + src.size() + 1, file[i].find(';') - (index + src.size() + 1)));
 	}
 	return (result);
 }

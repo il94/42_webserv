@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/14 01:39:33 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 15:59:48 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,24 +22,31 @@
 
 #include <algorithm>
 
-std::string								to_string(size_t n);
-std::vector<std::string>				fileToVector( std::string path );
-std::vector<std::vector <std::string> > splitFileConfig(std::string path);
+std::string								to_string( size_t );
+std::vector<std::string>				fileToVector( std::string );
+std::vector<std::vector <std::string> > splitFileConfig( std::string );
+
+std::string					findInFileContent(const std::vector<std::string> &, const std::string &);
+std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &, const std::string &);
 
 template <typename T>
-void	displayString(T str)
+void	displayElement(const T &element, const std::string &name)
 {
-	std::cout << str << std::endl;
+	std::cout << name + " = " << element << std::endl;
 }
 
 template <typename T>
-void	displayVector(T vec)
+void	displayVector(const T &vector, const std::string &name)
 {
-	std::cout << "===========================" << std::endl;
-	std::cout << std::endl;
-	std::for_each(vec.begin(), vec.end(), displayString<std::string>);
-	std::cout << std::endl;
+	for (typename T::const_iterator it = vector.begin(); it != vector.end(); it++)
+		std::cout << name + " = " << *it << std::endl;
+}
 
+template <typename T>
+void	displayMap(const T &map, const std::string &name)
+{
+	for (typename T::const_iterator it = map.begin(); it != map.end(); it++)
+		std::cout << name + " " << it->first << " = " << it->second << std::endl;
 }
 
 #endif

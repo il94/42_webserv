@@ -1,5 +1,7 @@
 #include "Config.hpp"
 
+#include "../utils/utils.hpp"
+
 /*=============================== Constructors ===============================*/
 
 Config::Config(){
@@ -16,71 +18,34 @@ Config::~Config(){
 
 Config& Config::operator=(const Config &src)
 {
-	_fileContent = src._fileContent;
+	_content = src._content;
+	_error = src._error;
 	_port = src._port;
 	_host = src._host;
 	_name = src._name;
 	_errorPages = src._errorPages;
 	_maxBodySize = src._maxBodySize;
-	_allowedMethods = src._allowedMethods;
+	_locations = src._locations;
 	return (*this);
 }
 
 /*================================= Methods ==================================*/
 
-std::string	Config::findInFileContent(const std::string &src)
+void	Config::display( void )
 {
-	std::string	result;
-	int			index = -1;
-	size_t		i = 0;
+	displayVector(getPort(), "PORT");
+	displayVector(getHost(), "HOST");
+	displayElement(getName(), "NAME");
+	displayMap(getErrorPages(), "ERROR PAGE");
+	displayElement(getMaxBodySize(), "MAX BODY SIZE");
 
-	for (i = 0; i < _fileContent.size() and index == -1 ; i++)
-		index = _fileContent[i].find(src);
-	if (index == -1)
-		return ("default");
-
-	result = _fileContent[i - 1].substr(index + src.size() + 1, _fileContent[i - 1].find(';') - (index + src.size() + 1));
-	return (result);
-}
-
-std::vector<std::string>	Config::multipleFindInFileContent(const std::string &src)
-{
-	std::vector<std::string>	result;
-	int							index = -1;
-
-	for (size_t i = 0; i < _fileContent.size(); i++)
+	std::cout << std::endl;
+	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
-		index = _fileContent[i].find(src);
-		if (index != -1)
-			result.push_back(_fileContent[i].substr(index + src.size() + 1, _fileContent[i].find(';') - (index + src.size() + 1)));
+		std::cout << "LOCATION [" << it->first << "]" << std::endl;
+		it->second.display();
+		std::cout << std::endl;
 	}
-	return (result);
-}
-
-void	Config::printConfig( void )
-{
-	std::cout << "PORT = " << getPort() << std::endl;
-	std::cout << "HOST = " << getHost() << std::endl;
-	std::cout << "NAME = " << getName() << std::endl;
-	for (std::map<std::string, std::string>::iterator it = _errorPages.begin(); it != _errorPages.end(); it++)
-		std::cout << "ERROR PAGE " << it->first << " = " << it->second << std::endl;
-	std::cout << "MAX BODY SIZE = " << getMaxBodySize() << std::endl;
-
-	// for (size_t i = 0; i < getLocations().size(); i++)
-	// {
-	// 	std::cout << "LOCATION " << _locations[i].getPath() << std::endl;
-	// 	// for (Location::iterator it = _locations[i].begin(); it != _locations[i].end(); it++)
-	// 	// {
-	// 	// 	std::cout << *it << std::endl;
-	// 	// }
-	// }
-	
-
-	for (std::vector<std::string>::iterator it = _allowedMethods.begin(); it != _allowedMethods.end(); it++)
-		std::cout << "ALLOWED METHOD = " << *it << std::endl;
-	std::cout << "ROOT = " << getRoot() << std::endl;
-	std::cout << "INDEX = " << getIndex() << std::endl;
-	std::cout << "LISTING = " << getListing() << std::endl;
 }
 
 bool	closeBrace(std::string src)
@@ -92,128 +57,84 @@ bool	closeBrace(std::string src)
 	return (*it == '}');
 }
 
-// std::vector<Location>	Config::extractLocations( void )
-// {
-// 	std::vector<Location>	result;
-// 	Location				element;
-
-// 	std::vector<std::string>::iterator	start;
-// 	std::vector<std::string>::iterator	end;
-
-// 	std::string::iterator	it;
-
-// 	for (start = _fileContent.begin(); start != _fileContent.end(); start++)
-// 	{
-// 		it = start->begin();
-// 		element.clear();
-// 		while (*it == ' ' or *it == '\t')
-// 			it++;
-// 		if (start->substr(std::distance(start->begin(), it), sizeof("location")) == "location ")
-// 		{
-// 			it += sizeof("location");
-// 			while (*it == ' ' or *it == '\t')
-// 				it++;
-// 			if (it != start->end())
-// 			{
-// 				element.setPath( start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it) )));
-// 				it += element.getPath().size();
-// 				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
-// 				{
-// 					start++;
-// 					while (not closeBrace(*start))
-// 					{
-// 						element.push_back(*start);
-// 						start++;
-// 					}
-// 					if (element.empty() == false)
-// 						result.push_back(element);
-// 					std::cout << "PRINT = " <<   element.getPath() << std::endl;
-// 					std::cout << "PRINT = " <<   element[0] << std::endl;
-// 					std::cout << "PRINT2 = " <<   result[0].getPath() << std::endl;
-// 					std::cout << "PRINT2 = " <<   result[0][0] << std::endl;
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return (result);
-// }
-
-// std::vector<Location>	Config::extractLocations( void )
-// {
-
-// 	std::vector<Location>	result;
-// 	Location				element;
-
-
-// 	std::vector<std::string>::iterator	start;
-// 	std::vector<std::string>::iterator	end;
-
-// 	std::string::iterator	it;
-
-// 	for (start = _fileContent.begin(); start != _fileContent.end(); start++)
-// 	{
-// 		it = start->begin();
-// 		element.clear();
-// 		while (*it == ' ' or *it == '\t')
-// 			it++;
-// 		if (start->substr(std::distance(start->begin(), it), sizeof("location")) == "location ")
-// 		{
-// 			it += sizeof("location");
-// 			while (*it == ' ' or *it == '\t')
-// 				it++;
-// 			if (it != start->end())
-// 			{
-// 				element.setPath( start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it) )));
-// 				it += element.getPath().size();
-// 				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
-// 				{
-// 					start++;
-// 					while (not closeBrace(*start))
-// 					{
-// 						element.push_back(*start);
-// 						start++;
-// 					}
-// 					if (element.empty() == false)
-// 						result.push_back(element);
-// 					std::cout << "PRINT = " <<   element.getPath() << std::endl;
-// 					std::cout << "PRINT = " <<   element[0] << std::endl;
-// 					std::cout << "PRINT2 = " <<   result[0].getPath() << std::endl;
-// 					std::cout << "PRINT2 = " <<   result[0][0] << std::endl;
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return (result);
-// }
-
-
-short	Config::extractPort( void )
+std::map<std::string, Location>	Config::extractLocations( void )
 {
-	std::string	result;
+	std::map<std::string, Location>		result;
 
-	result = findInFileContent("listen");
-	if (result == "default")
-		return (8000);
-	else
-		return (std::atoi((result.substr(result.find(':') + 1, result.size()).c_str())));
+	std::vector<std::string>::iterator	start;
+	std::vector<std::string>::iterator	end;
+
+	std::string::iterator				it;
+
+	for (start = _content.begin(); start != _content.end(); start++)
+	{
+		it = start->begin();
+		while (*it == ' ' or *it == '\t')
+			it++;
+		if (start->substr(std::distance(start->begin(), it), sizeof("location")) == "location ")
+		{
+			it += sizeof("location");
+			while (*it == ' ' or *it == '\t')
+				it++;
+			if (it != start->end())
+			{
+				std::pair<std::string, Location>	element;
+				element.first = start->substr(std::distance(start->begin(), it), start->find(' ', std::distance(start->begin(), it + 1)) - std::distance(start->begin(), it));
+				it += element.first.size();
+				if (start->find("{\n", start->find(' ', std::distance(start->begin(), it + 1) - std::distance(start->begin(), it))))
+				{
+					start++;
+					while (not closeBrace(*start))
+					{
+						element.second.pushContent(*start);
+						start++;
+					}
+					if (not element.second.emptyContent())
+						result.insert(std::pair<std::string, Location>(element));
+				}
+			}
+		}
+	}
+	return (result);
 }
 
-std::string	Config::extractHost( void )
+std::vector<int>	Config::extractPort( void ) //verif si inferieur a 1024
 {
-	std::string	result;
+	std::vector<int>			result;
+	std::vector<std::string>	content;
 
-	result = findInFileContent("listen");
-	if (result == "default")
-		return ("127.0.0.1");
+	content = multipleFindInFileContent(_content, "listen");
+	if (content.empty() == true)
+		result.push_back(8000);
 	else
-		return (result.substr(0, result.find(':')));
+	{
+		for (std::vector<std::string>::iterator it = content.begin(); it < content.end(); it++)
+			result.push_back(std::atoi((it->substr(it->find(':') + 1, it->size()).c_str())));
+	}
+	return (result);
+}
+
+std::vector<std::string>	Config::extractHost( void )
+{
+	std::vector<std::string>	result;
+	std::vector<std::string>	content;
+
+	content = multipleFindInFileContent(_content, "listen");
+	if (content.empty() == true)
+		result.push_back("127.0.0.1");
+	else
+	{
+		for (std::vector<std::string>::iterator it = content.begin(); it < content.end(); it++)
+			result.push_back(it->substr(0, it->find(':')));
+	}
+	return (result);
 }
 
 std::string	Config::extractName( void )
 {
 	std::string	result;
 
-	result = findInFileContent("server_name");
+	result = findInFileContent(_content, "server_name");
 	if (result == "default")
 		return ("default_server");
 	else
@@ -225,7 +146,7 @@ std::map<std::string, std::string>	Config::extractErrorPages( void )
 	std::map<std::string, std::string>	result;
 	std::vector<std::string>			content;
 
-	content = multipleFindInFileContent("error_page");
+	content = multipleFindInFileContent(_content, "error_page");
 
 	result.insert(std::pair<std::string, std::string>("404", "/default_files/404.html"));
 	result.insert(std::pair<std::string, std::string>("500", "/default_files/500.html"));
@@ -251,7 +172,7 @@ long	Config::extractMaxBodySize( void )
 	long		result;
 	std::string	tmp;
 
-	tmp = findInFileContent("client_max_body_size");
+	tmp = findInFileContent(_content, "client_max_body_size");
 	if (tmp == "default")
 		return (1000000);
 	else
@@ -272,75 +193,17 @@ long	Config::extractMaxBodySize( void )
 	}
 }
 
-std::vector<std::string>	Config::extractAllowedMethods( void )
-{
-	std::vector<std::string>	result;
-
-	result = multipleFindInFileContent("allowed_method");
-
-	if (result.empty() == true)
-	{
-		result.push_back("GET");
-		result.push_back("POST");
-		result.push_back("DELETE");
-	}
-	return (result);
-}
-
-std::string	Config::extractRoot( void )
-{
-	std::string	result;
-
-	result = findInFileContent("root");
-	if (result == "default")
-	{
-		_listing = true;
-		result = "/";
-	}
-	else
-	{
-		if (result[0] != '/')
-			result = '/' + result;
-	}
-	return (result);
-}
-
-std::string	Config::extractIndex( void )
-{
-	std::string	result;
-
-	result = findInFileContent("index");
-	if (result == "default")
-		return ("/index.html");
-	else
-	{
-		if (result[0] != '/')
-			result = '/' + result;
-		return (result);
-	}
-}
-
-bool	Config::extractListing( void )
-{
-	std::string	result;
-
-	result = findInFileContent("autoindex");
-	if (result == "on")
-		return (true);
-	return (false);
-}
-
 /*================================ Accessors =================================*/
 
-void	Config::setFileContent(std::vector<std::string> &src){
-	_fileContent = src;
+void	Config::setContent(std::vector<std::string> &src){
+	_content = src;
 }
 
-void	Config::setPort(const short &src){
+void	Config::setPort(const std::vector<int> &src){
 	_port = src;
 }
 
-void	Config::setHost(const std::string &src){
+void	Config::setHost(const std::vector<std::string> &src){
 	_host = src;
 }
 
@@ -356,39 +219,32 @@ void	Config::setMaxBodySize(const long &src){
 	_maxBodySize = src;
 }
 
-void	Config::setLocations(const std::vector<Location> &src){
+void	Config::setLocations(const std::map<std::string, Location> &src)
+{
 	_locations = src;
+
+	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
+	{
+		it->second.setAllowedMethods(it->second.extractAllowedMethods());
+		it->second.setRoot(it->second.extractRoot());
+		it->second.setIndex(it->second.extractIndex());
+		it->second.setListing(it->second.extractListing());
+	}
 }
 
-void	Config::setAllowedMethods(const std::vector<std::string> &src){
-	_allowedMethods = src;
+std::vector<std::string> 			Config::getContent( void ){
+	return (_content);
 }
 
-void	Config::setRoot(const std::string &src){
-	_root = src;
-}
-
-void	Config::setIndex(const std::string &src){
-	_index = src;
-}
-
-void	Config::setListing(const bool &src){
-	_index = src;
-}
-
-
-
-
-
-short	Config::getPort( void ){
+std::vector<int>					Config::getPort( void ){
 	return (_port);
 }
 
-std::string	Config::getHost( void ){
+std::vector<std::string>			Config::getHost( void ){
 	return (_host);
 }
 
-std::string	Config::getName( void ){
+std::string							Config::getName( void ){
 	return (_name);
 }
 
@@ -396,26 +252,10 @@ std::map<std::string, std::string>	Config::getErrorPages( void ){
 	return (_errorPages);
 }
 
-long		Config::getMaxBodySize( void ){
+long								Config::getMaxBodySize( void ){
 	return (_maxBodySize);
 }
 
-std::vector<Location>	Config::getLocations( void ){
+std::map<std::string, Location>		Config::getLocations( void ){
 	return (_locations);
-}
-
-std::vector<std::string>	Config::getAllowedMethods( void ){
-	return (_allowedMethods);
-}
-
-std::string	Config::getRoot( void ){
-	return (_root);
-}
-
-std::string	Config::getIndex( void ){
-	return (_index);
-}
-
-bool	Config::getListing( void ){
-	return (_listing);
 }

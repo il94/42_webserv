@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/21 12:29:16 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/22 16:22:51 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ Server::~Server(void)
 // Operators ================================================================ //
 Server &	Server::operator=(const Server & srv)
 {
-	config = srv.config;
+	_config = srv._config;
 	return ( *this );
 }
 
@@ -91,31 +91,24 @@ Server &	Server::operator=(const Server & srv)
 
 void		Server::setConfig(std::vector< std::string > & srv)
 {
-	this->config.setFileContent(srv);
+	this->_config.setContent(srv);
 	
 	/*==================================*/
 	
-	config.setPort(config.extractPort());
-	config.setHost(config.extractHost());
-	config.setName(config.extractName());
-	config.setErrorPages(config.extractErrorPages());
-	config.setMaxBodySize(config.extractMaxBodySize());
+	_config.setPort(_config.extractPort());
+	_config.setHost(_config.extractHost());
+	_config.setName(_config.extractName());
+	_config.setErrorPages(_config.extractErrorPages());
+	_config.setMaxBodySize(_config.extractMaxBodySize());
 	
 
 	/*==================================*/
 
-	// config.setLocations(config.splitServerConfig());
-	// config.setLocations(config.extractLocations());
-
-	config.setAllowedMethods(config.extractAllowedMethods());
-	
-	config.setListing(config.extractListing());
-	config.setRoot(config.extractRoot());
-	config.setIndex(config.extractIndex());
+	_config.setLocations(_config.extractLocations());
 	
 	/*==================================*/
 	
-	config.printConfig();
+	_config.display();
 	
 	/*==================================*/
 	
