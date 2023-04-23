@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 22:33:50 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 04:49:45 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,9 @@ class Response
 		Response(Request & request, Config & config);
 		~Response(void);
 
+
 		/*Methods*/
+		void	generate();
 		void	GET(void);
 		void	POST(void);
 		void	DELETE(void);
@@ -42,6 +44,8 @@ class Response
 		std::string	readErrorPage(const std::string & path);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
+
+		void	findLocation();
 		/*---------------*/
 
 		/*Header*/
@@ -49,8 +53,9 @@ class Response
 		void	setCode(int	code);
 		void	setContentLength(size_t size);
 		
-		std::string	getStatuMsg();
+		bool	isAllowedMethod();
 		void	initStatusMsg();
+		std::string	getStatuMsg();
 		std::string	writeHeader(void);
 		std::string	getHeader(size_t size, std::string path);
 		/*------*/
@@ -58,15 +63,16 @@ class Response
 	private :
 
 		/*Header*/
-		std::string	_contentLength;
-		std::string	_contentType;
-		std::map<int, std::string> _statusMsg;
+		std::string					_contentLength;
+		std::string					_contentType;
+		std::map<int, std::string>	_statusMsg;
 		int			_code;
 		/*------*/
 		
 		Request		_request;
 		Config		_config;
 		std::string	_response;
+		Location	_location;
 };
 
 

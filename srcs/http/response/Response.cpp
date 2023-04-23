@@ -6,24 +6,49 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/21 11:39:17 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 05:36:01 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void): _contentLength(""), _contentType(""), _code(200), _response("") {}
+Response::Response(void): _contentLength("0"), _contentType(""), _code(200), _response("") {}
 
 Response::Response(Request & request, Config & config) :
-	_contentLength(""), _contentType(""), _code(200),
-		_request(request), _config(config), _response(""){}
+	_contentLength(""), _contentType(""), _code(request.getRet()),
+		_request(request), _config(config), _response("")
+{
+	findLocation();
+}
 
 Response::~Response(void) {}
 
+
 /*Methods*/
+
+void	Response::generate()
+{
+	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
+		!= _location.getAllowedMethods().end())
+			_code = 405;
+	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
+		_code = 413;
+	if (_code == 405 || 413)
+	{
+		_response = getHeader(0, "");
+		return ;
+	}
+	if (_request.getMethod() == "GET")
+		GET();
+	else if (_request.getMethod() == "POST")
+		POST();
+	else
+		DELETE();
+}
+
 void	Response::GET(void)
 {
-	if (_request.getMethod() != "GET")
+	if (_request.getMethod() == "GET")
 		return ;
 	if (_code == 200)
 		_code = readContent();
@@ -169,6 +194,28 @@ int	Response::fileExist(std::string path)
 		return 1;
 	return 0;
 }
+
+void	Response::findLocation()
+{
+	std::map<std::string, Location>				locationM = _config.getLocations();
+	std::vector<std::string>					splitedURL = _request.splitURL();
+	std::vector<std::string>::const_iterator	it = splitedURL.begin();
+
+	while (it != splitedURL.end())
+	{
+		if (locationM.find(*it) != locationM.end())
+		{
+			_location = locationM[*it];
+			return;
+
+		} else if (locationM.find((*it).substr(0, rfind(*it, "/"))) \
+			!= locationM.end()){
+				_location = locationM[(*it).substr(0, rfind(*it, "/"))];
+			return;
+		}
+	}
+	_location = locationM["/"];
+}
 /*---------------*/
 
 /*Header*/
@@ -185,8 +232,16 @@ std::string	Response::getHeader(size_t size, std::string path)
 
 std::string	Response::writeHeader(void)
 {
+	std::string	header = "";
+
 	initStatusMsg();
-	std::string	header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
+
+	if (_code == 405)
+		header = "HTTP/1.1 405 Method Not Allowed\r\n";
+	else if (_code == 413)
+		header = "HTTP/1.1 413 Payload Too Large\r\n";
+	else
+		header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
 	if (!_contentLength.empty())
 		header += "Content-Length: " + _contentLength + "\r\n";
@@ -203,6 +258,7 @@ void	Response::initStatusMsg()
 	_statusMsg[400] = "Bad Request";
 	_statusMsg[403] = "Forbidden";
 	_statusMsg[404] = "Not Found";
+	_statusMsg[405] = "Method Not Allowed";
 	_statusMsg[500] = "Internal Server Error";
 }
 
@@ -240,5 +296,5 @@ void	Response::setContentType(std::string path)
 }
 /*------*/
 
-void	Response::setRequest(Request &request) {_request = request;}
+void	Response::setRequest(Request &request): _code(request.getRet()), _request(request) {}
 std::string	Response::getResponse() {return _response;}

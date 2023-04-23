@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/18 22:13:41 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 04:11:45 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,20 @@ void	Request::setQueryM()
 	}
 }
 
+std::vector<std::string>	Request::splitURL()
+{
+	std::vector<std::string>	splitedURL;
+	std::string	URL = 			getURL();
 
+	URL = URL[URL.size() - 1]  != '/' ? URL + "/" : URL;
+
+	do
+	{
+		splitedURL.push_back(URL);
+		URL = URL.substr(0, rfind(URL, "/"));
+	} while (URL != "");
+	return (splitedURL);
+}
 
 std::string Request::getURL() const { return _data[1]; }
 
@@ -121,3 +134,5 @@ std::string Request::getElInHeader(const std::string & key) { return _headerM[ke
 std::map<std::string, std::string>	Request::getHeaderM() { return _headerM; }
 
 std::string Request::getRequestBody() const { return _reqBody; }
+
+int	Request::getRet() const {return _ret; }
