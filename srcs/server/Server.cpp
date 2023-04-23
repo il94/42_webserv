@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/23 13:29:10 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/23 15:48:06 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,8 +96,8 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	/*==================================*/
 	
 	_config.setPort(_config.extractPort());
-	// _config.setHost(_config.extractHost());
-	// _config.setName(_config.extractName());
+	_config.setHost(_config.extractHost());
+	_config.setName(_config.extractName());
 	// _config.setErrorPages(_config.extractErrorPages());
 	// _config.setMaxBodySize(_config.extractMaxBodySize());
 	
@@ -105,7 +105,7 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	/*==================================*/
 
 	// _config.setLocations(_config.extractLocations());
-		// std::cout << "index = " << _config.getLocations()["/gfd"]._index << std::endl;
+		// std::cout << "index = " << _config.getLocations() << std::endl;
 	
 	/*==================================*/
 	

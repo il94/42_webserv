@@ -34,18 +34,18 @@ Config& Config::operator=(const Config &src)
 void	Config::display( void )
 {
 	displayVector(getPort(), "PORT");
-	// displayVector(getHost(), "HOST");
-	// displayElement(getName(), "NAME");
+	displayVector(getHost(), "HOST");
+	displayElement(getName(), "NAME");
 	// displayMap(getErrorPages(), "ERROR PAGE");
 	// displayElement(getMaxBodySize(), "MAX BODY SIZE");
 
-	// std::cout << std::endl;
-	// for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
-	// {
-	// 	std::cout << "LOCATION [" << it->first << "]" << std::endl;
-	// 	it->second.display();
-	// 	std::cout << std::endl;
-	// }
+	std::cout << std::endl;
+	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
+	{
+		std::cout << "LOCATION [" << it->first << "]" << std::endl;
+		it->second.display();
+		std::cout << std::endl;
+	}
 }
 
 bool	closeBrace(std::string src)
@@ -99,7 +99,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 	return (result);
 }
 
-std::vector<int>	Config::extractPort( void ) //verif si inferieur a 1024
+std::vector<int>	Config::extractPort( void )
 {
 	std::vector<int>			result;
 	std::vector<std::string>	content;
@@ -109,13 +109,19 @@ std::vector<int>	Config::extractPort( void ) //verif si inferieur a 1024
 		result.push_back(DEFAULT_PORT);
 	else
 	{
+		unsigned int	tmp;
+
 		for (std::vector<std::string>::iterator it = content.begin(); it < content.end(); it++)
-			result.push_back(std::atoi((it->substr(it->find(':') + 1, it->size()).c_str())));
+		{
+			tmp = std::atoi((it->substr(it->find(':') + 1, it->size()).c_str()));
+			if (tmp >= 1024)
+				result.push_back(tmp);
+		}
 	}
 	return (result);
 }
 
-std::vector<std::string>	Config::extractHost( void )
+std::vector<std::string>	Config::extractHost( void ) //verif si IP valide + format
 {
 	std::vector<std::string>	result;
 	std::vector<std::string>	content;
