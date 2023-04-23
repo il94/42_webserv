@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:55 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 04:04:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:12:06 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,8 @@ class	Request
 		bool	badFirstLine();
 		std::vector<std::string>	splitURL();
 
-		void	setRequestAtr(const std::string & req);
-		void	setQueryM();
+		void	parseHeader(const std::string & req);
+		void	parseBody();
 	
 	private:
 		std::vector<std::string>	_data;

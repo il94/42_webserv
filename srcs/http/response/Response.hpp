@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 04:49:45 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:23:15 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class Response
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
 
-		void	findLocation();
+		Location	findLocation();
 		/*---------------*/
 
 		/*Header*/
@@ -57,7 +57,7 @@ class Response
 		void	initStatusMsg();
 		std::string	getStatuMsg();
 		std::string	writeHeader(void);
-		std::string	getHeader(size_t size, std::string path);
+		std::string	generateHeader(size_t size, std::string path);
 		/*------*/
 	
 	private :

@@ -6,17 +6,57 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 04:11:45 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:13:21 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
+/*=============================== Constructors ===============================*/
 Request::Request(void): _requestContent(""), _reqBody(""),  _ret(200){}
 
 Request::~Request(void){}
 
-void	Request::setRequestAtr(const std::string & req)
+/*================================= Methods ==================================*/
+
+bool	Request::badFirstLine()
+{
+	_ret = 400;
+	if(_data.size() != 3 || _data[2].find("HTTP/") == std::string::npos)
+	{
+		std::cerr << RED << "Error : the request cannot be processed, somes elements are missing" << END << std::endl;
+		return true;
+	}
+	if (_data[2] != "HTTP/1.0" && _data[2] != "HTTP/1.1")
+	{
+		std::cerr << RED << "Error : the request cannot be processed, BAD HTTP VERSION" << END << std::endl;
+		return true;
+	}
+	if (_data[0] != "POST"  && _data[0] != "DELETE" && _data[0] != "GET")
+	{
+		std::cerr << RED << "Error : the request cannot be processed, INVALID METHOD" << END << std::endl;
+		return true;
+	}
+	_ret = 200;
+	return false;
+}
+
+std::vector<std::string>	Request::splitURL()
+{
+	std::vector<std::string>	splitedURL;
+	std::string	URL = 			getURL();
+
+	URL = URL[URL.size() - 1]  != '/' ? URL + "/" : URL;
+
+	do
+	{
+		splitedURL.push_back(URL);
+		URL = URL.substr(0, rfind(URL, "/"));
+	} while (URL != "");
+	return (splitedURL);
+}
+
+void	Request::parseHeader(const std::string & req)
 {
 	std::string	firstReqLine(req, 0, req.find("\n"));
 	std::string	tmp;
@@ -51,29 +91,7 @@ void	Request::setRequestAtr(const std::string & req)
 		_reqBody = req.substr(bodyPosition + 2);
 }
 
-bool	Request::badFirstLine()
-{
-	_ret = 400;
-	if(_data.size() != 3 || _data[2].find("HTTP/") == std::string::npos)
-	{
-		std::cerr << RED << "Error : the request cannot be processed, somes elements are missing" << END << std::endl;
-		return true;
-	}
-	if (_data[2] != "HTTP/1.0" && _data[2] != "HTTP/1.1")
-	{
-		std::cerr << RED << "Error : the request cannot be processed, BAD HTTP VERSION" << END << std::endl;
-		return true;
-	}
-	if (_data[0] != "POST"  && _data[0] != "DELETE" && _data[0] != "GET")
-	{
-		std::cerr << RED << "Error : the request cannot be processed, INVALID METHOD" << END << std::endl;
-		return true;
-	}
-	_ret = 200;
-	return false;
-}
-
-void	Request::setQueryM()
+void	Request::parseBody()
 {
 	std::string	queryString = "";
 
@@ -106,20 +124,7 @@ void	Request::setQueryM()
 	}
 }
 
-std::vector<std::string>	Request::splitURL()
-{
-	std::vector<std::string>	splitedURL;
-	std::string	URL = 			getURL();
-
-	URL = URL[URL.size() - 1]  != '/' ? URL + "/" : URL;
-
-	do
-	{
-		splitedURL.push_back(URL);
-		URL = URL.substr(0, rfind(URL, "/"));
-	} while (URL != "");
-	return (splitedURL);
-}
+/*================================ Accessors =================================*/
 
 std::string Request::getURL() const { return _data[1]; }
 

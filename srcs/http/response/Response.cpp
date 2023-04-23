@@ -6,25 +6,24 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 05:36:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:23:41 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
+/*=============================== Constructors ===============================*/
 Response::Response(void): _contentLength("0"), _contentType(""), _code(200), _response("") {}
 
 Response::Response(Request & request, Config & config) :
 	_contentLength(""), _contentType(""), _code(request.getRet()),
-		_request(request), _config(config), _response("")
-{
-	findLocation();
-}
+		_request(request), _config(config), _response(""),
+			_location(findLocation()){}
 
 Response::~Response(void) {}
 
 
-/*Methods*/
+/*================================= Methods ==================================*/
 
 void	Response::generate()
 {
@@ -35,7 +34,7 @@ void	Response::generate()
 		_code = 413;
 	if (_code == 405 || 413)
 	{
-		_response = getHeader(0, "");
+		_response = generateHeader(0, "");
 		return ;
 	}
 	if (_request.getMethod() == "GET")
@@ -46,6 +45,8 @@ void	Response::generate()
 		DELETE();
 }
 
+/*============================= HTTP Methods =================================*/
+
 void	Response::GET(void)
 {
 	if (_request.getMethod() == "GET")
@@ -54,7 +55,7 @@ void	Response::GET(void)
 		_code = readContent();
 	else
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = getHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
 }
 
 void	Response::POST(void)
@@ -99,7 +100,7 @@ void	Response::POST(void)
 	}
 	if (_code == 500)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = getHeader(_response.size(), "") + _response;
+	_response = generateHeader(_response.size(), "") + _response;
 }
 
 void	Response::DELETE(void)
@@ -115,12 +116,11 @@ void	Response::DELETE(void)
 		_code = 404;
 	if (_code == 404 || _code == 403)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = getHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
 }
 
-/*-------*/
+/*============================= UTILS =================================*/
 
-/*Response Utils*/
 int	Response::readContent(void)
 {
 	std::ifstream	file;
@@ -195,7 +195,7 @@ int	Response::fileExist(std::string path)
 	return 0;
 }
 
-void	Response::findLocation()
+Location	Response::findLocation()
 {
 	std::map<std::string, Location>				locationM = _config.getLocations();
 	std::vector<std::string>					splitedURL = _request.splitURL();
@@ -205,21 +205,19 @@ void	Response::findLocation()
 	{
 		if (locationM.find(*it) != locationM.end())
 		{
-			_location = locationM[*it];
-			return;
+			return locationM[*it];
 
 		} else if (locationM.find((*it).substr(0, rfind(*it, "/"))) \
 			!= locationM.end()){
-				_location = locationM[(*it).substr(0, rfind(*it, "/"))];
-			return;
+			return locationM[(*it).substr(0, rfind(*it, "/"))];
 		}
 	}
-	_location = locationM["/"];
+	return locationM["/"];
 }
-/*---------------*/
 
-/*Header*/
-std::string	Response::getHeader(size_t size, std::string path)
+/*============================= HTTP HEADER =================================*/
+
+std::string	Response::generateHeader(size_t size, std::string path)
 {
 	std::string	header;
 
@@ -262,6 +260,8 @@ void	Response::initStatusMsg()
 	_statusMsg[500] = "Internal Server Error";
 }
 
+/*================================ Accessors =================================*/
+
 std::string	Response::getStatuMsg()
 {
 	if (_statusMsg.find(_code) == _statusMsg.end())
@@ -294,7 +294,7 @@ void	Response::setContentType(std::string path)
 		_contentType = "text/plain";
 
 }
-/*------*/
 
 void	Response::setRequest(Request &request): _code(request.getRet()), _request(request) {}
+
 std::string	Response::getResponse() {return _response;}
