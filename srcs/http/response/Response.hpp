@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:23:15 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:45:26 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ class Response
 		std::string	readErrorPage(const std::string & path);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
-
+		
 		Location	findLocation();
+		/*listing.cpp/ Listing*/
+			std::string	generateAutoIndex();
 		/*---------------*/
 
 		/*Header*/

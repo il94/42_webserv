@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:23:41 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/23 17:39:19 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,10 @@ int	Response::readContent(void)
 		buffer << file.rdbuf();
 		_response = buffer.str();
 		file.close();
+	}
+	else if (_location.getListing())
+	{
+		
 	}
 	else
 	{
