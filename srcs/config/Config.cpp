@@ -34,18 +34,18 @@ Config& Config::operator=(const Config &src)
 void	Config::display( void )
 {
 	displayVector(getPort(), "PORT");
-	displayVector(getHost(), "HOST");
-	displayElement(getName(), "NAME");
-	displayMap(getErrorPages(), "ERROR PAGE");
-	displayElement(getMaxBodySize(), "MAX BODY SIZE");
+	// displayVector(getHost(), "HOST");
+	// displayElement(getName(), "NAME");
+	// displayMap(getErrorPages(), "ERROR PAGE");
+	// displayElement(getMaxBodySize(), "MAX BODY SIZE");
 
-	std::cout << std::endl;
-	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
-	{
-		std::cout << "LOCATION [" << it->first << "]" << std::endl;
-		it->second.display();
-		std::cout << std::endl;
-	}
+	// std::cout << std::endl;
+	// for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
+	// {
+	// 	std::cout << "LOCATION [" << it->first << "]" << std::endl;
+	// 	it->second.display();
+	// 	std::cout << std::endl;
+	// }
 }
 
 bool	closeBrace(std::string src)

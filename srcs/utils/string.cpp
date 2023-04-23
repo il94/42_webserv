@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/22 19:02:44 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/23 14:28:30 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,23 +39,40 @@ std::vector<std::string> fileToVector( std::string path )
 	return (result);
 }
 
-std::vector<std::vector <std::string> > splitFileConfig(std::string path)
+bool	closeBrace(std::string &src, const int index)
+{
+	std::string::iterator it = src.begin() + index - 1;
+	while (it != src.end() and (*it == ' ' or *it == '\t'))
+		it++;
+	return (*it == '}');
+}
+
+bool	openBrace(std::string &src, const int index)
+{
+	std::string::iterator it = src.begin() + index - 1;
+	while (it != src.end() and (*it == ' ' or *it == '\t'))
+		it++;
+	return (*it == '{');
+}
+
+std::vector<std::vector <std::string> > extractServers(std::string path)
 {
 	std::vector<std::vector <std::string> > result;
 
 	std::vector<std::string>			fileContent = fileToVector(path);
-	std::vector<std::string>			element;
 	std::vector<std::string>::iterator	start;
 	std::vector<std::string>::iterator	end;
 
-	for (start = std::find(fileContent.begin(), fileContent.end(), "server {"); start != fileContent.end(); start = std::find(start, fileContent.end(), "server {"))
+	for (start = fileContent.begin(); start != fileContent.end(); start = end)
 	{
-		end = std::find(start, fileContent.end(), "}");
-		element.clear();
-		for (++start; start != end; start++)
-			element.push_back(*start);
-		result.push_back(element);
-		start = ++end;
+		end = start + 1;
+		if (start->rfind("server", 0, sizeof("server") - 1) != -1 and openBrace(*start, start->find("server", 0) + sizeof("server")))
+		{
+			while (end != fileContent.end() and (*end)[0] != '}' and end->find("server") == -1)
+				end++;
+			if (end != fileContent.end() and (*end)[0] == '}')
+				result.push_back(std::vector<std::string>(start + 1, end));
+		}
 	}
 	return (result);
 }
@@ -76,13 +93,21 @@ std::string	findInFileContent(const std::vector<std::string> &file, const std::s
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &file, const std::string &src)
 {
 	std::vector<std::string>	result;
-	int							index = -1;
+	int							index;
+	std::string::const_iterator it;
 
-	for (size_t i = 0; i < file.size(); i++)
+	for (std::vector<std::string>::const_iterator start = file.begin(); start != file.end(); start++)
 	{
-		index = file[i].find(src);
-		if (index != -1 and file[i][index - 1] == ' ' or file[i][index - 1] == '\t')
-			result.push_back(file[i].substr(index + src.size() + 1, file[i].find(';') - (index + src.size() + 1)));
+		it = start->begin();
+		while (it != start->end() and (*it == ' ' or *it == '\t'))
+			it++;
+		index = start->rfind(src.c_str(), std::distance(start->begin(), it));
+		if (index != -1 and start->find(';', index)) 
+		{
+			while (it != start->end() and (*it == ' ' or *it == '\t'))
+				it++;
+			result.push_back(start->substr(index + src.size() + 1, start->find(';') - (index + src.size() + 1)));
+		}
 	}
 	return (result);
 }

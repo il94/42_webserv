@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/22 19:46:09 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/23 13:50:16 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 
 std::string								to_string( size_t );
 std::vector<std::string>				fileToVector( std::string );
-std::vector<std::vector <std::string> > splitFileConfig( std::string );
+std::vector<std::vector <std::string> > extractServers( std::string );
 
 std::string					findInFileContent(const std::vector<std::string> &, const std::string &);
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &, const std::string &);
