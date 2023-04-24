@@ -81,28 +81,26 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)))
 
 void		Server::setConfig(std::vector< std::string > & srv)
 {
-	this->_config.setFileContent(srv);
-
+	this->_config.setContent(srv);
+	
 	/*==================================*/
-
+	
 	_config.setPort(_config.extractPort());
 	_config.setHost(_config.extractHost());
-	_config.setSocket(_config.extractSocket());
 	_config.setName(_config.extractName());
-	_config.setErrorPages(_config.extractErrorPages());
-	_config.setMaxBodySize(_config.extractMaxBodySize());
+	// _config.setErrorPages(_config.extractErrorPages());
+	// _config.setMaxBodySize(_config.extractMaxBodySize());
+	
 
 	/*==================================*/
 
-	_config.setAllowedMethods(_config.extractAllowedMethods());
-
-	_config.setRoot(_config.extractRoot());
-	_config.setIndex(_config.extractIndex());
-
+	// _config.setLocations(_config.extractLocations());
+		// std::cout << "index = " << _config.getLocations() << std::endl;
+	
 	/*==================================*/
-
-	_config.printConfig();
-
+	
+	_config.display();
+	
 	/*==================================*/
 }
 

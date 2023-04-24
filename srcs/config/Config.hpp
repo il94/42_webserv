@@ -71,6 +71,14 @@ class Location
 };
 
 
+#include "Location.hpp"
+#include "../utils/utils.hpp"
+
+#define DEFAULT_PORT 8000
+#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_NAME "default_server"
+#define DEFAULT_MAX_BODY_SIZE 1000000
+
 class Config
 {
 	public :
