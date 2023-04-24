@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/14 10:43:45 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/24 17:26:24 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Server
 		void				setConfig(std::vector< std::string > & srv);
 
 	private:
-		Config				config;
+		Config				_config;
 		std::string			_name;
 		int					_port;
 		int					_srvfd;

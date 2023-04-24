@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:45:26 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 17:33:16 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include "../../../include/webserv.hpp"
 #include <sys/stat.h>
 #include <fstream>
+#include <dirent.h>
 #include "../../cgi/CGI.hpp"
 #include "../../utils/utils.hpp"
 #include "../request/Request.hpp"
@@ -36,7 +37,9 @@ class Response
 		void	DELETE(void);
 		/*-------*/
 
-		void	setRequest(Request &request);
+		void		setRequest(Request &request);
+		void		setConfig(Config &config);
+
 		std::string	getResponse();
 
 		/*Response Utils*/
@@ -63,6 +66,8 @@ class Response
 		/*------*/
 	
 	private :
+
+		int	_serverIndex;
 
 		/*Header*/
 		std::string					_contentLength;

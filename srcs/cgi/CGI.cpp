@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/21 04:52:42 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 15:54:52 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request), _body(request.getRequestBody()){}
+CGI::CGI(Request &request): _request(request){}
 
 CGI::~CGI(){}
 
@@ -49,7 +49,7 @@ std::string CGI::execCGI(std::string scriptPath)
 		pipe(pipefd_input);
 		pipe(pipefd_output);
 		
-		pid_t pid = fork();
+		pid = fork();
 		
 		if (pid == 0) {
 			// child process

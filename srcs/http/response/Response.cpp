@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:39:19 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 17:34:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -299,6 +299,17 @@ void	Response::setContentType(std::string path)
 
 }
 
-void	Response::setRequest(Request &request): _code(request.getRet()), _request(request) {}
+void	Response::setRequest(Request &request)
+{
+	_code = request.getRet();
+	_request = request;
+}
+
+void	Response::setConfig(Config &config)
+{
+	_config = config;
+	_location = findLocation();
+}
+
 
 std::string	Response::getResponse() {return _response;}

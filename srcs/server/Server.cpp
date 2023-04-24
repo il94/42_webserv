@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 23:05:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 17:36:24 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ Server::~Server(void)
 // Operators ================================================================ //
 Server &	Server::operator=(const Server & srv)
 {
-	config = srv.config;
+	_config = srv._config;
 	return ( *this );
 }
 
@@ -91,28 +91,18 @@ Server &	Server::operator=(const Server & srv)
 
 void		Server::setConfig(std::vector< std::string > & srv)
 {
-	this->config.setFileContent(srv);
-	
+	this->_config.setContent(srv);	
 	/*==================================*/
 	
-	config.setPort(config.extractPort());
-	config.setHost(config.extractHost());
-	config.setSocket(config.extractSocket());
-	config.setName(config.extractName());
-	config.setErrorPages(config.extractErrorPages());
-	config.setMaxBodySize(config.extractMaxBodySize());
-	
+	_config.setPort(_config.extractPort());
+	_config.setHost(_config.extractHost());
+	_config.setName(_config.extractName());
 
 	/*==================================*/
 
-	config.setAllowedMethods(config.extractAllowedMethods());
-	
-	config.setRoot(config.extractRoot());
-	config.setIndex(config.extractIndex());
-	
 	/*==================================*/
 	
-	config.printConfig();
+	_config.display();
 	
 	/*==================================*/
 	
@@ -165,19 +155,11 @@ void	Server::run(void)
 					int ret = read(cliSocket, buf, 10000);
 					if (ret > 0)
 					{ 
-						req.setRequestAtr(buf);
-						req.setQueryM();
+						req.parseHeader(std::string(buf));
+						req.parseBody();
 						response.setRequest(req);
-						if (req.getMethod() == "GET")
-						{
-							response.GET();
-						}
-						else if (req.getMethod() == "POST")
-						{
-							response.POST();
-							std::cout << "RESPONSE" << std::endl << response.getResponse() << std::endl;
-
-						}
+						response.setConfig(_config);
+						response.generate();
 					}
 				}
 				if ( cliEvents[i].events & EPOLLOUT & ~EPOLLHUP )

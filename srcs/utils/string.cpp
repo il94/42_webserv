@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 03:57:51 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 18:09:37 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,52 +56,96 @@ std::vector<std::string> fileToVector( std::string path )
 	return (result);
 }
 
-std::vector<std::vector <std::string> > splitFileConfig(std::string path)
+bool	closeBrace(std::string &src, const int index)
+{
+	std::string::iterator it = src.begin() + index - 1;
+	while (it != src.end() and (*it == ' ' or *it == '\t'))
+		it++;
+	return (*it == '}');
+}
+
+bool	openBrace(std::string &src, const int index)
+{
+	std::string::iterator it = src.begin() + index - 1;
+
+	while (it != src.end() and (*it == ' ' or *it == '\t'))
+		it++;
+	return (*it == '{');
+}
+
+std::vector<std::vector <std::string> > extractServers(std::string path)
 {
 	std::vector<std::vector <std::string> > result;
 
 	std::vector<std::string>			fileContent = fileToVector(path);
-	std::vector<std::string>			element;
 	std::vector<std::string>::iterator	start;
 	std::vector<std::string>::iterator	end;
 
-	for (start = std::find(fileContent.begin(), fileContent.end(), "server {"); start != fileContent.end(); start = std::find(start, fileContent.end(), "server {"))
+	for (start = fileContent.begin(); start != fileContent.end(); start = end)
 	{
-		end = std::find(start, fileContent.end(), "}");
-		element.clear();
-		for (++start; start != end; start++)
-			element.push_back(*start);
-		result.push_back(element);
-		start = ++end;
+		end = start + 1;
+		if (start->rfind("server", 0, sizeof("server") - 1) != std::string::npos and openBrace(*start, start->find("server", 0) + sizeof("server")))
+		{
+			while (end != fileContent.end() and (*end)[0] != '}')
+				end++;
+			if (end != fileContent.end() and (*end)[0] == '}')
+				result.push_back(std::vector<std::string>(start + 1, end));
+		}
 	}
 	return (result);
 }
 
 std::string	findInFileContent(const std::vector<std::string> &file, const std::string &src)
 {
-	std::string	result;
-	int			index = -1;
-	size_t		i = 0;
+	std::string					result;
+	int							index;
+	std::string::const_iterator it;
 
-	for (i = 0; i < file.size() and index == -1 ; i++)
-		index = file[i].find(src);
-	if (index == -1)
-		return ("default");
-
-	result = file[i - 1].substr(index + src.size() + 1, file[i - 1].find(';') - (index + src.size() + 1));
+	for (std::vector<std::string>::const_iterator start = file.begin(); start != file.end(); start++)
+	{
+		it = start->begin();
+		while (it != start->end() and (*it == ' ' or *it == '\t'))
+			it++;
+		index = start->rfind(src.c_str(), std::distance(start->begin(), it));
+		if (index != -1 and (*(it + src.size()) == ' ' or *(it + src.size()) == '\t') and start->find(';', index) != std::string::npos) 
+		{
+			while (it != start->end() and (*it == ' ' or *it == '\t'))
+				it++;
+			while (it != start->end() and *it != ' ' and *it != '\t')
+				it++;
+			while (it != start->end() and (*it == ' ' or *it == '\t'))
+				it++;
+			if (it != start->end())
+				result = start->substr(std::distance(start->begin(), it), start->find(';') - std::distance(start->begin(), it));
+			return (result);
+		}
+	}
 	return (result);
 }
 
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &file, const std::string &src)
 {
 	std::vector<std::string>	result;
-	int							index = -1;
+	size_t						index;
+	std::string::const_iterator it;
 
-	for (size_t i = 0; i < file.size(); i++)
+	for (std::vector<std::string>::const_iterator start = file.begin(); start != file.end(); start++)
 	{
-		index = file[i].find(src);
-		if (index != -1)
-			result.push_back(file[i].substr(index + src.size() + 1, file[i].find(';') - (index + src.size() + 1)));
+		it = start->begin();
+		while (it != start->end() and (*it == ' ' or *it == '\t'))
+			it++;
+		index = start->rfind(src.c_str(), std::distance(start->begin(), it));
+		if (index != std::string::npos and (*(it + src.size()) == ' ' or *(it + src.size()) == '\t') and start->find(';', index) != std::string::npos) 
+		{
+			while (it != start->end() and (*it == ' ' or *it == '\t'))
+				it++;
+			while (it != start->end() and *it != ' ' and *it != '\t')
+				it++;
+			while (it != start->end() and (*it == ' ' or *it == '\t'))
+				it++;
+			if (it != start->end())
+				result.push_back(start->substr(std::distance(start->begin(), it), start->find(';') - std::distance(start->begin(), it)));
+		}
 	}
 	return (result);
 }
