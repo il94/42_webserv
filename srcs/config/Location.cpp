@@ -70,7 +70,7 @@ std::pair<int, std::string>	Location::extractRedirection( void )
 	}
 	else
 	{
-		if (element.find(element.substr(0, element.find(' '))) != -1 or element.find(element.substr(0, element.find('\t'))) != -1)
+		if (element.find(element.substr(0, element.find(' '))) != std::string::npos or element.find(element.substr(0, element.find('\t'))) != std::string::npos)
 		{
 			result.first = std::atoi(element.substr(0, element.find(' ')).c_str());
 			result.second = element.substr(element.rfind(' ') + 1);

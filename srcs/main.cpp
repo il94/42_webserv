@@ -46,7 +46,7 @@ int	main(int ac, char **av)
 	else
 	{
 		std::cout << "Default mode" << std::endl;
-		Server	server("default");
+		Server	server;
 		server.run();
 	}
 

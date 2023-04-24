@@ -60,7 +60,6 @@ bool	closeBrace(std::string src)
 std::map<std::string, Location>	Config::extractLocations( void )
 {
 	std::map<std::string, Location>		result;
-
 	std::vector<std::string>::iterator	start;
 	//std::vector<std::string>::iterator	end;
 
@@ -266,24 +265,4 @@ size_t								Config::getMaxBodySize( void ){
 
 std::map<std::string, Location>		Config::getLocations( void ){
 	return (_locations);
-}
-
-bool						Location::getListing( void ){
-	return (_listing);
-}
-
-
-
-std::vector<std::string>	Location::getAllowedCGI( void ){
-	return (_allowedCGI);
-}
-
-
-
-void	Location::pushContent( const std::string &src ){
-	_content.push_back(src);
-}
-
-bool	Location::emptyContent( void ){
-	return (_content.empty());
 }
