@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 14:36:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/25 18:13:10 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,17 +64,40 @@ Server::~Server(void)
 
 	while ( i < this->_getNbSrv() )
 	{
-		close( this->_getSrvFd( i ) );
-		close( this->_getEplFd() );
+		if ( close( this->_getSrvFd( i ) ) == -1 )
+			this->_log(ERROR, -1, __func__, __LINE__, "close server socket");
 		i++;
 	}
+	if ( close( this->_getEplFd() ) == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "close epoll instance");
 	return;
 }
 
 // Operators ================================================================ //
 Server &	Server::operator=(const Server & srv __attribute__((unused)))
 {
-	_config = srv._config;
+	size_t	i	= 0;
+
+	if ( this->_srvfd.size() != 0 )
+		for (size_t j = 0; j < this->_srvfd.size(); j++)
+		{
+			close( this->_getSrvFd( j ) );
+		}
+	this->_srvfd.clear();
+	this->_names	= srv._names;
+	this->_ports	= srv._ports;
+	this->_sockaddr	= srv._sockaddr;
+	this->_srvfd	= srv._srvfd;
+	this->_nbSrv	= srv._ports.size();
+	while ( i < this->_getNbSrv() )
+	{
+		this->_srvfd.push_back( dup( srv._getSrvFd( i ) ) );
+		this->_eplevs[i].data.fd = this->_getSrvFd( i );
+		i++;
+	}
+	this->_eplfd = epoll_create( 1 );
+	if ( this->_eplfd == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
 	return ( *this );
 }
 
