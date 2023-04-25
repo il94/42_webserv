@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:47 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/12 21:58:57 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 15:55:05 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define CGI_HPP
 
 # include "../http/request/Request.hpp"
+# include <vector>
+# include <algorithm>
 # include <unistd.h>
 # include <string.h>
 # include <sys/wait.h>
@@ -28,9 +30,11 @@ class CGI
 		CGI(Request &request);
 		~CGI();
 
+		void	setEnv();
 		std::string	execCGI(std::string scriptName);
 	private:
-		std::string		_body;
+		Request			_request;
+		char				**_env;
 };
 
 # endif

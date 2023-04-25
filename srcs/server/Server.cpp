@@ -18,8 +18,6 @@
 
 #include <unistd.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
 #include <fcntl.h>
 #include <netdb.h>
 
@@ -27,61 +25,54 @@
 #include "../http/request/Request.hpp"
 #include "../http/response/Response.hpp"
 
-#define PORT		8080
-#define MAX_EVENTS	5
+#define DEF_PORT	8080
+#define MAX_EVENTS	64
 
 // Constructors ============================================================= //
-Server::Server(void) : _name( "webserv" ), _port( PORT ), _srvfd( -1 ), _eplfd( -1 ), _address( NULL ), _eplev( NULL ), _flag( EMPTY )
+Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv" ), _ports( 1, DEF_PORT ),
+	_sockaddr(  ), _eplevs(  ), _srvfd(  ) 
 {
-	this->_setSockAddr();
-	this->_mkSrvSocket();
-	this->_setEpollEvent();
-	this->_mkEpoll();
+	this->_setSockaddr();
+	this->_setEplevs();
+	this->_eplfd = epoll_create( 1 );
+	if ( this->_eplfd == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
 	return;
 }
 
-Server::Server( const std::string &src )
+Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), _names( srv._names ),
+	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )
 {
-	if (src == "default")
-	{
-		/* générer un serveur par défaut */
-	}
-	return;
-}
+	size_t	i	= 0;
 
-Server::Server(const Server & srv) : _name( srv._getName() ), _srvfd( dup( srv._getFd( SRV ) ) ), _eplfd( dup( srv._getFd( EPL ) ) ), _address( NULL ), _eplev( NULL ), _flag ( EMPTY )
-{
-	int	i = 0;
-
-	if (this->_address == NULL)
-		this->_setSockAddr();
-	this->_srvfd				= dup( srv._getFd( SRV ) );
-	this->_eplfd				= dup( srv._getFd( EPL ) );
-	this->_address->sa_family	= ( srv._getSockAddr() )->sa_family;
-	while (i < 14)
+	while ( i < this->_getNbSrv() )
 	{
-		this->_address->sa_data[i] = ( srv._getSockAddr() )->sa_data[i];
+		this->_srvfd.push_back( dup( srv._getSrvFd( i ) ) );
+		this->_eplevs[i].data.fd = this->_getSrvFd( i );
 		i++;
 	}
-	if (this->_eplev == NULL)
-		this->_setEpollEvent();
-	this->_eplev->events = srv._eplev->events;
-	this->_eplev->data.fd = srv._getFd( SRV );
+	this->_eplfd = epoll_create( 1 );
+	if ( this->_eplfd == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
 	return;
 }
 
 // Destructor =============================================================== //
 Server::~Server(void)
 {
-	if ( this->_srvfd != -1 && close( this->_srvfd ) == -1 )
-		this->_srvError(__func__, __LINE__, "close srvfd");
-	if ( this->_eplfd != -1 && close( this->_eplfd ) == -1 )
-		this->_srvError(__func__, __LINE__, "close eplfd");
+	size_t	i = 0;
+
+	while ( i < this->_getNbSrv() )
+	{
+		close( this->_getSrvFd( i ) );
+		close( this->_getEplFd() );
+		i++;
+	}
 	return;
 }
 
 // Operators ================================================================ //
-Server &	Server::operator=(const Server & srv)
+Server &	Server::operator=(const Server & srv __attribute__((unused)))
 {
 	_config = srv._config;
 	return ( *this );
@@ -97,37 +88,25 @@ void		Server::setConfig(std::vector< std::string > & srv)
 	
 	_config.setPort(_config.extractPort());
 	_config.setHost(_config.extractHost());
-	_config.setSocket(_config.extractSocket());
 	_config.setName(_config.extractName());
-	_config.setErrorPages(_config.extractErrorPages());
-	_config.setMaxBodySize(_config.extractMaxBodySize());
+	// _config.setErrorPages(_config.extractErrorPages());
+	// _config.setMaxBodySize(_config.extractMaxBodySize());
 	
 
 	/*==================================*/
 
-	_config.setAllowedMethods(_config.extractAllowedMethods());
-	
-	_config.setRoot(_config.extractRoot());
-	_config.setIndex(_config.extractIndex());
+	// _config.setLocations(_config.extractLocations());
+		// std::cout << "index = " << _config.getLocations() << std::endl;
 	
 	/*==================================*/
 	
-	_config.printConfig();
+	_config.display();
 	
 	/*==================================*/
-	
 }
 
-// Public member functions ================================================== //
-void	Server::run(void)
+std::string	testing_data(void)
 {
-	int				cliSocket	= -1;
-	int				nbEvents	= -1;
-	int				addrlen;
-	Request			req;
-	Response		response;
-	t_epoll_event	cliEvents[ MAX_EVENTS ];
-
 	// Testing data = will be removed ======================================= //
 	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
 	int hfd = open("./html/index.html", O_RDONLY );
@@ -139,185 +118,245 @@ void	Server::run(void)
 	std::ostringstream oss;
     oss << html.size();
 	hello = hello + oss.str() + "\n" + b;
-	
 	// ====================================================================== //
+	return ( hello );
+}
 
-	// Connection management ================================================ //
-	if ( listen( this->_getFd( SRV ), 100 ) == -1 )
-		this->_srvError(__func__, __LINE__, "listen");
-	this->_log("listening");
-	while ( this->_flag != ERROR )
+// Public member functions ================================================== //
+void	Server::run(void)
+{
+	int				cliSocket	= -1;
+	int				nbEvents	= -1;
+	int				addrlen		= 1;
+	t_epollEv		cliEvents[ MAX_EVENTS ];
+
+	// Creates sockets if they don't exist
+	if ( this->_srvfd.size() == 0 )
+		this->_initSrv();
+	while ( 1 )
 	{
-		nbEvents = epoll_wait( this->_getFd( EPL ), cliEvents, MAX_EVENTS, -1);
+		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
 		for (int i = 0; i < nbEvents; ++i)
 		{
-			if ( cliEvents[i].data.fd == this->_getFd( SRV ) )
+			if ( cliEvents[i].data.fd == this->_getSrvFd( i ) )
 			{
-				cliSocket = accept( this->_getFd( SRV ), this->_address, reinterpret_cast<socklen_t *>(&addrlen) );
+				// Accepting connections
+				cliSocket = accept( this->_getSrvFd( i ), const_cast< t_sockaddr* >( &this->_getSockaddr( i ) ), reinterpret_cast<socklen_t *>(&addrlen) );
 				if ( cliSocket == -1 )
-					this->_srvError(__func__, __LINE__, "accept");
+					this->_log(ERROR, i, __func__, __LINE__, "accept");
 				else
-					this->_log("connection established");
-				/*
-				std::cout << "\t\tepoll_events = " << cliEvents[i].events << std::endl;
-				if (cliSocket)
+					this->_log(LOG, i, __func__, __LINE__, "connection established");
+				// Sending data to client, example : end of a download or curl request
+				if ( cliEvents[i].events & EPOLLOUT )
 				{
-					char buf[10000];
-					int ret = read(cliSocket, buf, 10000);
-					std::cout << "reading" << std::endl;
-					if (ret > 0)
-					{ 
-						std::cout << buf << std::endl;
-						req.setRequestAtr(buf);
-						req.setQueryM();
-						if (req.getMethod() == "GET")
-						{
-							response.setRequest(req);
-							response.GET();
-						}
-					}
+					this->_log(LOG, i, __func__, __LINE__, "send request");
 				}
-				*/
-				if ( cliEvents[i].events & EPOLLOUT ) //only if client request data, like the end of a download
+				// Receive client request
+				if ( cliEvents[i].events & EPOLLIN )
 				{
-					this->_log("receiving request from client");
-				}
-				if ( cliEvents[i].events & EPOLLIN ) //receive client request here
-				{
-					this->_log("sending data to client");
-					//send( cliSocket, hello.c_str(), hello.size(), 0 );
-					send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
-				}
-				else
-				{
-					this->_log("I don't know what happens");
+					this->_log(LOG, i, __func__, __LINE__, "treating client request");
+						//parse request
+						//treat request
+					this->_log(LOG, i, __func__, __LINE__, "sending data to client");
+						//send data to client
+					// Testing page
+					send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
+					//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 				}
 			}
 			else
-				this->_log("connection refused");
+				this->_log(LOG, i, __func__, __LINE__, "connection refused");
 			close( cliSocket );
-			this->_log("listening");
+			this->_log(LOG, i, __func__, __LINE__, "listening");
 		}
 	}
-
-	_getName();
 	// ====================================================================== //
 	return;
 }
 
 // Private member functions ================================================= //
-void	Server::_setSockAddr(void)
+void	Server::_initSrv(void)
 {
-	static t_sockaddr_in	address;
+	size_t			i			= 0;
+	int				srvfd		= -1;
+	int				opt			= 1;
 
-	address.sin_family		= AF_INET;
-	address.sin_addr.s_addr	= INADDR_ANY;
-	address.sin_port		= htons( this->_getPort() );
-	for (size_t i = 0; i < sizeof( address.sin_zero ); i++)
+	while ( i < this->_getNbSrv() )
 	{
-		address.sin_zero[i] = '\0';
+		srvfd = -1;
+		srvfd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
+		if ( srvfd == -1 )
+			this->_log(ERROR, i, __func__, __LINE__, "socket");
+		if ( setsockopt( srvfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
+			this->_log(ERROR, i, __func__, __LINE__, "setsockopt");
+		if ( bind( srvfd, &this->_getSockaddr( i ), sizeof( t_sockaddr ) ) == -1 )
+			this->_log(ERROR, i, __func__, __LINE__, "bind");
+		this->_setSrvFd( srvfd );
+		if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD,
+					this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
+			this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl");
+		try
+		{
+			if ( listen( this->_getSrvFd( i ), 100 ) == -1 )
+			{
+				this->_log(ERROR, i, __func__, __LINE__, "listen");
+				if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL,
+							this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
+					this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
+			}
+		}
+		catch (std::exception & e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+		this->_log(LOG, i, __func__, __LINE__, "listening");
+		i++;
 	}
-	this->_address = reinterpret_cast<t_sockaddr *>(&address);
+
 	return;
 }
 
-void	Server::_mkSrvSocket(void)
+// log function ============================================================= //
+void	Server::_log(const int error, int i, const char *func, const int line, const char *msg) 
 {
-	int	fd	= -1;
-	int	opt = 1;
-
-	fd = socket( AF_INET, SOCK_STREAM /*| SOCK_NONBLOCK*/, 0 ); 
-	if (fd == -1)
-		this->_srvError(__func__, __LINE__, "socket");
-	if ( setsockopt( fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
-		this->_srvError(__func__, __LINE__, "setsockopt");
-	if ( bind( fd, this->_getSockAddr(), sizeof( t_sockaddr ) ) == -1 )
-		this->_srvError(__func__, __LINE__, "bind");
-
-	this->_srvfd = fd;
-	return;
-}
-
-void	Server::_setEpollEvent(void)
-{
-	static t_epoll_event	eplev;
-
-	eplev.events = EPOLLIN | EPOLLOUT;// | EPOLLHUP;
-	eplev.data.fd = this->_getFd( SRV );
-	this->_eplev = &eplev;
-	return;
-}
-
-void	Server::_mkEpoll(void)
-{
-	int	fd	= -1;
-
-	fd = epoll_create( 1 );
-	if ( fd == -1 )
-		this->_srvError(__func__, __LINE__, "epoll_create");
-	this->_eplfd = fd;
-	if ( epoll_ctl( this->_getFd( EPL ), EPOLL_CTL_ADD, this->_getFd( SRV ), this->_eplev ) == -1)
-		this->_srvError(__func__, __LINE__, "epoll_ctl");
-	return;
-}
-
-const int & 	Server::_getFd( const t_fd FD ) const
-{
-	switch ( FD )
+	if ( error )
 	{
-		case SRV :
-			return ( this->_srvfd );
-		case EPL :
-			return ( this->_eplfd );
-		default :
-			throw;
+		std::cerr << func << ":" << line - 1 << ":";
+		perror(msg);
+		//this->_flag = ERROR;
 	}
-}
-
-Server::t_sockaddr *	Server::_getSockAddr(void) const
-{
-	return ( this->_address );
-}
-
-Server::t_epoll_event *	Server::_getEpollEvent(void) const
-{
-	return ( this->_eplev );
-}
-
-void	Server::_srvError(const char *func, const int line, const char *msg)
-{
-	std::cerr << func << ":" << line - 1 << ":";
-	this->_flag = ERROR;
-	perror( msg );
-	//exit( 1 );
+	else
+	{
+		std::cout << "\t" << ( (i > -1) ? this->_getName( i ) : "Epoll instance" );
+		std::cout << "[" << ( (i > -1) ? this->_getPort( i ) : -1 ) << "] : ";
+		std::cout << msg << std::endl;
+	}
 	return;
 }
 
-void	Server::_log(const char *msg) const
+// Getters ================================================================== //
+size_t Server::_getNbSrv(void) const
 {
-	std::cout << "\t" << this->_getName() << "[" << this->_getPort() << "] : ";
-	std::cout << msg << std::endl;
+	return ( this->_nbSrv );
+}
+
+const int & Server::_getEplFd(void) const
+{
+	return ( this->_eplfd );
+}
+
+const std::string &	Server::_getName(const size_t & i) const
+{
+	if ( i < 0 || i >= this->_getNbSrv() )
+		throw WrongSize();
+	return ( this->_names[i] );
+}
+
+size_t 	Server::_getPort(const size_t & i) const
+{
+	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_ports.size() )
+		throw WrongSize();
+	return ( this->_ports[i] );
+}
+
+const int &	Server::_getSrvFd(const size_t & i) const
+{
+	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_srvfd.size() )
+		throw WrongSize();
+	return ( this->_srvfd[i] );
+}
+
+const Server::t_sockaddr &	Server::_getSockaddr(const size_t & i) const
+{
+	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_sockaddr.size() )
+		throw WrongSize();
+	return ( this->_sockaddr[i] );
+}
+
+const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
+{
+	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_eplevs.size() )
+		throw WrongSize();
+	return ( this->_eplevs[i] );
+}
+
+// Setters ================================================================== //
+void	Server::_setName(const std::string & name)
+{
+	size_t	i	= 0;
+
+	while ( i < this->_names.size() && i < this->_getNbSrv() )
+	{
+		if ( name == this->_names[i] )
+			throw Duplicate();
+		i++;
+	}
+	this->_names.push_back( name );
 	return;
 }
 
-void	Server::_setPort(const int port)
+void	Server::_setPort(const int & port)
 {
-	this->_port = port;
+	size_t	i	= 0;
+
+	while ( i < this->_ports.size() && i < this->_getNbSrv() )
+	{
+		if ( port == this->_ports[i] )
+			throw Duplicate();
+		i++;
+	}
+	this->_ports.push_back( port );
 	return;
 }
 
-const int &	Server::_getPort(void) const
+void	Server::_setSrvFd(const int & fd)
 {
-	return ( this->_port );
-}
+	size_t	i	= 0;
 
-void	Server::_setName(const std::string name)
-{
-	this->_name = name;
+	while ( i < this->_srvfd.size() && i < this->_getNbSrv() )
+	{
+		if ( fd == this->_srvfd[i] )
+			throw Duplicate();
+		i++;
+	}
+	this->_eplevs[i].data.fd = fd;
+	this->_srvfd.push_back( fd );
 	return;
 }
 
-const std::string &	Server::_getName(void) const
+void	Server::_setSockaddr(void)
 {
-	return ( this->_name );
+	size_t			i		= 0;
+	t_sockaddr_in	addrIn;
+	t_sockaddr		*addr;
+
+	addrIn.sin_family		= AF_INET;
+	addrIn.sin_addr.s_addr	= INADDR_ANY;
+	for (size_t j = 0; j < sizeof( addrIn.sin_zero ); j++)
+	{
+		addrIn.sin_zero[j] = '\0';
+	}
+	while ( i < this->_getNbSrv() )
+	{
+		addrIn.sin_port = htons( this->_getPort( i ) );
+		addr = reinterpret_cast< t_sockaddr * >( &addrIn );
+		this->_sockaddr.push_back( *addr );
+		i++;
+	}
+	return;
+}
+
+void	Server::_setEplevs(void)
+{
+	size_t		i		= 0;
+	t_epollEv	eplev;
+
+	eplev.events	= EPOLLIN | EPOLLOUT;
+	eplev.data.fd	= -1;
+	while ( i < this->_getNbSrv() )
+	{
+		this->_eplevs.push_back( eplev );
+		i++;
+	}
+	return;
 }

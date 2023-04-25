@@ -6,72 +6,94 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/12 21:57:54 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 15:54:52 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGI.hpp"
 
-CGI::CGI()
-{
-}
+CGI::CGI(){}
 
-CGI::CGI(Request &request): _body(request.getRequestBody())
-{
-}
+CGI::CGI(Request &request): _request(request){}
 
 CGI::~CGI(){}
 
-std::string	CGI::execCGI(std::string scriptName)
+void	CGI::setEnv()
 {
-	int			pid;
-	int			pipefd[2];
-	std::string	sendedBody = "";
+	std::map<std::string, std::string>	header = _request.getHeaderM();
+	header["REQUEST_METHOD"] = _request.getMethod();
+	header["SERVER_PROTOCOL"] = "HTTP/1.1";
+	
+	_env = new char *[header.size() + 1];
+	int	j = 0;
+	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
+	{
+		std::string	tmp = i->first + "=" + i->second;
+		_env[j] = new char[tmp.size() + 1];
+		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());
+		j++;
+	}
+	_env[j] = NULL;
+}
 
-	if (pipe(pipefd) < 0)
-	{
-		std::cerr << "Pipe failed" << std::endl;
-		return ("");
-	}
-	pid = fork();
-	if (pid < 0)
-	{
-		std::cerr << "Fork failed" << std::endl;
-		return ("");
-	}
-	else if (pid == 0)
-	{
-		char	* const * nll = NULL;
-		if (dup2(pipefd[0], 0) < 0)
-		{
-			std::cerr << "Dup2 failed" << std::endl;
-			exit(1); // exit fatal..
+std::string CGI::execCGI(std::string scriptPath)
+{
+		pid_t			pid;
+		int				pipefd_input[2];
+		int				pipefd_output[2];
+
+		std::string		output = "";
+		const char		*failedSTR = "Status: 500\r\n\r\n";
+
+		setEnv();
+		pipe(pipefd_input);
+		pipe(pipefd_output);
+		
+		pid = fork();
+		
+		if (pid == 0) {
+			// child process
+			char * const *nll = NULL;
+
+			dup2(pipefd_input[0], STDIN_FILENO);
+			close(pipefd_input[1]);
+
+			dup2(pipefd_output[1], STDOUT_FILENO);
+			close(pipefd_output[0]);
+
+			execve(scriptPath.c_str(), nll, _env);
+			std::cerr << RED << "Execve failed\n" << END << std::endl;
+			write(pipefd_output[1], failedSTR, strlen(failedSTR));
+			close(pipefd_input[0]);
+			close(pipefd_output[1]);
+			for (size_t i = 0; _env[i]; i++)
+				delete[] _env[i];
+			delete[] _env;
+			exit(EXIT_FAILURE);
 		}
-		if (dup2(pipefd[1], 1) < 0)
+		else if (pid > 0)
 		{
-			std::cerr << "Dup2 failed" << std::endl;
-			exit(1); // exit fatal...
+			// parent process
+			close(pipefd_input[0]);
+			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
+			close(pipefd_input[1]);
+
+			close(pipefd_output[1]);
+			char buffer[1024];
+			while (read(pipefd_output[0], buffer, 1024) > 0) {
+				output += buffer;
+			}
+			close(pipefd_output[0]);
+
+			wait(NULL);
 		}
-		execve(scriptName.c_str(), nll, NULL);
-		close(pipefd[1]);
-		close(pipefd[0]);
-		std::cerr << "Execve failed" << std::endl;
-	}
-	else
-	{
-		char	buffer[CGI_BUFSIZE] = {0};
-		if (pipefd[1] > -1)
-			close(pipefd[1]);
-		waitpid(-1, NULL, 0);
-		int ret = 1;
-		while (ret > 0)
+		else
 		{
-			memset(buffer, 0, CGI_BUFSIZE);
-			ret = read(pipefd[0], buffer, CGI_BUFSIZE - 1);
-			sendedBody += buffer;
+			std::cerr << RED << "Fork failed\n" << END << std::endl;
+			return std::string(failedSTR);
 		}
-	}
-	if (pipefd[0] > -1)
-			close(pipefd[0]);
-	return (sendedBody);
+		for (size_t i = 0; _env[i]; i++)
+			delete[] _env[i];
+		delete[] _env;
+		return output;
 }

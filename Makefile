@@ -53,9 +53,9 @@ SRC = main.cpp \
 		\
 		cgi/CGI.cpp \
 		\
-		config/Config.cpp \
+		config/Config.cpp config/Location.cpp\
 		\
-		http/request/Request.cpp http/response/Response.cpp \
+		http/request/Request.cpp http/response/Response.cpp http/response/listing.cpp\
 		\
 		server/Server.cpp \
 		\

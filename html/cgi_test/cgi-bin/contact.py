@@ -3,8 +3,8 @@
 import cgi
 
 print("Content-type: text/html\n\n")
-print("<html><head><title>Réponse du serveur</title></head><body>")
-print("<h1>Réponse du serveur</h1>")
+print("<html><head><title>Reponse du serveur</title></head><body>")
+print("<h1>Reponse du serveur</h1>")
 
 form = cgi.FieldStorage()
 nom = form.getvalue("nom")

@@ -6,29 +6,121 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/15 22:15:02 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/24 17:34:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response(void) {}
+/*=============================== Constructors ===============================*/
+Response::Response(void): _contentLength("0"), _contentType(""), _code(200), _response("") {}
 
-Response::Response(Request request): _request(request) {}
+Response::Response(Request & request, Config & config) :
+	_contentLength(""), _contentType(""), _code(request.getRet()),
+		_request(request), _config(config), _response(""),
+			_location(findLocation()){}
 
 Response::~Response(void) {}
 
-/*Methods*/
+
+/*================================= Methods ==================================*/
+
+void	Response::generate()
+{
+	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
+		!= _location.getAllowedMethods().end())
+			_code = 405;
+	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
+		_code = 413;
+	if (_code == 405 || 413)
+	{
+		_response = generateHeader(0, "");
+		return ;
+	}
+	if (_request.getMethod() == "GET")
+		GET();
+	else if (_request.getMethod() == "POST")
+		POST();
+	else
+		DELETE();
+}
+
+/*============================= HTTP Methods =================================*/
+
 void	Response::GET(void)
 {
-	if (_request.getMethod() != "GET")
+	if (_request.getMethod() == "GET")
 		return ;
-	readContent();
-	_response = getHeader(_response.size(), _request.getURL(), 200) + "\r\n" + _response;
+	if (_code == 200)
+		_code = readContent();
+	else
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
 }
-/*-------*/
 
-/*Response Utils*/
+void	Response::POST(void)
+{
+	if (_request.getMethod() != "POST")
+		return ;
+	if (fileExist("./html/cgi_test/" + _request.getURL()))
+	{
+		CGI cgi(_request);
+		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
+			_response.erase(0, 1);
+		size_t	bodyPosition = _response.find("\r\n\r\n");
+		size_t	boundary = std::string::npos;
+
+		std::string			tmp;
+		std::istringstream	stream(_response);
+		
+		while (std::getline(stream, tmp))
+		{
+			if (tmp == "")
+				break;
+			boundary = tmp.find(":");
+			if (boundary != std::string::npos)
+			{
+				if (boundary > bodyPosition)
+					break;
+				std::string	key(tmp, 0, boundary);
+				std::string	value(tmp, boundary + 2);
+				if (key == "Status")
+					_code = std::atoi(value.c_str());
+				else if (key == "Content-Type")
+					_contentType = value;
+			}
+		}
+		_response = _response.substr(bodyPosition + 2);
+	}
+	else
+	{
+		_code = 204;
+		_response = "";
+	}
+	if (_code == 500)
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+	_response = generateHeader(_response.size(), "") + _response;
+}
+
+void	Response::DELETE(void)
+{
+	if (fileExist(_request.getURL()))
+	{
+		if (remove(_request.getURL().c_str()) == 0)
+			_code = 204;
+		else
+			_code = 403;
+	}
+	else
+		_code = 404;
+	if (_code == 404 || _code == 403)
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+}
+
+/*============================= UTILS =================================*/
+
 int	Response::readContent(void)
 {
 	std::ifstream	file;
@@ -42,15 +134,43 @@ int	Response::readContent(void)
 		file.open(path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
-			return (-1);
+			_response = readErrorPage(_config.getErrorPages("403"));
+			return (403);
 		}
 		buffer << file.rdbuf();
 		_response = buffer.str();
 		file.close();
-		return (0);
 	}
-	return (-1);
+	else if (_location.getListing())
+	{
+		
+	}
+	else
+	{
+		_response = readErrorPage(_config.getErrorPages("404"));
+		return (404);
+	}
+	return (200);
 }
+
+std::string	Response::readErrorPage(const std::string & path)
+{
+	std::ifstream	file;
+	std::stringstream	buffer;
+
+	if (fileExist(path))
+	{
+		file.open(path.c_str(), std::ifstream::in);
+		if (!file.is_open())
+			return ("<!DOCTYPE html>\n<html><title>404</title><body> Cant open error page !</body></html>\n");
+		buffer << file.rdbuf();
+		file.close();
+		_contentType = "text/html";
+		return (buffer.str());
+	}
+	return ("<!DOCTYPE html>\n<html><title>404</title><body>Error page does not exist </body></html>\n");
+}
+
 
 int	Response::writeContent(std::string content)
 {
@@ -78,23 +198,52 @@ int	Response::fileExist(std::string path)
 		return 1;
 	return 0;
 }
-/*---------------*/
 
-/*Header*/
-std::string	Response::getHeader(size_t size, std::string path, int code)
+Location	Response::findLocation()
+{
+	std::map<std::string, Location>				locationM = _config.getLocations();
+	std::vector<std::string>					splitedURL = _request.splitURL();
+	std::vector<std::string>::const_iterator	it = splitedURL.begin();
+
+	while (it != splitedURL.end())
+	{
+		if (locationM.find(*it) != locationM.end())
+		{
+			return locationM[*it];
+
+		} else if (locationM.find((*it).substr(0, rfind(*it, "/"))) \
+			!= locationM.end()){
+			return locationM[(*it).substr(0, rfind(*it, "/"))];
+		}
+	}
+	return locationM["/"];
+}
+
+/*============================= HTTP HEADER =================================*/
+
+std::string	Response::generateHeader(size_t size, std::string path)
 {
 	std::string	header;
 
 	setContentLength(size);
-	setContentType(path);
-	setCode(code);
+	if (path != "")
+		setContentType(path);
 	header = writeHeader();
 	return (header);
 }
 
 std::string	Response::writeHeader(void)
 {
-	std::string	header = "HTTP/1.1 " + _code + " " + "ok" + "\r\n";
+	std::string	header = "";
+
+	initStatusMsg();
+
+	if (_code == 405)
+		header = "HTTP/1.1 405 Method Not Allowed\r\n";
+	else if (_code == 413)
+		header = "HTTP/1.1 413 Payload Too Large\r\n";
+	else
+		header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
 	if (!_contentLength.empty())
 		header += "Content-Length: " + _contentLength + "\r\n";
@@ -103,12 +252,35 @@ std::string	Response::writeHeader(void)
 	return (header);
 }
 
-void	Response::setCode(int code) { _code = to_string(code); }
+void	Response::initStatusMsg()
+{
+	_statusMsg[100] = "Continue";
+	_statusMsg[200] = "ok";
+	_statusMsg[204] = "No Content";
+	_statusMsg[400] = "Bad Request";
+	_statusMsg[403] = "Forbidden";
+	_statusMsg[404] = "Not Found";
+	_statusMsg[405] = "Method Not Allowed";
+	_statusMsg[500] = "Internal Server Error";
+}
+
+/*================================ Accessors =================================*/
+
+std::string	Response::getStatuMsg()
+{
+	if (_statusMsg.find(_code) == _statusMsg.end())
+		return ("Unknown Code");
+	return (_statusMsg[_code]);
+}
+
+void	Response::setCode(int code) { _code = code; }
 
 void	Response::setContentLength(size_t size) { _contentLength = to_string(size); }
 
 void	Response::setContentType(std::string path)
 {
+	if (_contentType != "")
+		return ;
 	std::string	type = path.substr(path.find(".") + 1);
 	if (type == "html")
 		_contentType = "text/html";
@@ -126,7 +298,18 @@ void	Response::setContentType(std::string path)
 		_contentType = "text/plain";
 
 }
-/*------*/
 
-void	Response::setRequest(Request &request) {_request = request;}
+void	Response::setRequest(Request &request)
+{
+	_code = request.getRet();
+	_request = request;
+}
+
+void	Response::setConfig(Config &config)
+{
+	_config = config;
+	_location = findLocation();
+}
+
+
 std::string	Response::getResponse() {return _response;}

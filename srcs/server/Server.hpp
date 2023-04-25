@@ -6,14 +6,17 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/17 13:27:35 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/24 18:15:16 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <map>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+
+#include "../config/Config.hpp"
 
 typedef enum e_fd
 {
@@ -23,25 +26,33 @@ typedef enum e_fd
 
 typedef enum e_flag
 {
-	EMPTY = 0,
-	ERROR = 1 << 0
+	LOG		= 0,
+	EMPTY 	= 0,
+	ERROR 	= 1 << 0
 }	t_flag;
 
-//#include <map>
-//#include <vector>
-
-#include "../config/Config.hpp"
+typedef struct s_config
+{
+	size_t						size;
+	std::vector< std::string >	names;
+	std::vector< int		 >	ports;
+	std::vector< int		 >	srvfd;
+}								t_config;
 
 class Server
 {
 	public:
-		typedef		struct sockaddr			t_sockaddr;
-		typedef 	struct sockaddr_in		t_sockaddr_in;
-		typedef		struct epoll_event		t_epoll_event;
+		typedef		struct sockaddr				t_sockaddr;
+		typedef 	struct sockaddr_in			t_sockaddr_in;
+		typedef		struct epoll_event			t_epollEv;
+		typedef		std::vector < std::string >	t_vString;
+		typedef		std::vector < int		 >	t_vInt;
+		typedef		std::vector < t_epollEv	 >	t_vEplEv;
+		typedef		std::vector	< t_sockaddr >	t_vSockaddr;
+		typedef		std::vector	< t_flag >		t_vFlag;
 
 							Server(void);
 							Server(const Server & src);
-							Server(const std::string & srv);
 							~Server(void);
 
 		Server			 &	operator=(const Server & srv);
@@ -49,31 +60,69 @@ class Server
 		void				run(void);
 		void				setConfig(std::vector< std::string > & srv);
 
+		class WrongSize : public std::exception {
+			public:
+				const char * what(void) const throw() {
+					return ("Wrong size: size parameter out of bound.");
+				}
+		};
+		class Duplicate : public std::exception {
+			public:
+				const char * what(void) const throw() {
+					return ("Duplicate: these parameter already exists.");
+				}
+		};
+
 	private:
 		Config				_config;
-		std::string			_name;
-		int					_port;
-		int					_srvfd;
-		int					_eplfd; 
-		t_sockaddr		 *	_address;
-		t_epoll_event	 *	_eplev;
-		t_flag				_flag;
+		//t_flag				_flag;
+		int					_eplfd;
 
-		void				_srvError(const char *func, const int line,
-										const char *msg);
-		void				_log(const char *msg)				const;
-		void				_setSockAddr(void);
-		void				_mkSrvSocket(void);
-		void				_setEpollEvent(void);
-		void				_mkEpoll(void);
-		const int		 &	_getFd(const t_fd FD)				const;
-		t_sockaddr 		 *	_getSockAddr(void)					const;
-		t_epoll_event	 *  _getEpollEvent(void)				const;
-		void				_setPort(const int port);
-		const int 		 &	_getPort(void) 						const;
-		void				_setName(const std::string name);
-		const std::string &	_getName(void)						const;
+		int					_nbSrv; //= listen port number (ie = _ports.size())
+		//t_vFlag				_flags;
+		t_vString			_names;
+		t_vInt				_ports;
+		t_vSockaddr			_sockaddr;
+		t_vEplEv			_eplevs;
+		t_vInt				_srvfd;
 
+		void				_initSrv(void);
+
+		size_t	  			_getNbSrv(void)					const;
+		const int		  &	_getEplFd(void)					const;
+		const std::string &	_getName(const size_t & i)		const;
+		size_t	  			_getPort(const size_t & i)		const;
+		const int	 	  &	_getSrvFd(const size_t & i)		const;
+		const t_sockaddr  &	_getSockaddr(const size_t & i)	const;
+		const t_epollEv	  &	_getEpollEv(const size_t & i)	const;
+		size_t				_getNbSockets(void)				const;
+
+		void				_setName(const std::string & name);
+		void				_setPort(const int & port);
+		void				_setSrvFd(const int & fd);
+		void				_setSockaddr(void);
+		void				_setEplevs(void);
+
+		void				_log(const int error, int i, const char *func, const int line, const char *msg);
 };
 
 #endif
+
+/*
+ * Server execution order :
+ * 	1/ set :
+ * 		_nbSrv
+ * 		_names
+ * 		_ports
+ * 		_sockkaddr
+ * 		_eplevs
+ * 		_eplfd
+ * 	2/ initsrv :
+ * 		socket
+ * 		setsockopt
+ * 		bind
+ * 		epoll_ctl ADD socket into epoll instance survey
+ * 		set socket into epoll event struct
+ * 		listen
+ */ 
+

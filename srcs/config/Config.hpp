@@ -1,13 +1,14 @@
 #ifndef CONFIG
 #define CONFIG
 
-#include <iostream>
+# include "../../include/webserv.hpp"
+#include "Location.hpp"
+#include "../utils/utils.hpp"
 
-#include <string>
-#include <map>
-#include <vector>
-
-#include <algorithm>
+#define DEFAULT_PORT 8000
+#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_NAME "default_server"
+#define DEFAULT_MAX_BODY_SIZE 1000000
 
 class Config
 {
@@ -22,81 +23,51 @@ class Config
 	Config&	operator=(const Config&);
 
 	/* Methods */
-	
-	std::string	findInFileContent( const std::string & );
-	std::vector<std::string>	multipleFindInFileContent( const std::string & );
-	void		printConfig( void );
 
+	void								display( void );
 
-
-	std::string	extractPort ( void );
-	std::string	extractHost( void );
-	std::string	extractSocket( void );
-	std::string	extractName( void );
+	std::vector<int>					extractPort ( void );
+	std::vector<std::string>			extractHost( void );
+	std::string							extractName( void );
 	std::map<std::string, std::string>	extractErrorPages( void );
-	std::string	extractMaxBodySize( void );
-
-	std::vector<std::string>	extractAllowedMethods( void );
-
-	std::string	extractRoot( void );
-	std::string	extractIndex( void );
-
-
+	long								extractMaxBodySize( void );
+	std::map<std::string, Location>		extractLocations( void );
 
 	/* Accessors */
-	void	setFileContent( std::vector<std::string> & );
-
-	void	setPort( const std::string & );
-	void	setHost( const std::string & );
-	void	setSocket( const std::string & );
+	void	setContent( std::vector<std::string> & );
+	void	setPort( const std::vector<int> & );
+	void	setHost( const std::vector<std::string> & );
 	void	setName( const std::string & );
 	void	setErrorPages( const std::map<std::string, std::string> & );
-	void	setMaxBodySize( const std::string & );
+	void	setMaxBodySize( const long & );
+	void	setLocations( const std::map<std::string, Location> & );
 
-	void	setAllowedMethods( const std::vector<std::string> & );
-
-	void	setRoot( const std::string & );
-	void	setIndex( const std::string & );
-
-
-	std::string	getPort( void );
-	std::string	getHost( void );
-	std::string	getSocket( void );
-	std::string	getName( void );
+	std::vector<std::string>			getContent( void );
+	std::vector<int>					getPort( void );
+	std::vector<std::string>			getHost( void );
+	std::string							getName( void );
 	std::map<std::string, std::string>	getErrorPages( void );
-	std::string	getMaxBodySize( void );
-
-	std::vector<std::string>	getAllowedMethods( void );
-
-	std::string	getRoot( void );
-	std::string	getIndex( void );
-
-
+	size_t								getMaxBodySize( void );
+	std::map<std::string, Location>		getLocations( void );
+	std::string							getErrorPages(std::string key);
 
 	private :
 
 	/* Attributes */
-	std::vector<std::string>			_fileContent;
+	std::vector<std::string>	_content;
+	bool						_error;
 
-	std::string	_port; //listen [IP + Port = 000.0.0.0:0000]
-	std::string	_host; //listen [IP + Port = 000.0.0.0:0000]
-		// OU
-	std::string	_socket; //listen [IP + Port = 000.0.0.0:0000]
+	std::vector<int>					_port;			//listen
+	std::vector<std::string>			_host;			//listen
 
-	std::string	_name; //server_name [name]
-	// default host:port
-	std::map<std::string, std::string>	_errorPages; //error_page [path_file.html]
-	std::string	_maxBodySize; //client_max_body_size [value + unit = 00M]
+	std::string							_name;			//server_name
+														//default host:port
+	std::map<std::string, std::string>	_errorPages;	//error_page
+	size_t 								_maxBodySize;	//client_max_body_size
 
 	/*=====================================*/
 
-	std::vector<std::string>	_allowedMethods; // allowed_method [method name]
-	// HTTP redirection
-	std::string	_root; //root [path]
-	std::string	_index; //index [path]
-	// std::vector<std::string>	_contentPath; //location...
-	/**/
-	// std::string	_directoryRequest;	//error_directory_page [path_file.html]
+	std::map<std::string, Location>	_locations;
 
 	/*=====================================*/
 
