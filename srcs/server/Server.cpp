@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/25 18:13:10 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/27 17:03:50 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,13 +101,7 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)))
 	return ( *this );
 }
 
-// Member functions ========================================================= ///
-
-void		Server::setConfig(std::vector< std::string > & srv __attribute__((unused)) )
-{
-
-}
-
+// Testing functions ======================================================== ///
 std::string	testing_data(void)
 {
 	// Testing data = will be removed ======================================= //
@@ -133,6 +127,7 @@ void	Server::run(void)
 	int				addrlen		= 1;
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 
+	std::cout << "Server log : " << std::endl;
 	// Creates sockets if they don't exist
 	if ( this->_srvfd.size() == 0 )
 		this->_initSrv();
@@ -177,6 +172,41 @@ void	Server::run(void)
 	return;
 }
 
+void		Server::setConfig(std::vector< std::string > & cfg __attribute__((unused)))
+{
+	/*
+	this->_config.setPort( cfg.extractPort() )
+	this->_config.setName( cfg.extractName() );
+	this->_config.setFileContent(srv);
+	
+	//==================================//
+	
+	_config.setHost(_config.extractHost());
+	_config.setSocket(_config.extractSocket());
+	_config.setErrorPages(_config.extractErrorPages());
+	_config.setMaxBodySize(_config.extractMaxBodySize());
+	
+
+	//==================================//
+
+	_config.setAllowedMethods(_config.extractAllowedMethods());
+	
+	_config.setRoot(_config.extractRoot());
+	_config.setIndex(_config.extractIndex());
+
+	//==================================//
+	
+	_config.printConfig();
+	
+	//==================================//
+	*/
+	return;
+}
+
+Config	&	Server::getConfig(void)
+{
+	return ( this->_config );
+}
 // Private member functions ================================================= //
 void	Server::_initSrv(void)
 {
@@ -250,35 +280,35 @@ const int & Server::_getEplFd(void) const
 
 const std::string &	Server::_getName(const size_t & i) const
 {
-	if ( i < 0 || i >= this->_getNbSrv() )
+	if ( /*i < 0 ||*/ i >= this->_getNbSrv() )
 		throw WrongSize();
 	return ( this->_names[i] );
 }
 
 size_t 	Server::_getPort(const size_t & i) const
 {
-	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_ports.size() )
+	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_ports.size() )
 		throw WrongSize();
 	return ( this->_ports[i] );
 }
 
 const int &	Server::_getSrvFd(const size_t & i) const
 {
-	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_srvfd.size() )
+	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_srvfd.size() )
 		throw WrongSize();
 	return ( this->_srvfd[i] );
 }
 
 const Server::t_sockaddr &	Server::_getSockaddr(const size_t & i) const
 {
-	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_sockaddr.size() )
+	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_sockaddr.size() )
 		throw WrongSize();
 	return ( this->_sockaddr[i] );
 }
 
 const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
 {
-	if ( i < 0 || i >= this->_getNbSrv() || i >= this->_eplevs.size() )
+	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_eplevs.size() )
 		throw WrongSize();
 	return ( this->_eplevs[i] );
 }

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/24 16:57:50 by auzun            ###   ########.fr       */
+/*   Updated: 2023/04/27 17:02:39 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,38 +17,36 @@
 
 #include <algorithm>
 
+#include "config/Config.hpp"
 #include "server/Server.hpp"
 #include "cgi/CGI.hpp"
 #include "utils/utils.hpp"
 
 int	main(int ac __attribute__((unused)), char **av __attribute((unused)))
 {
-	(void)ac;
+	Server	server;
 	
 	if (av[0] and av[1])
 	{
-		std::vector<std::vector <std::string> > _configs = extractServers(av[1]);
-
-		std::vector< Server >	servers(_configs.size());
+		std::vector<std::vector <std::string> > configs = extractServers(av[1]);
 
 		std::cout << "=============================" << std::endl;
-		for (size_t	i = 0; i < servers.size(); i++)
+		for (size_t	i = 0; i < configs.size(); i++)
 		{
 			// displayVector(_configs[i], "Serveur :");
-			servers[i].setConfig(_configs[i]);
+			( server.getConfig() ).setContent( configs[i] );
+			server.setConfig( configs[i] );
 			std::cout << "=============================" << std::endl;
 		}
-		// servers[0].run();
-
-
-		
+		server.run();
 	}
 	else
 	{
-		std::cout << "Default mode" << std::endl;
-		Server	server;
+		std::cout << "Server running in default mode :" << std::endl;
+		std::cout << "\tName : webserv"		<< std::endl;
+		std::cout << "\tIp   : 127.0.0.1"	<< std::endl;
+		std::cout << "\tPort : 8080"		<< std::endl;
 		server.run();
 	}
-
 	return 0;
 }

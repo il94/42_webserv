@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/24 18:15:16 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/27 16:40:02 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Server
 		typedef		std::vector < t_epollEv	 >	t_vEplEv;
 		typedef		std::vector	< t_sockaddr >	t_vSockaddr;
 		typedef		std::vector	< t_flag >		t_vFlag;
+		typedef		std::vector	< Config >		t_vConfig;
 
 							Server(void);
 							Server(const Server & src);
@@ -59,6 +60,7 @@ class Server
 
 		void				run(void);
 		void				setConfig(std::vector< std::string > & srv);
+		Config			  &	getConfig(void);
 
 		class WrongSize : public std::exception {
 			public:
@@ -75,6 +77,7 @@ class Server
 
 	private:
 		Config				_config;
+		//Config				_config;
 		//t_flag				_flag;
 		int					_eplfd;
 

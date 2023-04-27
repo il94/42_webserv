@@ -22,7 +22,7 @@ build	:= san
 #                                   COMMANDS                                   #
 #==============================================================================#
 
-CXX = c++
+CXX = c++ -g3
 CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
