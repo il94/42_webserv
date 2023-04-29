@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/27 17:03:50 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/29 19:44:22 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@
 #define MAX_EVENTS	64
 
 // Constructors ============================================================= //
-Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv" ), _ports( 1, DEF_PORT ),
-	_sockaddr(  ), _eplevs(  ), _srvfd(  ) 
+
+Server::Server(void)
 {
 	this->_setSockaddr();
 	this->_setEplevs();
@@ -39,6 +39,10 @@ Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv"
 		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
 	return;
 }
+
+// Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv" ), _ports( 1, DEF_PORT ),
+// 	_sockaddr(  ), _eplevs(  ), _srvfd(  ) 
+
 
 Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), _names( srv._names ),
 	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )
@@ -120,6 +124,70 @@ std::string	testing_data(void)
 }
 
 // Public member functions ================================================== //
+
+void	Server::display(void)
+{
+	std::cout << std::endl << "========================================" << std::endl << std::endl;
+
+	std::cout << _getNbSrv() << " Instances" << std::endl << std::endl; 
+
+	displayVector(_ports, "Ports alloues");
+
+	std::cout << std::endl;	
+
+	displayVector(_names, "Serveur concerne");
+
+	std::cout << std::endl;
+
+	std::cout << "========================================" << std::endl << std::endl;
+
+	for (std::vector<Config>::iterator it = _configs.begin(); it != _configs.end(); it++)
+	{
+		std::cout << "Instance no " << std::distance(_configs.begin(), it) << std::endl << std::endl;
+		it->display();
+		std::cout << "========================================" << std::endl << std::endl;
+	}
+}
+
+void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
+{
+	std::vector<std::vector <std::string> >::iterator it;
+
+	for (it = srv.begin(); it != srv.end(); it++)
+	{
+		Config	tmp;
+
+		tmp.setContent(*it);
+		
+		tmp.setPort(tmp.extractPort());
+		tmp.setHost(tmp.extractHost());
+		tmp.setName(tmp.extractName());
+		tmp.setErrorPages(tmp.extractErrorPages());
+		tmp.setMaxBodySize(tmp.extractMaxBodySize());
+
+		tmp.setLocations(tmp.extractLocations());
+
+		if (tmp.getError() == false)
+		{
+			std::vector<int>	tmpPorts = tmp.getPort();
+
+			_ports.insert(_ports.end(), tmpPorts.begin(), tmpPorts.end());
+			for (size_t i = 0; i < tmpPorts.size(); i++)
+				_names.push_back(tmp.getName());
+				
+			_configs.push_back(tmp);
+		}
+	}
+	if (_configs.empty() == true)
+	{
+		_configs.push_back(Config());
+		_ports.push_back(DEFAULT_PORT);
+		_names.push_back(DEFAULT_NAME);
+	}
+	
+	_nbSrv = _configs.size();
+}
+
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
@@ -172,41 +240,11 @@ void	Server::run(void)
 	return;
 }
 
-void		Server::setConfig(std::vector< std::string > & cfg __attribute__((unused)))
-{
-	/*
-	this->_config.setPort( cfg.extractPort() )
-	this->_config.setName( cfg.extractName() );
-	this->_config.setFileContent(srv);
-	
-	//==================================//
-	
-	_config.setHost(_config.extractHost());
-	_config.setSocket(_config.extractSocket());
-	_config.setErrorPages(_config.extractErrorPages());
-	_config.setMaxBodySize(_config.extractMaxBodySize());
-	
+// Config	&	Server::getConfig(void)
+// {
+// 	return ( this->_config );
+// }
 
-	//==================================//
-
-	_config.setAllowedMethods(_config.extractAllowedMethods());
-	
-	_config.setRoot(_config.extractRoot());
-	_config.setIndex(_config.extractIndex());
-
-	//==================================//
-	
-	_config.printConfig();
-	
-	//==================================//
-	*/
-	return;
-}
-
-Config	&	Server::getConfig(void)
-{
-	return ( this->_config );
-}
 // Private member functions ================================================= //
 void	Server::_initSrv(void)
 {

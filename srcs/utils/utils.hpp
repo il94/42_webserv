@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/25 18:42:28 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/29 17:31:15 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@
 size_t									rfind(const std::string& str, const std::string& substr);
 std::string								to_string( size_t );
 std::vector<std::string>				fileToVector( std::string );
+
+bool	closeBrace(std::string &src, const int index);
+bool	openBrace(std::string &src, const int index);
+
 std::vector<std::vector <std::string> > extractServers( std::string );
 
 std::string					findInFileContent(const std::vector<std::string> &, const std::string &);

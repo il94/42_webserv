@@ -8,3 +8,10 @@
 -> CGI (~execution python / php...)
 -> Cookie
 -> 
+
+
+==================================
+Note il config
+
+Cette directive peut être utilisée dans le bloc de configuration http, server, ou location. Si elle est définie dans le bloc http, elle s'applique à l'ensemble du serveur. Si elle est définie dans un bloc server, elle s'applique à toutes les locations de ce serveur. Si elle est définie dans un bloc location, elle s'applique uniquement à cette location.
+==================================

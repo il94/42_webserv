@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/27 16:40:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/29 17:49:49 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,9 @@ class Server
 		Server			 &	operator=(const Server & srv);
 
 		void				run(void);
-		void				setConfig(std::vector< std::string > & srv);
-		Config			  &	getConfig(void);
+		void				display(void);
+		void				setConfigs(std::vector<std::vector <std::string> > & srv);
+		// Config			  &	getConfig(void);
 
 		class WrongSize : public std::exception {
 			public:
@@ -76,13 +77,15 @@ class Server
 		};
 
 	private:
-		Config				_config;
-		//Config				_config;
+		std::vector<Config>	_configs;
 		//t_flag				_flag;
 		int					_eplfd;
 
 		int					_nbSrv; //= listen port number (ie = _ports.size())
 		//t_vFlag				_flags;
+
+		
+		
 		t_vString			_names;
 		t_vInt				_ports;
 		t_vSockaddr			_sockaddr;

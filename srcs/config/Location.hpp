@@ -34,6 +34,7 @@ class Location
 	/* Accessors */
 	void	setContent( const std::vector<std::string> & );
 	void	setPath( const std::string & );
+	void	setError( const bool & );
 
 	void	setAllowedMethods( const std::vector<std::string> & );
 	void	setRedirection( const std::pair<int, std::string> & );
@@ -44,6 +45,7 @@ class Location
 
 	std::vector<std::string>	getContent( void );
 	std::string					getPath( void );
+	bool						getError( void );
 
 	std::vector<std::string>	getAllowedMethods( void );
 	std::pair<int, std::string>	getRedirection( void );
@@ -61,6 +63,7 @@ class Location
 	/* Attributes */
 	std::vector<std::string>	_content;
 	std::string					_path;
+	bool						_error;
 
 	std::vector<std::string>		_allowedMethods;	//allowed_method *
 	std::pair<int, std::string>		_redirection;		//return *

@@ -1,7 +1,14 @@
 #ifndef CONFIG
 #define CONFIG
 
-# include "../../include/webserv.hpp"
+#include <iostream>
+
+#include <string>
+#include <map>
+#include <vector>
+
+#include <algorithm>
+
 #include "Location.hpp"
 #include "../utils/utils.hpp"
 
@@ -30,26 +37,28 @@ class Config
 	std::vector<std::string>			extractHost( void );
 	std::string							extractName( void );
 	std::map<std::string, std::string>	extractErrorPages( void );
-	long								extractMaxBodySize( void );
+	unsigned long						extractMaxBodySize( void );
 	std::map<std::string, Location>		extractLocations( void );
 
 	/* Accessors */
-	void	setContent( std::vector<std::string> & );
+	void	setContent( const std::vector<std::string> & );
+	void	setError( const bool & );
 	void	setPort( const std::vector<int> & );
 	void	setHost( const std::vector<std::string> & );
 	void	setName( const std::string & );
 	void	setErrorPages( const std::map<std::string, std::string> & );
-	void	setMaxBodySize( const long & );
+	void	setMaxBodySize( const unsigned long & );
 	void	setLocations( const std::map<std::string, Location> & );
 
 	std::vector<std::string>			getContent( void );
+	bool								getError( void );
 	std::vector<int>					getPort( void );
 	std::vector<std::string>			getHost( void );
 	std::string							getName( void );
 	std::map<std::string, std::string>	getErrorPages( void );
-	size_t								getMaxBodySize( void );
+	std::string							getErrorPages( const std::string & );
+	unsigned long						getMaxBodySize( void );
 	std::map<std::string, Location>		getLocations( void );
-	std::string							getErrorPages(std::string key);
 
 	private :
 
@@ -63,7 +72,7 @@ class Config
 	std::string							_name;			//server_name
 														//default host:port
 	std::map<std::string, std::string>	_errorPages;	//error_page
-	size_t 								_maxBodySize;	//client_max_body_size
+	long 								_maxBodySize;	//client_max_body_size
 
 	/*=====================================*/
 

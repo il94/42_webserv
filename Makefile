@@ -3,17 +3,6 @@
 #==============================================================================#
 
 NAME = webserv
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/02/14 14:14:06 by halvarez          #+#    #+#              #
-#    Updated: 2023/03/31 18:43:56 by halvarez         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
 
 #Default build version called with make rule = release
 build	:= san
@@ -23,7 +12,7 @@ build	:= san
 #==============================================================================#
 
 CXX = c++ -g3
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
+# CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory

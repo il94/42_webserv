@@ -153,10 +153,30 @@ void	Location::setPath( const std::string &src ){
 	_path = src;
 }
 
+void	Location::setError(const bool &src){
+	_error = src;
+}
 
 
-void	Location::setAllowedMethods(const std::vector<std::string> &src){
-	_allowedMethods = src;
+void	Location::setAllowedMethods(const std::vector<std::string> &src)
+{
+	_allowedMethods.clear();
+
+	std::vector<std::string>::const_iterator it = src.begin();
+
+	for (it = src.begin(); it != src.end(); it++)
+	{
+		if (*it == "GET" or *it == "POST" or *it == "DELETE")
+		{
+			if (std::find(_allowedMethods.begin(), _allowedMethods.end(), *it) == _allowedMethods.end())
+				_allowedMethods.push_back(*it);
+		}
+		else
+		{
+			setError(true);
+			std::cout << *it << " is an invalid method" << std::endl;
+		}
+	}
 }
 
 void	Location::setRedirection(const std::pair<int, std::string> &src){
@@ -191,6 +211,9 @@ std::string					Location::getPath( void ){
 	return (_path);
 }
 
+bool				 		Location::getError( void ){
+	return (_error);
+}
 
 
 std::vector<std::string>	Location::getAllowedMethods( void ){
