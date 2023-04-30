@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/29 19:44:22 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/30 11:34:42 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,6 +252,10 @@ void	Server::_initSrv(void)
 	int				srvfd		= -1;
 	int				opt			= 1;
 
+	if ( this->_sockaddr.size() == 0 )
+		this->_setSockaddr();
+	if ( this->_eplevs.size() == 0 )
+		this->_setEplevs();
 	while ( i < this->_getNbSrv() )
 	{
 		srvfd = -1;
