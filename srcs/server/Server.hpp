@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 13:05:49 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/30 13:56:25 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ typedef enum e_flag
 {
 	LOG		= 0,
 	EMPTY 	= 0,
-	ERROR 	= 1 << 0
+	ERROR 	= 1 << 0,
+	IS_USED	= 1 << 1,
 }	t_flag;
 
 typedef struct s_config
@@ -49,6 +50,7 @@ class Server
 		typedef		std::vector < int		 >	t_vInt;
 		typedef		std::vector < t_epollEv	 >	t_vEplEv;
 		typedef		std::vector	< t_sockaddr >	t_vSockaddr;
+		typedef		std::vector < t_flag	 >	t_vFlag;
 		typedef		std::vector	< Config >		t_vConfig;
 
 							Server(void);
@@ -79,6 +81,7 @@ class Server
 		t_vConfig			_configs;
 		int					_eplfd;
 		int					_nbSrv; //= listen port number (ie = _ports.size())
+		t_vFlag				_flags;
 		
 		t_vString			_names;
 		t_vInt				_ports;
