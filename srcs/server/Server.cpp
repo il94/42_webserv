@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 12:32:33 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/30 13:34:30 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@
 #define MAX_EVENTS	64
 
 // Constructors ============================================================= //
-
 Server::Server(void)
 {
 	this->_setSockaddr();
@@ -42,7 +41,6 @@ Server::Server(void)
 
 // Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv" ), _ports( 1, DEF_PORT ),
 // 	_sockaddr(  ), _eplevs(  ), _srvfd(  ) 
-
 
 Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), _names( srv._names ),
 	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )
@@ -159,9 +157,9 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 
 		tmp.setContent(*it);
 		
-		tmp.setPort(tmp.extractPort());
 		tmp.setHost(tmp.extractHost());
 		tmp.setName(tmp.extractName());
+		tmp.setPort(tmp.extractPort());
 		tmp.setErrorPages(tmp.extractErrorPages());
 		tmp.setMaxBodySize(tmp.extractMaxBodySize());
 
@@ -181,11 +179,11 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 	if (_configs.empty() == true)
 	{
 		_configs.push_back(Config());
-		_ports.push_back(DEFAULT_PORT);
 		_names.push_back(DEFAULT_NAME);
+		_ports.push_back(DEFAULT_PORT);
 	}
 	
-	_nbSrv = _configs.size();
+	_nbSrv = _ports.size();
 }
 
 void	Server::run(void)

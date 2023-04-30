@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/29 17:49:49 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/30 13:05:49 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ class Server
 		typedef		std::vector < int		 >	t_vInt;
 		typedef		std::vector < t_epollEv	 >	t_vEplEv;
 		typedef		std::vector	< t_sockaddr >	t_vSockaddr;
-		typedef		std::vector	< t_flag >		t_vFlag;
 		typedef		std::vector	< Config >		t_vConfig;
 
 							Server(void);
@@ -77,14 +76,9 @@ class Server
 		};
 
 	private:
-		std::vector<Config>	_configs;
-		//t_flag				_flag;
+		t_vConfig			_configs;
 		int					_eplfd;
-
 		int					_nbSrv; //= listen port number (ie = _ports.size())
-		//t_vFlag				_flags;
-
-		
 		
 		t_vString			_names;
 		t_vInt				_ports;
