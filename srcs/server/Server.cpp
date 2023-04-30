@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 11:34:42 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/30 12:32:33 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,36 +202,39 @@ void	Server::run(void)
 	while ( 1 )
 	{
 		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
-		for (int i = 0; i < nbEvents; ++i)
+		for (int i = 0; i < nbEvents; i++)
 		{
-			if ( cliEvents[i].data.fd == this->_getSrvFd( i ) )
+			for (int j = 0; j < this->_getNbSrv(); j++)
 			{
-				// Accepting connections
-				cliSocket = accept( this->_getSrvFd( i ), const_cast< t_sockaddr* >( &this->_getSockaddr( i ) ), reinterpret_cast<socklen_t *>(&addrlen) );
-				if ( cliSocket == -1 )
-					this->_log(ERROR, i, __func__, __LINE__, "accept");
+				if ( cliEvents[i].data.fd == this->_getSrvFd( j ) )
+				{
+					// Accepting connections
+					cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), reinterpret_cast<socklen_t *>(&addrlen) );
+					if ( cliSocket == -1 )
+						this->_log(ERROR, j, __func__, __LINE__, "accept");
+					else
+						this->_log(LOG, j, __func__, __LINE__, "connection established");
+					// Sending data to client, example : end of a download or curl request
+					if ( cliEvents[i].events & EPOLLOUT )
+					{
+						this->_log(LOG, j, __func__, __LINE__, "send request");
+					}
+					// Receive client request
+					if ( cliEvents[i].events & EPOLLIN )
+					{
+						this->_log(LOG, j, __func__, __LINE__, "treating client request");
+							//parse request
+							//treat request
+						this->_log(LOG, j, __func__, __LINE__, "sending data to client");
+							//send data to client
+						// Testing page
+						send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
+						//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
+					}
+				}
 				else
-					this->_log(LOG, i, __func__, __LINE__, "connection established");
-				// Sending data to client, example : end of a download or curl request
-				if ( cliEvents[i].events & EPOLLOUT )
-				{
-					this->_log(LOG, i, __func__, __LINE__, "send request");
-				}
-				// Receive client request
-				if ( cliEvents[i].events & EPOLLIN )
-				{
-					this->_log(LOG, i, __func__, __LINE__, "treating client request");
-						//parse request
-						//treat request
-					this->_log(LOG, i, __func__, __LINE__, "sending data to client");
-						//send data to client
-					// Testing page
-					send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
-					//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
-				}
+					this->_log(LOG, i, __func__, __LINE__, "connection refused");
 			}
-			else
-				this->_log(LOG, i, __func__, __LINE__, "connection refused");
 			close( cliSocket );
 			this->_log(LOG, i, __func__, __LINE__, "listening");
 		}
@@ -268,7 +271,7 @@ void	Server::_initSrv(void)
 			this->_log(ERROR, i, __func__, __LINE__, "bind");
 		this->_setSrvFd( srvfd );
 		if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD,
-					this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
+				this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
 			this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl");
 		try
 		{
