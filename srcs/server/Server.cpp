@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 13:34:30 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/04/30 18:23:01 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,9 +149,7 @@ void	Server::display(void)
 
 void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 {
-	std::vector<std::vector <std::string> >::iterator it;
-
-	for (it = srv.begin(); it != srv.end(); it++)
+	for (std::vector<std::vector <std::string> >::iterator it = srv.begin(); it != srv.end(); it++)
 	{
 		Config	tmp;
 
@@ -182,7 +180,19 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 		_names.push_back(DEFAULT_NAME);
 		_ports.push_back(DEFAULT_PORT);
 	}
-	
+	for (int i = 0; i < _ports.size(); i++)
+	{
+		for (int j = i + 1; j < _ports.size(); j++)
+		{
+			while (_ports[j] == _ports[i])
+			{
+				_ports.erase(_ports.begin() + j);
+				_names.erase(_names.begin() + j);
+			}
+		}
+	}
+
+
 	_nbSrv = _ports.size();
 }
 
