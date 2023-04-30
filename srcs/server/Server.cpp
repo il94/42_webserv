@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 18:23:01 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/30 19:48:09 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,8 @@ void	Server::display(void)
 
 void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 {
+	bool	error = false;
+
 	for (std::vector<std::vector <std::string> >::iterator it = srv.begin(); it != srv.end(); it++)
 	{
 		Config	tmp;
@@ -173,8 +175,10 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 				
 			_configs.push_back(tmp);
 		}
+		else
+			error = true;
 	}
-	if (_configs.empty() == true)
+	if (_configs.empty() == true and error == false)
 	{
 		_configs.push_back(Config());
 		_names.push_back(DEFAULT_NAME);
@@ -191,7 +195,6 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 			}
 		}
 	}
-
 
 	_nbSrv = _ports.size();
 }

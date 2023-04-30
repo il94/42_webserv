@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/29 17:31:15 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/30 18:32:15 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ std::vector<std::vector <std::string> > extractServers( std::string );
 
 std::string					findInFileContent(const std::vector<std::string> &, const std::string &);
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &, const std::string &);
+
+bool	isValidIP( const std::string & );
 
 template <typename T>
 void	displayElement(const T &element, const std::string &name)

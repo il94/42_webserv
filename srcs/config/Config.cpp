@@ -225,8 +225,8 @@ void	Config::setError(const bool &src){
 	_error = src;
 }
 
-void	Config::setPort(const std::vector<int> &src){
-
+void	Config::setPort(const std::vector<int> &src)
+{
 	std::vector<int>::const_iterator it = src.begin();
 
 	for (it = src.begin(); getError() == false and it != src.end(); it++)
@@ -234,15 +234,27 @@ void	Config::setPort(const std::vector<int> &src){
 		if (*it < 1024)
 		{
 			setError(true);
-			std::cout << "INVALID PORT\n";
+			std::cout << "[ERROR] " << *it << " Is an invalid port" << std::endl;
 		}
 	}
 	if (getError() == false)
 		_port = src;
 }
 
-void	Config::setHost(const std::vector<std::string> &src){ //verif si IP valide + format
-	_host = src;
+void	Config::setHost(const std::vector<std::string> &src)//verif si IP valide + format
+{
+	std::vector<std::string>::const_iterator it = src.begin();
+
+	for (it = src.begin(); getError() == false and it != src.end(); it++)
+	{
+		if (not isValidIP(*it))
+		{
+			setError(true);
+			std::cout << "[ERROR] " << *it << " Is an invalid host" << std::endl;
+		}
+	}
+	if (getError() == false)
+		_host = src;
 }
 
 void	Config::setName(const std::string &src){ //verif si nom deja pris
