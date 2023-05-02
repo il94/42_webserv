@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/29 17:36:01 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/04/30 19:36:05 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,4 +166,71 @@ std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string
 		}
 	}
 	return (result);
+}
+
+bool	isValidIP( const std::string &src )
+{
+	std::vector<int>	srcSplitted;
+	std::string			element;
+
+	if (src == "localhost")
+		return (true);
+	for (std::string::const_iterator it = src.begin(); it != src.end(); it++)
+	{
+		if (not std::isdigit(*it) and *it != '.')
+			return (false);
+	}
+	
+	for (std::string::const_iterator it = src.begin(); it != src.end(); it++)
+	{
+		element.clear();
+		if (*it == '.')
+		{
+			while (it != src.end() and *it == '.')
+				it++;
+		}
+		std::string::const_iterator it2 = it;
+		while (it2 != src.end() and *it2 != '.')
+		{
+			element += *it2;
+			it2++;
+		}
+		if (element.empty() == false)
+			srcSplitted.push_back(std::atoi(element.c_str()));
+		it = it2 - 1;
+	}
+	if (srcSplitted.size() != 4)
+		return (false);
+
+	if (srcSplitted[0] == 10)
+	{
+		for (std::vector<int>::iterator it = srcSplitted.begin() + 1; it != srcSplitted.end(); it++)
+		{
+			if (*it > 255)
+				return (false);
+		}
+		return (true);
+	}
+	else if (srcSplitted[0] == 172 and (srcSplitted[1] >= 16 and srcSplitted[1] <= 31))
+	{
+		for (std::vector<int>::iterator it = srcSplitted.begin() + 2; it != srcSplitted.end(); it++)
+		{
+			if (*it > 255)
+				return (false);
+		}
+		return (true);
+	}
+	else if (srcSplitted[0] == 192 and srcSplitted[1] == 168)
+	{
+		for (std::vector<int>::iterator it = srcSplitted.begin() + 1; it != srcSplitted.end(); it++)
+		{
+			if (*it > 255)
+				return (false);
+		}
+		return (true);
+	}
+	else if (srcSplitted[0] == 127 and srcSplitted[1] == 0 and srcSplitted[2] == 0 and srcSplitted[3] == 1)
+		return (true);
+	else
+		return (false);
 }
