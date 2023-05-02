@@ -40,6 +40,8 @@ class Config
 	unsigned long						extractMaxBodySize( void );
 	std::map<std::string, Location>		extractLocations( void );
 
+	Location							extractRoute( void );
+
 	/* Accessors */
 	void	setContent( const std::vector<std::string> & );
 	void	setError( const bool & );
@@ -50,6 +52,8 @@ class Config
 	void	setMaxBodySize( const unsigned long & );
 	void	setLocations( const std::map<std::string, Location> & );
 
+	void	setRoute( const Location & );
+
 	std::vector<std::string>			getContent( void );
 	bool								getError( void );
 	std::vector<int>					getPort( void );
@@ -59,6 +63,8 @@ class Config
 	std::string							getErrorPages( const std::string & );
 	unsigned long						getMaxBodySize( void );
 	std::map<std::string, Location>		getLocations( void );
+
+	Location							getRoute( void );
 
 	private :
 
@@ -73,6 +79,8 @@ class Config
 														//default host:port
 	std::map<std::string, std::string>	_errorPages;	//error_page
 	long 								_maxBodySize;	//client_max_body_size
+
+	Location							_route;
 
 	/*=====================================*/
 

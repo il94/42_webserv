@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/02 13:06:43 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/02 17:46:46 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,8 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 		tmp.setPort(tmp.extractPort());
 		tmp.setErrorPages(tmp.extractErrorPages());
 		tmp.setMaxBodySize(tmp.extractMaxBodySize());
+
+		tmp.setRoute(tmp.extractRoute());
 
 		tmp.setLocations(tmp.extractLocations());
 

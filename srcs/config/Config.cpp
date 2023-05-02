@@ -48,6 +48,8 @@ void	Config::display( void )
 	displayMap(getErrorPages(), "ERROR PAGE");
 	displayElement(getMaxBodySize(), "MAX BODY SIZE");
 
+	_route.display();
+
 	std::cout << std::endl;
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
@@ -215,6 +217,14 @@ unsigned long	Config::extractMaxBodySize( void )
 	return (result);
 }
 
+Location	Config::extractRoute( void )
+{
+	Location	result;
+
+	result.setContent(getContent());
+	return (result);
+}
+
 /*================================ Accessors =================================*/
 
 void	Config::setContent(const std::vector<std::string> &src){
@@ -289,6 +299,16 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 	}
 }
 
+void	Config::setRoute( const Location &src )
+{
+	_route.setAllowedMethods(_route.extractAllowedMethods());
+	_route.setRedirection(_route.extractRedirection());
+	_route.setRoot(_route.extractRoot());
+	_route.setIndex(_route.extractIndex());
+	_route.setListing(_route.extractListing());
+	_route.setAllowedCGI(_route.extractAllowedCGI());
+}
+
 std::vector<std::string> 			Config::getContent( void ){
 	return (_content);
 }
@@ -323,4 +343,8 @@ unsigned long						Config::getMaxBodySize( void ){
 
 std::map<std::string, Location>		Config::getLocations( void ){
 	return (_locations);
+}
+
+Location							Config::getRoute( void ){
+	return (_route);
 }
