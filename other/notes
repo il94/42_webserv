@@ -14,4 +14,27 @@
 Note il config
 
 Cette directive peut être utilisée dans le bloc de configuration http, server, ou location. Si elle est définie dans le bloc http, elle s'applique à l'ensemble du serveur. Si elle est définie dans un bloc server, elle s'applique à toutes les locations de ce serveur. Si elle est définie dans un bloc location, elle s'applique uniquement à cette location.
+
+La directive root est utilisée dans la configuration de Nginx pour spécifier le répertoire racine des fichiers statiques d'un site web. Cette directive indique à Nginx où se trouvent les fichiers à servir en réponse aux requêtes HTTP.
+
+Voici un exemple de configuration qui utilise la directive root pour définir le répertoire racine d'un site web :
+
+markdown
+Copy code
+server {
+    listen 80;
+    server_name example.com;
+
+    root /var/www/example.com;
+
+    location / {
+        index index.html;
+    }
+}
+Dans cet exemple, la directive root est utilisée pour définir le répertoire racine des fichiers du site web à /var/www/example.com. Cela signifie que tous les fichiers statiques, tels que les fichiers HTML, CSS, JavaScript, images, etc., pour ce site web se trouvent dans ce répertoire.
+
+Lorsque Nginx reçoit une requête HTTP pour le domaine example.com, il recherche les fichiers à servir dans le répertoire /var/www/example.com. La directive location spécifie que si la requête ne contient pas de chemin spécifique, le fichier index.html sera servi par défaut.
+
+En résumé, la directive root permet de spécifier le répertoire racine des fichiers statiques d'un site web dans la configuration de Nginx. Cette directive est essentielle pour servir les fichiers corrects en réponse aux requêtes HTTP.
+
 ==================================

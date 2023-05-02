@@ -1,7 +1,0 @@
-Initialiser un serveur :
-
-server {
-	[KEYWORD] + [VALUE] + ';'
-}
-
-Keyword + space + {} + '\n'

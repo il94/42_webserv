@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/02 10:44:07 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/02 13:06:43 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ void	Server::display(void)
 
 	for (std::vector<Config>::iterator it = _configs.begin(); it != _configs.end(); it++)
 	{
-		std::cout << "Instance no " << std::distance(_configs.begin(), it) << std::endl << std::endl;
+		std::cout << "Serveur [" << it->getName() << "]" << std::endl << std::endl;
 		it->display();
 		std::cout << "========================================" << std::endl << std::endl;
 	}

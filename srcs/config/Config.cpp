@@ -194,7 +194,7 @@ unsigned long	Config::extractMaxBodySize( void )
 
 	tmp = findInFileContent(_content, "client_max_body_size");
 	if (tmp.empty())
-		result = 1000000;
+		result = DEFAULT_MAX_BODY_SIZE;
 	else
 	{
 		result = std::atol(tmp.c_str());
