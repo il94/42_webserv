@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/04/30 19:48:09 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/02 10:44:07 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@
 #define MAX_EVENTS	64
 
 // Constructors ============================================================= //
-Server::Server(void)
+Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockaddr( ), _eplevs( ),
+	_srvfd( ), _cliSocket(  )
 {
 	this->_setSockaddr();
 	this->_setEplevs();
@@ -39,11 +40,8 @@ Server::Server(void)
 	return;
 }
 
-// Server::Server(void) : _nbSrv( 1 ), /*_flags( 1, EMPTY ),*/ _names( 1, "webserv" ), _ports( 1, DEF_PORT ),
-// 	_sockaddr(  ), _eplevs(  ), _srvfd(  ) 
-
-Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), _names( srv._names ),
-	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )
+Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), /*_flags( ),*/ _names( srv._names ),
+	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  ), _cliSocket(  )
 {
 	size_t	i	= 0;
 
@@ -238,26 +236,22 @@ void	Server::run(void)
 							//treat request
 						this->_log(LOG, j, __func__, __LINE__, "sending data to client");
 							//send data to client
-						// Testing page
+						// Testing page ====================
 						send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
+						// =================================
 						//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 					}
 				}
 				else
 					this->_log(LOG, i, __func__, __LINE__, "connection refused");
 			}
-			close( cliSocket );
+			closeCliSocket( cliSocket ); //will be remove
 			this->_log(LOG, i, __func__, __LINE__, "listening");
 		}
 	}
 	// ====================================================================== //
 	return;
 }
-
-// Config	&	Server::getConfig(void)
-// {
-// 	return ( this->_config );
-// }
 
 // Private member functions ================================================= //
 void	Server::_initSrv(void)
@@ -302,6 +296,41 @@ void	Server::_initSrv(void)
 		i++;
 	}
 
+	return;
+}
+
+void	Server::add2epoll(int cliSocket)
+{
+	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
+	t_epollEv					ev;
+
+	ev.events					= EPOLLIN | EPOLLOUT;
+	ev.data.fd					= cliSocket;
+	if ( it == this->_cliSocket.end() )
+	{
+		this->_cliSocket[cliSocket]	= ev;
+		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_ADD, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
+			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
+	}
+	else
+		std::cerr << "Error: client socket=" << cliSocket << " is already stored" << std::endl;
+	return;
+}
+
+void	Server::closeCliSocket(int cliSocket)
+{
+	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
+
+	if ( it != this->_cliSocket.end() )
+	{
+		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
+			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
+		this->_cliSocket.erase( cliSocket );
+	}
+	else
+		std::cerr << "Error: client socket=" << cliSocket << " isn't stored" << std::endl;
+	if ( close( cliSocket ) == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
 	return;
 }
 
