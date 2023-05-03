@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/02 10:44:07 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/03 18:12:51 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,10 @@
 Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockaddr( ), _eplevs( ),
 	_srvfd( ), _cliSocket(  )
 {
-	this->_setSockaddr();
-	this->_setEplevs();
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
 		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
+	fcntl( this->_eplfd, F_SETFL, O_NONBLOCK);
 	return;
 }
 
@@ -54,6 +53,7 @@ Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), /*_flags( ),*/ _nam
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
 		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
+	fcntl( this->_eplfd, F_SETFL, O_NONBLOCK);
 	return;
 }
 
@@ -201,8 +201,11 @@ void	Server::run(void)
 {
 	int				cliSocket	= -1;
 	int				nbEvents	= -1;
-	int				addrlen		= 1;
 	t_epollEv		cliEvents[ MAX_EVENTS ];
+	std::string		request;
+	size_t			sizeRequest	= 1000000;
+	size_t			rcv;
+
 
 	std::cout << "Server log : " << std::endl;
 	// Creates sockets if they don't exist
@@ -217,39 +220,66 @@ void	Server::run(void)
 			{
 				if ( cliEvents[i].data.fd == this->_getSrvFd( j ) )
 				{
+					// Clear and set request buffer
+					request.clear();
+					request.resize( sizeRequest );
 					// Accepting connections
-					cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), reinterpret_cast<socklen_t *>(&addrlen) );
-					if ( cliSocket == -1 )
-						this->_log(ERROR, j, __func__, __LINE__, "accept");
-					else
-						this->_log(LOG, j, __func__, __LINE__, "connection established");
+					cliSocket = this->_acceptConnection( j );
 					// Sending data to client, example : end of a download or curl request
 					if ( cliEvents[i].events & EPOLLOUT )
 					{
-						this->_log(LOG, j, __func__, __LINE__, "send request");
+						this->_log(LOG, j, __func__, __LINE__, "sending response");
+						//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 					}
 					// Receive client request
 					if ( cliEvents[i].events & EPOLLIN )
 					{
-						this->_log(LOG, j, __func__, __LINE__, "treating client request");
-							//parse request
-							//treat request
-						this->_log(LOG, j, __func__, __LINE__, "sending data to client");
-							//send data to client
+						this->_log(LOG, j, __func__, __LINE__, "receiving client request");
+						this->_readRequest( cliSocket, j, request );
 						// Testing page ====================
-						send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
+							//send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
 						// =================================
-						//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
 					}
 				}
-				else
-					this->_log(LOG, i, __func__, __LINE__, "connection refused");
+				this->_log(LOG, j, __func__, __LINE__, "listening");
 			}
 			closeCliSocket( cliSocket ); //will be remove
-			this->_log(LOG, i, __func__, __LINE__, "listening");
 		}
 	}
 	// ====================================================================== //
+	return;
+}
+
+void	Server::add2epoll(int cliSocket)
+{
+	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
+	t_epollEv					ev;
+
+	ev.events					= EPOLLIN | EPOLLOUT;
+	ev.data.fd					= cliSocket;
+	if ( it == this->_cliSocket.end() )
+	{
+		this->_cliSocket[cliSocket]	= ev;
+		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_ADD, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
+			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
+	}
+	else
+		std::cerr << "Error: client socket=" << cliSocket << " is already stored" << std::endl;
+	return;
+}
+
+void	Server::closeCliSocket(int cliSocket)
+{
+	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
+
+	if ( it != this->_cliSocket.end() )
+	{
+		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
+			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
+		this->_cliSocket.erase( cliSocket );
+	}
+	if ( close( cliSocket ) == -1 )
+		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
 	return;
 }
 
@@ -284,7 +314,7 @@ void	Server::_initSrv(void)
 			{
 				this->_log(ERROR, i, __func__, __LINE__, "listen");
 				if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL,
-							this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
+						this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
 					this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
 			}
 		}
@@ -299,54 +329,58 @@ void	Server::_initSrv(void)
 	return;
 }
 
-void	Server::add2epoll(int cliSocket)
+std::string &	Server::_readRequest( const int cliSocket, const int & j, std::string & request)
 {
-	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
-	t_epollEv					ev;
+	size_t	rcv = 0;
 
-	ev.events					= EPOLLIN | EPOLLOUT;
-	ev.data.fd					= cliSocket;
-	if ( it == this->_cliSocket.end() )
-	{
-		this->_cliSocket[cliSocket]	= ev;
-		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_ADD, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
-			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
-	}
+	this->_log(LOG, j, __func__, __LINE__, "receiving client request");
+	rcv = recv( cliSocket, request.data(), request.size() - 1, 0 );
+	if ( rcv == -1 )
+		this->_log(ERROR, j, __func__, __LINE__, "recv");
 	else
-		std::cerr << "Error: client socket=" << cliSocket << " is already stored" << std::endl;
-	return;
+	{
+		request[ rcv ] = '\0';
+		request.resize( rcv );
+	}
+	// Uncomment the line below to pur on screen the request
+	//std::cout << std::endl << request << std::endl;
+	//std::cout << "size request = " << request.size() << " | rcv = " << rcv << std::endl;
+	return ( request );
 }
 
-void	Server::closeCliSocket(int cliSocket)
+int	Server::_acceptConnection(const int & j)
 {
-	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
+	int	cliSocket;
+	int	addrlen		= 1;
 
-	if ( it != this->_cliSocket.end() )
-	{
-		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
-			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
-		this->_cliSocket.erase( cliSocket );
-	}
+	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), reinterpret_cast<socklen_t *>(&addrlen) );
+	if ( cliSocket == -1 )
+		this->_log(ERROR, j, __func__, __LINE__, "accept");
 	else
-		std::cerr << "Error: client socket=" << cliSocket << " isn't stored" << std::endl;
-	if ( close( cliSocket ) == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
-	return;
+		this->_log(LOG, j, __func__, __LINE__, "connection established");
+	return( cliSocket );
 }
 
 // log function ============================================================= //
 void	Server::_log(const int error, int i, const char *func, const int line, const char *msg) 
 {
-	if ( error )
+	if ( error && i == -1)
 	{
 		std::cerr << func << ":" << line - 1 << ":";
 		perror(msg);
 		//this->_flag = ERROR;
 	}
+	else if ( error && i != -1 )
+	{
+		std::cout << "\t" << this->_getName( i );
+		std::cout << "[" << this->_getPort( i ) << "]\t: ";
+		std::cerr << func << ":" << line - 1 << ":";
+		perror( msg );
+	}
 	else
 	{
 		std::cout << "\t" << ( (i > -1) ? this->_getName( i ) : "Epoll instance" );
-		std::cout << "[" << ( (i > -1) ? this->_getPort( i ) : -1 ) << "] : ";
+		std::cout << "[" << ( (i > -1) ? this->_getPort( i ) : -1 ) << "]\t: ";
 		std::cout << msg << std::endl;
 	}
 	return;

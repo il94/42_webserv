@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/02 10:42:18 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/03 18:12:38 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,8 @@ class Server
 		typedef		std::map< int, t_epollEv >	t_mEpollClient;
 
 							Server(void);
-							Server(const Server & src);
 							~Server(void);
 
-		Server			 &	operator=(const Server & srv);
 
 		void				run(void);
 		void				add2epoll(int cliSocket);
@@ -92,6 +90,8 @@ class Server
 		t_mEpollClient		_cliSocket;
 
 		void				_initSrv(void);
+		int					_acceptConnection(const int & j);
+		std::string		  &	_readRequest( const int cliSocket, const int & j, std::string & request );
 
 		size_t	  			_getNbSrv(void)					const;
 		const int		  &	_getEplFd(void)					const;
@@ -109,6 +109,9 @@ class Server
 		void				_setEplevs(void);
 
 		void				_log(const int error, int i, const char *func, const int line, const char *msg);
+
+							Server(const Server & src);
+		Server			 &	operator=(const Server & srv);
 };
 
 #endif
