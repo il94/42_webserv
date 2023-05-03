@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/23 17:43:11 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 17:03:11 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/04 00:02:39 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,16 @@
 
 std::string	Response::generateAutoIndex()
 {
-	std::string	path = _request.getURL();
+	std::string	path = "." + _request.getURL();
 	DIR 		*dir = opendir(path.c_str());
 	std::vector<std::string>	hosts = _config.getHost();
 	std::vector<int>			ports = _config.getPort();
 
 	if (dir == NULL)
 	{
-		std::cerr << RED << "Error : AutoIndex cannot processed, \n\
-				please check the following path --> " << path << " ." 
-				<< END << std::endl;
+		std::cerr << RED << "Error : AutoIndex cannot processed, \n "<<
+		"please check the following path --> " << path
+		<< END << std::endl;
 		return "";
 	}
 	std::string	autoIndex = \
@@ -39,8 +39,8 @@ std::string	Response::generateAutoIndex()
 	struct dirent	*readedDir = readdir(dir);
 	while (readedDir)
 	{
-		autoIndex += "\t\t<p><a href=\"http://" + hosts[_serverIndex]\
-			+ ":" + to_string(ports[_serverIndex]) + "/" + path + std::string(readedDir->d_name)\
+		autoIndex += "\t\t<p><a href=\"http://" + _host\
+			+ ":" + to_string(_port) + "/" + path + "/" + std::string(readedDir->d_name)\
 			+ "\">" + std::string(readedDir->d_name) + "</a></p>\n";
 		readedDir = readdir(dir);
 	}

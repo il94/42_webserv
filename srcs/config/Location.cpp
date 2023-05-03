@@ -198,14 +198,7 @@ void	Location::setListing(const bool &src){
 
 void	Location::setAllowedCGI(const std::vector<std::string> &src)
 {
-	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
-	{
-		if (getPath().back() == '/')
-			_index.push_back(getPath() + *it);
-		else
-			_index.push_back(getPath() + '/' + *it);
-	}
-	_allowedCGI = src;
+	_index = src;
 }
 
 

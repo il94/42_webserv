@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/03 19:07:47 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/03 23:43:48 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,11 +236,19 @@ void	Server::run(void)
 					{
 						this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 						request = this->_readRequest( cliSocket, j, request );
+						//std::cerr << RED << request << END << std::endl;
+						Request	req;
+						req.parseHeader(request);
+						req.parseBody();
+						//_configs[j].getLocations()["/"].display();
+						Response	rep(req, _configs[j], this->_getPort(j), this->_getName(j));
+						rep.generate();
+						std::cout << RED << rep.getResponse() << END << std::endl;
 						// index j tu peux recuperer name + port
 						// this->_getName( j ) pour avoir le nom
 						// this->_getPort( j ) pour avoir le port
 						// Testing page ====================
-							send( cliSocket, ( testing_data() ).c_str(), ( testing_data() ).size(), 0 );
+						send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
 						// =================================
 					}
 				}

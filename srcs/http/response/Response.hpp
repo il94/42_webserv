@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 17:33:16 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/03 23:36:37 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class Response
 {
 	public :
 		Response(void);
-		Response(Request & request, Config & config);
+		Response(Request & request, Config & config, int port, std::string host);
 		~Response(void);
 
 
@@ -39,6 +39,7 @@ class Response
 
 		void		setRequest(Request &request);
 		void		setConfig(Config &config);
+		void		setPath();
 
 		std::string	getResponse();
 
@@ -47,6 +48,7 @@ class Response
 		std::string	readErrorPage(const std::string & path);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
+		int	isDir(std::string path);
 		
 		Location	findLocation();
 		/*listing.cpp/ Listing*/
@@ -67,7 +69,10 @@ class Response
 	
 	private :
 
-		int	_serverIndex;
+		int			_port;
+		std::string	_host;
+
+		std::string	_path;
 
 		/*Header*/
 		std::string					_contentLength;

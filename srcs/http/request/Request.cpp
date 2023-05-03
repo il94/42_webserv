@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:13:21 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/03 21:05:12 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,10 +68,6 @@ void	Request::parseHeader(const std::string & req)
 	if (badFirstLine())
 		return ;
 
-	if (_data[1][0] == '/')
-		_data[1] = _data[1].substr(_data[1].find("/") + 1, _data[1].size() - 1);
-
-	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
 	size_t	boundary = std::string::npos;
 	while (std::getline(stream, tmp))

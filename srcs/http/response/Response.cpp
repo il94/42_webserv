@@ -6,16 +6,19 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 17:34:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/04 00:11:27 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
 /*=============================== Constructors ===============================*/
-Response::Response(void): _contentLength("0"), _contentType(""), _code(200), _response("") {}
+Response::Response(void): _port(8000), _host("127.0.0.1"),
+	_path(""), _contentLength("0"), _contentType(""),
+		_code(200), _response("") {}
 
-Response::Response(Request & request, Config & config) :
+Response::Response(Request & request, Config & config,
+	int port, std::string host) : _port(port), _host(host), _path(""),
 	_contentLength(""), _contentType(""), _code(request.getRet()),
 		_request(request), _config(config), _response(""),
 			_location(findLocation()){}
@@ -27,12 +30,16 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
+	setPath();
+	
+	_location.display();
+
 	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
-		!= _location.getAllowedMethods().end())
+		== _location.getAllowedMethods().end())
 			_code = 405;
 	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
 		_code = 413;
-	if (_code == 405 || 413)
+	if (_code == 405 || _code == 413)
 	{
 		_response = generateHeader(0, "");
 		return ;
@@ -49,13 +56,13 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
-	if (_request.getMethod() == "GET")
+	if (_request.getMethod() != "GET")
 		return ;
 	if (_code == 200)
 		_code = readContent();
 	else
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+	_response = generateHeader(_response.size(), _path) + "\r\n" + _response;
 }
 
 void	Response::POST(void)
@@ -105,9 +112,9 @@ void	Response::POST(void)
 
 void	Response::DELETE(void)
 {
-	if (fileExist(_request.getURL()))
+	if (fileExist(_path))
 	{
-		if (remove(_request.getURL().c_str()) == 0)
+		if (remove(_path.c_str()) == 0)
 			_code = 204;
 		else
 			_code = 403;
@@ -116,7 +123,7 @@ void	Response::DELETE(void)
 		_code = 404;
 	if (_code == 404 || _code == 403)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = generateHeader(_response.size(), _request.getURL()) + "\r\n" + _response;
+	_response = generateHeader(_response.size(), _path) + "\r\n" + _response;
 }
 
 /*============================= UTILS =================================*/
@@ -125,15 +132,14 @@ int	Response::readContent(void)
 {
 	std::ifstream	file;
 	std::stringstream	buffer;
-	std::string	path = _request.getURL();
 
 	_response = "";
-
-	if (fileExist(path))
+	if (fileExist(_path))
 	{
-		file.open(path.c_str(), std::ifstream::in);
+		file.open(_path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
+			std::cout << RED << "WSH PAPA ALLO " << END << std::endl;
 			_response = readErrorPage(_config.getErrorPages("403"));
 			return (403);
 		}
@@ -143,7 +149,8 @@ int	Response::readContent(void)
 	}
 	else if (_location.getListing())
 	{
-		
+		_response = generateAutoIndex();
+		_contentType = "text/html";
 	}
 	else
 	{
@@ -172,22 +179,22 @@ std::string	Response::readErrorPage(const std::string & path)
 }
 
 
-int	Response::writeContent(std::string content)
-{
-	std::ofstream	file;
-	std::string	path = _request.getURL();
+// int	Response::writeContent(std::string content)
+// {
+// 	std::ofstream	file;
+// 	std::string	path = _request.getURL();
 
-	if (fileExist(path))
-	{
-		file.open(path.c_str());
-		if (file.is_open() == false)
-			return (-1);
-		file << content;
-		file.close();
-		return (0);
-	}
-	return (-1);
-}
+// 	if (fileExist(path))
+// 	{
+// 		file.open(path.c_str());
+// 		if (file.is_open() == false)
+// 			return (-1);
+// 		file << content;
+// 		file.close();
+// 		return (0);
+// 	}
+// 	return (-1);
+// }
 
 
 int	Response::fileExist(std::string path)
@@ -196,6 +203,18 @@ int	Response::fileExist(std::string path)
 
 	if (stat(path.c_str(), &stats) == 0)
 		return 1;
+	return 0;
+}
+
+int	Response::isDir(std::string path)
+{
+	struct stat	stats;
+
+	if (stat(path.c_str(), &stats) == 0)
+	{
+		if (S_ISDIR(stats.st_mode))
+			return 1;
+	}
 	return 0;
 }
 
@@ -215,6 +234,7 @@ Location	Response::findLocation()
 			!= locationM.end()){
 			return locationM[(*it).substr(0, rfind(*it, "/"))];
 		}
+		it++;
 	}
 	return locationM["/"];
 }
@@ -311,5 +331,26 @@ void	Response::setConfig(Config &config)
 	_location = findLocation();
 }
 
+void	Response::setPath()
+{
+	std::string	root = _location.getRoot();
+	
+	root = root[root.length() - 1] == '/' ? root : root + "/";
+
+	std::string	locationPath = _location.getPath();
+
+	locationPath = locationPath[locationPath.length() - 1] == '/' ?\
+		locationPath : locationPath + "/";
+		
+	_path = root.substr(0, root.size() - 1) + _request.getURL();
+	
+	_path.erase(_path.find(locationPath), locationPath.size());
+	std::cout << PURPLE << _path << END << std::endl;
+	if (isDir(_path))
+	{
+		_path = _path[_path.length() - 1] == '/' ? _path : _path + "/";
+		_path= _path + _location.getIndex()[0];
+	}
+}
 
 std::string	Response::getResponse() {return _response;}
