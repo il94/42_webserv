@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 15:54:52 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/04 22:43:55 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	
+	//header["Content-Length"] = to_string(_request.getRequestContent().size());
+	//header["Content-Type"] = "application/x-www-form-urlencoded";
+	header["QUERY_STRING"] = _request.getRequestContent();
+
 	_env = new char *[header.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
@@ -31,6 +34,7 @@ void	CGI::setEnv()
 		std::string	tmp = i->first + "=" + i->second;
 		_env[j] = new char[tmp.size() + 1];
 		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());
+		std::cerr << PURPLE <<  _env[j]  << END << std::endl;
 		j++;
 	}
 	_env[j] = NULL;

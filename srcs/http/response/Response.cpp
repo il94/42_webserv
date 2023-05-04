@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/04 00:11:27 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/04 23:20:56 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ Response::~Response(void) {}
 void	Response::generate()
 {
 	setPath();
-	
+	//if url is dir and url is dir add concat index to path...
 	_location.display();
 
 	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
@@ -42,6 +42,12 @@ void	Response::generate()
 	if (_code == 405 || _code == 413)
 	{
 		_response = generateHeader(0, "");
+		return ;
+	}
+	else if (_location.getRedirection().first / 100 == 3)
+	{
+		_code = _location.getRedirection().first;
+		_response = generateHeader(_response.size(), ".html") + "\r\n" + _response;
 		return ;
 	}
 	if (_request.getMethod() == "GET")
@@ -56,9 +62,41 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
-	if (_request.getMethod() != "GET")
+	if (fileExist("./html/cgi_test/" + _request.getURL()))
+	{
+		CGI cgi(_request);
+		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+		std::cout << YELLOW << _response << END << std::endl;
+		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
+			_response.erase(0, 1);
+		size_t	bodyPosition = _response.find("\r\n\r\n");
+		size_t	boundary = std::string::npos;
+
+		std::string			tmp;
+		std::istringstream	stream(_response);
+		
+		while (std::getline(stream, tmp))
+		{
+			if (tmp == "")
+				break;
+			boundary = tmp.find(":");
+			if (boundary != std::string::npos)
+			{
+				if (boundary > bodyPosition)
+					break;
+				std::string	key(tmp, 0, boundary);
+				std::string	value(tmp, boundary + 2);
+				if (key == "Status")
+					_code = std::atoi(value.c_str());
+				else if (key == "Content-Type")
+					_contentType = value;
+			}
+		}
+		_response = _response.substr(bodyPosition + 2);
+		_response = generateHeader(_response.size(), "") + _response;
 		return ;
-	if (_code == 200)
+	}
+	else if (_code == 200)
 		_code = readContent();
 	else
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -67,8 +105,7 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
-	if (_request.getMethod() != "POST")
-		return ;
+	std::cerr << RED << "./html/cgi_test" + _request.getURL() << END << std::endl;
 	if (fileExist("./html/cgi_test/" + _request.getURL()))
 	{
 		CGI cgi(_request);
@@ -139,7 +176,6 @@ int	Response::readContent(void)
 		file.open(_path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
 		{
-			std::cout << RED << "WSH PAPA ALLO " << END << std::endl;
 			_response = readErrorPage(_config.getErrorPages("403"));
 			return (403);
 		}
@@ -262,6 +298,11 @@ std::string	Response::writeHeader(void)
 		header = "HTTP/1.1 405 Method Not Allowed\r\n";
 	else if (_code == 413)
 		header = "HTTP/1.1 413 Payload Too Large\r\n";
+	else if (_code / 100 == 3)
+	{
+		header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
+		header += "Location: " + _location.getRedirection().second + "\r\n";
+	}
 	else
 		header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
@@ -277,6 +318,8 @@ void	Response::initStatusMsg()
 	_statusMsg[100] = "Continue";
 	_statusMsg[200] = "ok";
 	_statusMsg[204] = "No Content";
+	_statusMsg[302] = "Found";
+	_statusMsg[303] = "Moved Permanently";
 	_statusMsg[400] = "Bad Request";
 	_statusMsg[403] = "Forbidden";
 	_statusMsg[404] = "Not Found";
