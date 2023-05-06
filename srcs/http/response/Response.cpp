@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/06 17:39:57 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/06 17:49:52 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,11 +272,17 @@ bool		Response::findCGI()
 	if (url[url.size() - 1] == '/')
 		return false;
 
+	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
+	std::string	urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
+	std::string	fileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
+
+	if (std::find(allowedCGI.begin(),allowedCGI.end(), fileExtension)\
+		== allowedCGI.end())
+		return false;
+	
+	std::string	urlFolder = url.substr(0, rfind(url, "/"));
 	std::vector<std::string>	cgiPaths = _location.getCgi();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
-
-	std::string	urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
-	std::string	urlFolder = url.substr(0, rfind(url, "/"));
 
 	while (it != cgiPaths.end())
 	{
