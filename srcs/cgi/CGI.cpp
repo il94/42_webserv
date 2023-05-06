@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/04 22:43:55 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/05 17:31:09 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	//header["Content-Length"] = to_string(_request.getRequestContent().size());
-	//header["Content-Type"] = "application/x-www-form-urlencoded";
 	header["QUERY_STRING"] = _request.getRequestContent();
 
 	_env = new char *[header.size() + 1];
@@ -34,7 +32,6 @@ void	CGI::setEnv()
 		std::string	tmp = i->first + "=" + i->second;
 		_env[j] = new char[tmp.size() + 1];
 		_env[j] = strcpy(_env[j], (const char *)tmp.c_str());
-		std::cerr << PURPLE <<  _env[j]  << END << std::endl;
 		j++;
 	}
 	_env[j] = NULL;
@@ -83,8 +80,8 @@ std::string CGI::execCGI(std::string scriptPath)
 			close(pipefd_input[1]);
 
 			close(pipefd_output[1]);
-			char buffer[1024];
-			while (read(pipefd_output[0], buffer, 1024) > 0) {
+			char buffer[1024] = {0};;
+			while (read(pipefd_output[0], buffer, 1023) > 0) {
 				output += buffer;
 			}
 			close(pipefd_output[0]);

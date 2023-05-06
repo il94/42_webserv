@@ -198,7 +198,7 @@ void	Location::setListing(const bool &src){
 
 void	Location::setAllowedCGI(const std::vector<std::string> &src)
 {
-	_index = src;
+	_allowedCGI = src;
 }
 
 
