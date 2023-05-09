@@ -60,7 +60,29 @@ void	Config::display( void )
 	}
 }
 
-std::map<std::string, Location>	Config::extractLocations( void )
+std::vector<std::string>		Config::extractContent( std::vector<std::string> src )
+{
+	std::vector<std::string>	result;
+
+	std::string::iterator		it;
+	for (std::vector<std::string>::iterator start = src.begin(); start != src.end(); start++)
+	{
+		it = start->begin();
+		while (it != start->end() && (*it == ' ' or *it == '\t'))
+			it++;
+		if (start->substr(std::distance(start->begin(), it), sizeof("location") - 1) == "location" and (*(it + sizeof("location") - 1) == ' ' or *(it + sizeof("location") - 1) == '\t'))
+		{
+			while (not closeBrace(*start, 1))
+				start++;
+		}
+		else
+			result.push_back(*start);
+	}
+	
+	return (result);
+}
+
+std::map<std::string, Location>	Config::extractLocations( std::vector<std::string> src )
 {
 	std::map<std::string, Location>		result;
 
@@ -68,7 +90,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 
 	std::string::iterator				it;
 
-	for (start = _content.begin(); start != _content.end(); start++)
+	for (start = src.begin(); start != src.end(); start++)
 	{
 		it = start->begin();
 		while (*it == ' ' or *it == '\t')
@@ -286,12 +308,14 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
+		it->second = getRoute();
 		it->second.setAllowedMethods(it->second.extractAllowedMethods());
 		it->second.setRedirection(it->second.extractRedirection());
 		it->second.setRoot(it->second.extractRoot());
 		it->second.setIndex(it->second.extractIndex());
 		it->second.setListing(it->second.extractListing());
 		it->second.setAllowedCGI(it->second.extractAllowedCGI());
+		it->second.setCGIBin(it->second.extractCGIBin());
 		// if (it->second.getError() == true)
 		// {
 		// 	_locations.erase(it);
@@ -308,6 +332,7 @@ void	Config::setRoute( const Location &src )
 	_route.setIndex(src.extractIndex());
 	_route.setListing(src.extractListing());
 	_route.setAllowedCGI(src.extractAllowedCGI());
+	_route.setCGIBin(src.extractCGIBin());
 }
 
 std::vector<std::string> 			Config::getContent( void ) const {
@@ -344,6 +369,10 @@ unsigned long						Config::getMaxBodySize( void ) const {
 
 std::map<std::string, Location>		Config::getLocations( void ) const {
 	return (_locations);
+}
+
+Location							Config::getRoute( void ) const {
+	return (_route);
 }
 
 Location							Config::getRoute( void ) const {

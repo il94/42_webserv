@@ -30,6 +30,7 @@ class Location
 	bool						extractListing( void ) const;
 	std::vector<std::string>	extractIndex( void ) const;
 	std::vector<std::string>	extractAllowedCGI( void ) const;
+	std::vector<std::string>	extractCGIBin( void ) const;
 
 	/* Accessors */
 	void	setContent( const std::vector<std::string> & );
@@ -42,6 +43,7 @@ class Location
 	void	setListing( const bool & );
 	void	setIndex( const std::vector<std::string> & );
 	void	setAllowedCGI( const std::vector<std::string> & );
+	void	setCGIBin( const std::vector<std::string> & );
 
 	std::vector<std::string>	getContent( void ) const;
 	std::string					getPath( void ) const;
@@ -53,6 +55,7 @@ class Location
 	bool						getListing( void ) const;
 	std::vector<std::string>	getIndex( void ) const;
 	std::vector<std::string>	getAllowedCGI( void ) const;
+	std::vector<std::string>	getCGIBin( void ) const;
 
 	void	pushContent( const std::string & );
 	bool	emptyContent( void );
@@ -71,6 +74,7 @@ class Location
 	bool							_listing;			//autoindex [on/off]
 	std::vector<std::string>		_index;				//index *
 	std::vector<std::string>		_allowedCGI;		//allowed_CGI *
+	std::vector<std::string>		_CGIBin;			//cgi_bin *
 };
 
 #endif

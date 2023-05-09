@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/06 22:45:24 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/09 15:46:02 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,11 @@ std::string	to_string(size_t n)
 
 std::vector<std::string> fileToVector( std::string path )
 {
+	std::vector<std::string>	result;
+	
+	if (path.empty() == true)
+		return (result);
+
 	std::ifstream	toRead(path.c_str());
 
 	if	(!toRead.good())
@@ -48,7 +53,6 @@ std::vector<std::string> fileToVector( std::string path )
 	}
 
 	std::string 				buffer;
-	std::vector<std::string>	result;
 
 	while (std::getline(toRead, buffer))
 		result.push_back(buffer);
@@ -71,50 +75,6 @@ bool	openBrace(std::string &src, const int index)
 	while (it != src.end() and (*it == ' ' or *it == '\t'))
 		it++;
 	return (*it == '{');
-}
-
-std::vector<std::vector <std::string> > extractServers(std::string path)
-{
-	std::vector<std::vector <std::string> > result;
-
-	std::vector<std::string>			fileContent = fileToVector(path);
-	std::vector<std::string>::iterator	start;
-	std::vector<std::string>::iterator	end;
-
-	std::vector<std::string>			element;
-
-	for (start = fileContent.begin(); start != fileContent.end(); start = end)
-	{
-		end = start + 1;
-		if (static_cast<int>(start->rfind("server", 0, sizeof("server") - 1)) != -1 and openBrace(*start, start->find("server", 0) + sizeof("server")))
-		{
-			while (end != fileContent.end() and (*end)[0] != '}')
-			{
-				element.push_back(*end);
-				end++;
-			}
-			if (end != fileContent.end() and (*end)[0] == '}')
-			{
-				std::string::iterator	it;
-				
-				for (std::vector<std::string>::iterator stort = element.begin(); stort != element.end(); stort++)
-				{
-					it = stort->begin();
-					while (*it == ' ' or *it == '\t')
-						it++;
-					if (stort->substr(std::distance(stort->begin(), it), sizeof("location") - 1) == "location" and (*(it + sizeof("location") - 1) == ' ' or *(it + sizeof("location") - 1) == '\t'))
-					{
-						while (not closeBrace(*stort, 1))
-							element.erase(stort);
-						element.erase(stort);
-					}
-				}
-				displayVector(element, "RESULAT");
-				result.push_back(element);
-			}
-		}
-	}
-	return (result);
 }
 
 std::string	findInFileContent(const std::vector<std::string> &file, const std::string &src)

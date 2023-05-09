@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:39 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/30 18:32:15 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/09 15:29:53 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,6 @@ std::vector<std::string>				fileToVector( std::string );
 
 bool	closeBrace(std::string &src, const int index);
 bool	openBrace(std::string &src, const int index);
-
-std::vector<std::vector <std::string> > extractServers( std::string );
 
 std::string					findInFileContent(const std::vector<std::string> &, const std::string &);
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &, const std::string &);

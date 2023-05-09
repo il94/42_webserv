@@ -20,12 +20,15 @@ Location& Location::operator=(const Location &src)
 {
 	_content = src._content;
 	_path = src._path;
+	_error = src._error;
 
 	_allowedMethods = src._allowedMethods;
 	_redirection = src._redirection;
 	_root = src._root;
-	_index = src._index;
 	_listing = src._listing;
+	_index = src._index;
+	_allowedCGI = src._allowedCGI;
+	_CGIBin = src._CGIBin;
 	return (*this);
 }
 
@@ -39,6 +42,7 @@ void	Location::display( void )
 	displayVector(getIndex(), "\tINDEX");
 	displayElement(getListing(), "\tLISTING");
 	displayVector(getAllowedCGI(), "\tALLOWED CGI");
+	displayVector(getCGIBin(), "\tCGI BIN");
 }
 
 std::vector<std::string>	Location::extractAllowedMethods( void ) const //verifier methodes invalides
@@ -85,12 +89,13 @@ std::string	Location::extractRoot( void ) const
 {
 	std::string	result;
 
-	// displayVector(getContent(), "PRINT");
-
 	result = findInFileContent(_content, "root");
 	if (result.empty())
 		result = "/";
-	// std::cout << "PRINT = " << result << std::endl;
+	displayVector(_content, "CONTENT");
+	std::cout << "=============PILOPLP========================" << std::endl;
+	std::cout << std::endl;
+	std::cout << std::endl;
 	return (result);
 }
 
@@ -115,8 +120,6 @@ std::vector<std::string>	Location::extractIndex( void ) const
 	return (result);
 }
 
-
-
 std::vector<std::string>	Location::extractAllowedCGI( void ) const
 {
 	std::vector<std::string>	result;
@@ -128,6 +131,17 @@ std::vector<std::string>	Location::extractAllowedCGI( void ) const
 		result.push_back(".py");
 		result.push_back(".php");
 	}
+	return (result);
+}
+
+std::vector<std::string>	Location::extractCGIBin( void ) const
+{
+	std::vector<std::string>	result;
+
+	result = multipleFindInFileContent(_content, "CGI_bin");
+
+	if (result.empty())
+		result.push_back("/");
 	return (result);
 }
 
@@ -184,6 +198,8 @@ void	Location::setRoot(const std::string &src)
 
 void	Location::setIndex(const std::vector<std::string> &src)
 {
+	_index.clear();
+
 	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
 	{
 		if (getPath().back() == '/')
@@ -197,10 +213,10 @@ void	Location::setListing(const bool &src){
 	_listing = src;
 }
 
-
-
 void	Location::setAllowedCGI(const std::vector<std::string> &src)
 {
+	_allowedCGI.clear();
+
 	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
 	{
 		if ((*it)[0] == '.')
@@ -208,6 +224,9 @@ void	Location::setAllowedCGI(const std::vector<std::string> &src)
 	}
 }
 
+void	Location::setCGIBin(const std::vector<std::string> &src){
+	_CGIBin = src;
+}
 
 
 std::vector<std::string> 	Location::getContent( void ) const {
@@ -221,7 +240,6 @@ std::string					Location::getPath( void ) const {
 bool				 		Location::getError( void ) const {
 	return (_error);
 }
-
 
 std::vector<std::string>	Location::getAllowedMethods( void ) const {
 	return (_allowedMethods);
@@ -243,12 +261,13 @@ bool						Location::getListing( void ) const {
 	return (_listing);
 }
 
-
-
 std::vector<std::string>	Location::getAllowedCGI( void ) const {
 	return (_allowedCGI);
 }
 
+std::vector<std::string>	Location::getCGIBin( void ) const {
+	return (_CGIBin);
+}
 
 
 void	Location::pushContent( const std::string &src ){

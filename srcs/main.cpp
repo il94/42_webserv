@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/06 19:41:10 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/09 15:41:39 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,12 @@
 int	main(int ac __attribute__((unused)), char **av __attribute((unused)))
 {		
 	Server	server;
-	
-	std::vector<std::vector <std::string> > _configs;
 
-	if (av[0] and av[1])
-		_configs = extractServers(av[1]);
+	// if (av[0] and av[1])
+	// 	server.setConfigs(av[1]);
 
-	server.setConfigs(_configs);
+	server.setConfigs(av);
+
 
 	server.display();
 

@@ -33,12 +33,14 @@ class Config
 
 	void								display( void );
 
+	std::vector<std::string>			extractContent( std::vector<std::string> );
+
 	std::vector<int>					extractPort ( void ) const ;
 	std::vector<std::string>			extractHost( void ) const ;
 	std::string							extractName( void ) const ;
 	std::map<std::string, std::string>	extractErrorPages( void ) const ;
 	unsigned long						extractMaxBodySize( void ) const ;
-	std::map<std::string, Location>		extractLocations( void ) ;
+	std::map<std::string, Location>		extractLocations( std::vector<std::string> src ) ;
 
 	Location							extractRoute( void ) const ;
 

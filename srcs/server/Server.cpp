@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/06 19:50:56 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/09 16:01:11 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,16 +145,50 @@ void	Server::display(void)
 	}
 }
 
-void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
+std::vector<std::vector <std::string> >	Server::extractContent( const std::string &path )
 {
+	std::vector<std::vector <std::string> > result;
+
+	std::vector<std::string>			fileContent = fileToVector(path);
+	std::vector<std::string>::iterator	start;
+	std::vector<std::string>::iterator	end;
+
+	std::vector<std::string>			element;
+
+	for (start = fileContent.begin(); start != fileContent.end(); start = end)
+	{
+		element.clear();
+		end = start + 1;
+		if (static_cast<int>(start->rfind("server", 0, sizeof("server") - 1)) != -1 and openBrace(*start, start->find("server", 0) + sizeof("server")))
+		{
+			while (end != fileContent.end() and (*end)[0] != '}')
+			{
+				element.push_back(*end);
+				end++;
+			}
+			if (end != fileContent.end() and (*end)[0] == '}')
+				result.push_back(element);
+		}
+	}
+	return (result);
+}
+
+void	Server::setConfigs( char **av )
+{
+	std::string	src;
+	if (av[0] and av[1])
+		src = av[1];
+
+	setContent(extractContent(src));
+
 	bool	error = false;
 
-	for (std::vector<std::vector <std::string> >::iterator it = srv.begin(); it != srv.end(); it++)
+	for (std::vector<std::vector <std::string> >::iterator it = _content.begin(); it != _content.end(); it++)
 	{
 		Config	tmp;
 
-		tmp.setContent(*it);
-		
+		tmp.setContent(tmp.extractContent(*it));
+
 		tmp.setHost(tmp.extractHost());
 		tmp.setName(tmp.extractName());
 		tmp.setPort(tmp.extractPort());
@@ -163,10 +197,7 @@ void	Server::setConfigs(std::vector<std::vector <std::string> > & srv)
 
 		tmp.setRoute(tmp.extractRoute());
 
-
-
-
-		tmp.setLocations(tmp.extractLocations());
+		tmp.setLocations(tmp.extractLocations(*it));
 
 		if (tmp.getError() == false)
 		{
@@ -403,6 +434,11 @@ const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
 	return ( this->_eplevs[i] );
 }
 
+std::vector<std::vector <std::string> >	Server::getContent( void ) const {
+	return (_content);
+}
+
+
 // Setters ================================================================== //
 void	Server::_setName(const std::string & name)
 {
@@ -482,4 +518,9 @@ void	Server::_setEplevs(void)
 		i++;
 	}
 	return;
+}
+
+void	Server::setContent( const std::vector<std::vector <std::string> > &src )
+{
+	_content = src;
 }
