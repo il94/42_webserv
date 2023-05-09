@@ -24,12 +24,12 @@ class Location
 	/* Methods */
 	void	display( void );
 
-	std::vector<std::string>	extractAllowedMethods( void );
-	std::pair<int, std::string>	extractRedirection( void );
-	std::string					extractRoot( void );
-	bool						extractListing( void );
-	std::vector<std::string>	extractIndex( void );
-	std::vector<std::string>	extractAllowedCGI( void );
+	std::vector<std::string>	extractAllowedMethods( void ) const;
+	std::pair<int, std::string>	extractRedirection( void ) const;
+	std::string					extractRoot( void ) const;
+	bool						extractListing( void ) const;
+	std::vector<std::string>	extractIndex( void ) const;
+	std::vector<std::string>	extractAllowedCGI( void ) const;
 
 	/* Accessors */
 	void	setContent( const std::vector<std::string> & );
@@ -43,16 +43,16 @@ class Location
 	void	setIndex( const std::vector<std::string> & );
 	void	setAllowedCGI( const std::vector<std::string> & );
 
-	std::vector<std::string>	getContent( void );
-	std::string					getPath( void );
-	bool						getError( void );
+	std::vector<std::string>	getContent( void ) const;
+	std::string					getPath( void ) const;
+	bool						getError( void ) const;
 
-	std::vector<std::string>	getAllowedMethods( void );
-	std::pair<int, std::string>	getRedirection( void );
-	std::string					getRoot( void );
-	bool						getListing( void );
-	std::vector<std::string>	getIndex( void );
-	std::vector<std::string>	getAllowedCGI( void );
+	std::vector<std::string>	getAllowedMethods( void ) const;
+	std::pair<int, std::string>	getRedirection( void ) const;
+	std::string					getRoot( void ) const;
+	bool						getListing( void ) const;
+	std::vector<std::string>	getIndex( void ) const;
+	std::vector<std::string>	getAllowedCGI( void ) const;
 
 	void	pushContent( const std::string & );
 	bool	emptyContent( void );

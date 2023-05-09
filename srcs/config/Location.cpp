@@ -41,7 +41,7 @@ void	Location::display( void )
 	displayVector(getAllowedCGI(), "\tALLOWED CGI");
 }
 
-std::vector<std::string>	Location::extractAllowedMethods( void ) //verifier methodes invalides
+std::vector<std::string>	Location::extractAllowedMethods( void ) const //verifier methodes invalides
 {
 	std::vector<std::string>	result;
 
@@ -56,7 +56,7 @@ std::vector<std::string>	Location::extractAllowedMethods( void ) //verifier meth
 	return (result);
 }
 
-std::pair<int, std::string>	Location::extractRedirection( void )
+std::pair<int, std::string>	Location::extractRedirection( void ) const
 {
 	std::pair<int, std::string>	result;
 	std::string					element;
@@ -81,17 +81,20 @@ std::pair<int, std::string>	Location::extractRedirection( void )
 	return (result);
 }
 
-std::string	Location::extractRoot( void )
+std::string	Location::extractRoot( void ) const
 {
 	std::string	result;
+
+	// displayVector(getContent(), "PRINT");
 
 	result = findInFileContent(_content, "root");
 	if (result.empty())
 		result = "/";
+	// std::cout << "PRINT = " << result << std::endl;
 	return (result);
 }
 
-bool	Location::extractListing( void )
+bool	Location::extractListing( void ) const
 {
 	std::string	result;
 
@@ -99,7 +102,7 @@ bool	Location::extractListing( void )
 	return (result.empty() or result == "on");
 }
 
-std::vector<std::string>	Location::extractIndex( void )
+std::vector<std::string>	Location::extractIndex( void ) const
 {
 	std::vector<std::string>	result;
 
@@ -114,7 +117,7 @@ std::vector<std::string>	Location::extractIndex( void )
 
 
 
-std::vector<std::string>	Location::extractAllowedCGI( void )
+std::vector<std::string>	Location::extractAllowedCGI( void ) const
 {
 	std::vector<std::string>	result;
 
@@ -200,52 +203,49 @@ void	Location::setAllowedCGI(const std::vector<std::string> &src)
 {
 	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
 	{
-		if (getPath().back() == '/')
-			_index.push_back(getPath() + *it);
-		else
-			_index.push_back(getPath() + '/' + *it);
+		if ((*it)[0] == '.')
+			_allowedCGI.push_back(*it);
 	}
-	_allowedCGI = src;
 }
 
 
 
-std::vector<std::string> 	Location::getContent( void ){
+std::vector<std::string> 	Location::getContent( void ) const {
 	return (_content);
 }
 
-std::string					Location::getPath( void ){
+std::string					Location::getPath( void ) const {
 	return (_path);
 }
 
-bool				 		Location::getError( void ){
+bool				 		Location::getError( void ) const {
 	return (_error);
 }
 
 
-std::vector<std::string>	Location::getAllowedMethods( void ){
+std::vector<std::string>	Location::getAllowedMethods( void ) const {
 	return (_allowedMethods);
 }
 
-std::pair<int, std::string>	Location::getRedirection( void ){
+std::pair<int, std::string>	Location::getRedirection( void ) const {
 	return (_redirection);
 }
 
-std::string					Location::getRoot( void ){
+std::string					Location::getRoot( void ) const {
 	return (_root);
 }
 
-std::vector<std::string>	Location::getIndex( void ){
+std::vector<std::string>	Location::getIndex( void ) const {
 	return (_index);
 }
 
-bool						Location::getListing( void ){
+bool						Location::getListing( void ) const {
 	return (_listing);
 }
 
 
 
-std::vector<std::string>	Location::getAllowedCGI( void ){
+std::vector<std::string>	Location::getAllowedCGI( void ) const {
 	return (_allowedCGI);
 }
 

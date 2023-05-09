@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/30 19:36:05 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/06 22:45:24 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,15 +81,37 @@ std::vector<std::vector <std::string> > extractServers(std::string path)
 	std::vector<std::string>::iterator	start;
 	std::vector<std::string>::iterator	end;
 
+	std::vector<std::string>			element;
+
 	for (start = fileContent.begin(); start != fileContent.end(); start = end)
 	{
 		end = start + 1;
 		if (static_cast<int>(start->rfind("server", 0, sizeof("server") - 1)) != -1 and openBrace(*start, start->find("server", 0) + sizeof("server")))
 		{
 			while (end != fileContent.end() and (*end)[0] != '}')
+			{
+				element.push_back(*end);
 				end++;
+			}
 			if (end != fileContent.end() and (*end)[0] == '}')
-				result.push_back(std::vector<std::string>(start + 1, end));
+			{
+				std::string::iterator	it;
+				
+				for (std::vector<std::string>::iterator stort = element.begin(); stort != element.end(); stort++)
+				{
+					it = stort->begin();
+					while (*it == ' ' or *it == '\t')
+						it++;
+					if (stort->substr(std::distance(stort->begin(), it), sizeof("location") - 1) == "location" and (*(it + sizeof("location") - 1) == ' ' or *(it + sizeof("location") - 1) == '\t'))
+					{
+						while (not closeBrace(*stort, 1))
+							element.erase(stort);
+						element.erase(stort);
+					}
+				}
+				displayVector(element, "RESULAT");
+				result.push_back(element);
+			}
 		}
 	}
 	return (result);

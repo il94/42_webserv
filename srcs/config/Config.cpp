@@ -34,6 +34,7 @@ Config& Config::operator=(const Config &src)
 	_name = src._name;
 	_errorPages = src._errorPages;
 	_maxBodySize = src._maxBodySize;
+	_route = src._route;
 	_locations = src._locations;
 	return (*this);
 }
@@ -106,7 +107,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 	return (result);
 }
 
-std::vector<int>	Config::extractPort( void )
+std::vector<int>	Config::extractPort( void ) const
 {
 	std::vector<int>			result;
 	std::vector<std::string>	content;
@@ -122,7 +123,7 @@ std::vector<int>	Config::extractPort( void )
 	return (result);
 }
 
-std::vector<std::string>	Config::extractHost( void )
+std::vector<std::string>	Config::extractHost( void ) const
 {
 	std::vector<std::string>	result;
 	std::vector<std::string>	content;
@@ -138,7 +139,7 @@ std::vector<std::string>	Config::extractHost( void )
 	return (result);
 }
 
-std::string	Config::extractName( void )
+std::string	Config::extractName( void ) const
 {
 	std::string	result;
 
@@ -149,7 +150,7 @@ std::string	Config::extractName( void )
 	return (result);
 }
 
-std::map<std::string, std::string>	Config::extractErrorPages( void )
+std::map<std::string, std::string>	Config::extractErrorPages( void ) const
 {
 	std::map<std::string, std::string>	result;
 	std::vector<std::string>			content;
@@ -189,7 +190,7 @@ std::map<std::string, std::string>	Config::extractErrorPages( void )
 	return (result);
 }
 
-unsigned long	Config::extractMaxBodySize( void )
+unsigned long	Config::extractMaxBodySize( void ) const
 {
 	unsigned long	result;
 	std::string		tmp;
@@ -217,7 +218,7 @@ unsigned long	Config::extractMaxBodySize( void )
 	return (result);
 }
 
-Location	Config::extractRoute( void )
+Location	Config::extractRoute( void ) const
 {
 	Location	result;
 
@@ -301,50 +302,50 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 
 void	Config::setRoute( const Location &src )
 {
-	_route.setAllowedMethods(_route.extractAllowedMethods());
-	_route.setRedirection(_route.extractRedirection());
-	_route.setRoot(_route.extractRoot());
-	_route.setIndex(_route.extractIndex());
-	_route.setListing(_route.extractListing());
-	_route.setAllowedCGI(_route.extractAllowedCGI());
+	_route.setAllowedMethods(src.extractAllowedMethods());
+	_route.setRedirection(src.extractRedirection());
+	_route.setRoot(src.extractRoot());
+	_route.setIndex(src.extractIndex());
+	_route.setListing(src.extractListing());
+	_route.setAllowedCGI(src.extractAllowedCGI());
 }
 
-std::vector<std::string> 			Config::getContent( void ){
+std::vector<std::string> 			Config::getContent( void ) const {
 	return (_content);
 }
 
-bool				 				Config::getError( void ){
+bool				 				Config::getError( void ) const {
 	return (_error);
 }
 
-std::vector<int>					Config::getPort( void ){
+std::vector<int>					Config::getPort( void ) const {
 	return (_port);
 }
 
-std::vector<std::string>			Config::getHost( void ){
+std::vector<std::string>			Config::getHost( void ) const {
 	return (_host);
 }
 
-std::string							Config::getName( void ){
+std::string							Config::getName( void ) const {
 	return (_name);
 }
 
-std::map<std::string, std::string>	Config::getErrorPages( void ){
+std::map<std::string, std::string>	Config::getErrorPages( void ) const {
 	return (_errorPages);
 }
 
-std::string	Config::getErrorPages(const std::string &key){
+std::string	Config::getErrorPages(const std::string &key) {
 	return (_errorPages[key]);
 }
 
-unsigned long						Config::getMaxBodySize( void ){
+unsigned long						Config::getMaxBodySize( void ) const {
 	return (_maxBodySize);
 }
 
-std::map<std::string, Location>		Config::getLocations( void ){
+std::map<std::string, Location>		Config::getLocations( void ) const {
 	return (_locations);
 }
 
-Location							Config::getRoute( void ){
+Location							Config::getRoute( void ) const {
 	return (_route);
 }
