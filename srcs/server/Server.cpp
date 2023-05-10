@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/10 15:09:33 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 18:19:08 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,7 @@ void	Server::run(void)
 					{
 						this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 						request = this->_readRequest( cliSocket, j, request );
-						std::cerr << RED << request << END << std::endl;
+						std::cerr << YELLOW << request << END << std::endl;
 						Request	req;
 						req.parseHeader(request);
 						req.parseBody();

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 13:49:29 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 19:52:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void	Request::parseBody()
 	else if (getMethod() == "POST")
 	{
 		queryString = _reqBody;
-		queryString = queryString.substr(2 , queryString.size() - 1);
+		queryString = queryString.substr(2);
 	}
 	else
 		return ;
@@ -138,3 +138,5 @@ std::map<std::string, std::string>	Request::getHeaderM() { return _headerM; }
 std::string Request::getRequestBody() const { return _reqBody; }
 
 int	Request::getRet() const {return _ret; }
+
+void	Request::setRequestContent(std::string src) {_requestContent = src; }

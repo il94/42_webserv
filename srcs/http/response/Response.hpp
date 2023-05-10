@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 13:52:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 20:05:49 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class Response
 		int	isFile(std::string path);
 		int	isDir(std::string path);
 		
+		void		updateContentIfBoundary();
 		bool		findCGI();
 		Location	findLocation();
 		
@@ -76,6 +77,9 @@ class Response
 		std::string	_host;
 
 		std::string	_path;
+
+		/*Upload*/
+		std::string	_uploadFileName;
 
 		/*Header*/
 		std::string					_contentLength;

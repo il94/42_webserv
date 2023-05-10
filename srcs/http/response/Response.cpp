@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 15:31:46 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 20:19:54 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ void	Response::POST(void)
 	std::cerr << RED << "./html/cgi_test" + _request.getURL() << END << std::endl;
 	if (fileExist("./html/cgi_test/" + _request.getURL()))
 	{
+		updateContentIfBoundary();
 		CGI cgi(_request);
 		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
@@ -223,22 +224,25 @@ std::string	Response::readErrorPage(const std::string & path)
 }
 
 
-// int	Response::writeContent(std::string content)
-// {
-// 	std::ofstream	file;
-// 	std::string	path = _request.getURL();
+void	Response::updateContentIfBoundary()
+{
+	const std::string	body = _request.getRequestBody();
+	size_t				boundary = body.find("------WebKitFormBoundary");
+	if (boundary == std::string::npos)
+		return ;
+	std::string			requestContent = body.substr(boundary);
 
-// 	if (fileExist(path))
-// 	{
-// 		file.open(path.c_str());
-// 		if (file.is_open() == false)
-// 			return (-1);
-// 		file << content;
-// 		file.close();
-// 		return (0);
-// 	}
-// 	return (-1);
-// }
+	size_t				filenameStartPos = requestContent.find("filename=\"") + 10;
+	size_t				filenameEndPos = requestContent.find("\"", filenameStartPos);
+	if (filenameStartPos != std::string::npos && filenameEndPos != std::string::npos
+		&& filenameEndPos > filenameStartPos)
+		_uploadFileName = requestContent.substr(filenameStartPos, filenameEndPos - filenameStartPos);
+	
+	requestContent = requestContent.substr(requestContent.find("\r\n\r\n") + 4);
+	requestContent = requestContent.substr(0, requestContent.find("------WebKitFormBoundary") - 4);
+	_request.setRequestContent(requestContent);
+}
+
 
 int	Response::fileExist(std::string path)
 {
@@ -364,6 +368,8 @@ std::string	Response::writeHeader(void)
 	else
 		header = "HTTP/1.1 " + to_string(_code) + " " + getStatuMsg() + "\r\n";
 
+	if (_host != "")
+		header += "Server: " + _host + "\r\n";
 	if (!_contentLength.empty())
 		header += "Content-Length: " + _contentLength + "\r\n";
 	if (!_contentType.empty())
