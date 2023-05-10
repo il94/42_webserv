@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/04 19:02:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 10:43:02 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,10 @@ class Response
 		std::string	readErrorPage(const std::string & path);
 		int	writeContent(std::string content);
 		int	fileExist(std::string path);
+		int	isFile(std::string path);
 		int	isDir(std::string path);
 		
+		bool		Response::findCGI();
 		Location	findLocation();
 		/*listing.cpp/ Listing*/
 			std::string	generateAutoIndex();

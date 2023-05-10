@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/06 17:49:52 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 10:47:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,13 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
-	//verif si _code == 400...
+	if (_code == 400)
+	{
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+		_response = generateHeader(_response.size(), "") + _response;
+		return ;
+	}
+
 	setPath();
 	_location.display();
 
@@ -41,7 +47,8 @@ void	Response::generate()
 		_code = 413;
 	if (_code == 405 || _code == 413)
 	{
-		_response = generateHeader(0, "");
+		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+		_response = generateHeader(_response.size(), "") + _response;
 		return ;
 	}
 	else if (_location.getRedirection().first / 100 == 3)
@@ -267,21 +274,21 @@ int	Response::isDir(std::string path)
 
 bool		Response::findCGI()
 {
-	std::string					url = _request.getURL();
+	std::string	url = _request.getURL();
 
 	if (url[url.size() - 1] == '/')
 		return false;
 
 	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
-	std::string	urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
-	std::string	fileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
+	std::string					urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
+	std::string					urlFileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
 
-	if (std::find(allowedCGI.begin(),allowedCGI.end(), fileExtension)\
+	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
 		== allowedCGI.end())
 		return false;
-	
-	std::string	urlFolder = url.substr(0, rfind(url, "/"));
-	std::vector<std::string>	cgiPaths = _location.getCgi();
+
+	std::string									urlFolder = url.substr(0, rfind(url, "/"));
+	std::vector<std::string>					cgiPaths = _location.getCgi();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
 
 	while (it != cgiPaths.end())
