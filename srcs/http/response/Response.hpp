@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 10:43:02 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 13:52:01 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,11 @@ class Response
 		int	isFile(std::string path);
 		int	isDir(std::string path);
 		
-		bool		Response::findCGI();
+		bool		findCGI();
 		Location	findLocation();
+		
 		/*listing.cpp/ Listing*/
-			std::string	generateAutoIndex();
+		std::string	generateAutoIndex();
 		/*---------------*/
 
 		/*Header*/

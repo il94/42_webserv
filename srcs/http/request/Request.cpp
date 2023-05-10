@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/04 20:20:00 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 13:49:29 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
+		std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");

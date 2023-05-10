@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 10:47:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 15:31:46 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ void	Response::generate()
 	if (_code == 400)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-		_response = generateHeader(_response.size(), "") + _response;
+		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
 		return ;
 	}
-
 	setPath();
+	std::cout << YELLOW << _path << END << std::endl;
 	_location.display();
 
 	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
@@ -48,13 +48,13 @@ void	Response::generate()
 	if (_code == 405 || _code == 413)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-		_response = generateHeader(_response.size(), "") + _response;
+		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
 		return ;
 	}
 	else if (_location.getRedirection().first / 100 == 3)
 	{
 		_code = _location.getRedirection().first;
-		_response = generateHeader(_response.size(), ".html") + "\r\n" + _response;
+		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
 		return ;
 	}
 	if (_request.getMethod() == "GET")
@@ -69,6 +69,7 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
+	std::cout << _path << std::endl;
 	// if (fileExist("./html/cgi_test/" + _request.getURL()))
 	// {
 	// 	CGI cgi(_request);
@@ -274,35 +275,35 @@ int	Response::isDir(std::string path)
 
 bool		Response::findCGI()
 {
-	std::string	url = _request.getURL();
+	// std::string	url = _request.getURL();
 
-	if (url[url.size() - 1] == '/')
-		return false;
+	// if (url[url.size() - 1] == '/')
+	// 	return false;
 
-	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
-	std::string					urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
-	std::string					urlFileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
+	// std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
+	// std::string					urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
+	// std::string					urlFileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
 
-	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
-		== allowedCGI.end())
-		return false;
+	// if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
+	// 	== allowedCGI.end())
+	// 	return false;
 
-	std::string									urlFolder = url.substr(0, rfind(url, "/"));
-	std::vector<std::string>					cgiPaths = _location.getCgi();
-	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
+	// std::string									urlFolder = url.substr(0, rfind(url, "/"));
+	// std::vector<std::string>					cgiPaths = _location.getCgi();
+	// std::vector<std::string>::const_iterator	it = cgiPaths.begin();
 
-	while (it != cgiPaths.end())
-	{
-		if ((*it).find(urlFolder) != std::string::npos)
-		{
-			if (isFile(*it + urlFileName))
-			{
-				_path = *it + urlFileName;
-				return true;
-			}
-		}
-		it++;
-	}
+	// while (it != cgiPaths.end())
+	// {
+	// 	if ((*it).find(urlFolder) != std::string::npos)
+	// 	{
+	// 		if (isFile(*it + urlFileName))
+	// 		{
+	// 			_path = *it + urlFileName;
+	// 			return true;
+	// 		}
+	// 	}
+	// 	it++;
+	// }
 	return false;
 }
 
@@ -321,9 +322,14 @@ Location	Response::findLocation()
 		} else if (locationM.find((*it).substr(0, rfind(*it, "/"))) \
 			!= locationM.end()){
 			return locationM[(*it).substr(0, rfind(*it, "/"))];
+		} else if (locationM.find((*it) + "/") \
+			!= locationM.end()){
+			return locationM[(*it) + "/"];
 		}
 		it++;
 	}
+
+
 	return locationM["/"];
 }
 
@@ -396,7 +402,7 @@ void	Response::setContentType(std::string path)
 {
 	if (_contentType != "")
 		return ;
-	std::string	type = path.substr(path.find(".") + 1);
+	std::string	type = path.substr(path.rfind(".") + 1);
 	if (type == "html")
 		_contentType = "text/html";
 	else if (type == "css")

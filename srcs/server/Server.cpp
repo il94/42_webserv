@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/04 23:25:49 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 15:09:33 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ void	Server::run(void)
 						req.parseHeader(request);
 						req.parseBody();
 						//_configs[j].getLocations()["/"].display();
-						Response	rep(req, _configs[j], this->_getPort(j), this->_getName(j));
+						Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
 						rep.generate();
 
 
@@ -348,7 +348,7 @@ std::string &	Server::_readRequest( const int cliSocket, const int & j, std::str
 	size_t	rcv = 0;
 
 	this->_log(LOG, j, __func__, __LINE__, "receiving client request");
-	rcv = recv( cliSocket, request.data(), request.size() - 1, 0 );
+	rcv = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
 	if ( rcv == -1 )
 		this->_log(ERROR, j, __func__, __LINE__, "recv");
 	else
