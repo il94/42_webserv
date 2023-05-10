@@ -4,7 +4,7 @@
 
 /*=============================== Constructors ===============================*/
 
-Location::Location(){
+Location::Location() : _error(false), _listing(false){
 }
 
 Location::Location(const Location &src){
@@ -92,10 +92,6 @@ std::string	Location::extractRoot( void ) const
 	result = findInFileContent(_content, "root");
 	if (result.empty())
 		result = "/";
-	displayVector(_content, "CONTENT");
-	std::cout << "=============PILOPLP========================" << std::endl;
-	std::cout << std::endl;
-	std::cout << std::endl;
 	return (result);
 }
 
@@ -104,7 +100,7 @@ bool	Location::extractListing( void ) const
 	std::string	result;
 
 	result = findInFileContent(_content, "autoindex");
-	return (result.empty() or result == "on");
+	return (not result.empty() or result == "on");
 }
 
 std::vector<std::string>	Location::extractIndex( void ) const
