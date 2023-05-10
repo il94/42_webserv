@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 20:19:54 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 20:42:09 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 
 /*=============================== Constructors ===============================*/
 Response::Response(void): _port(8000), _host("127.0.0.1"),
-	_path(""), _contentLength("0"), _contentType(""),
+	_path(""), _uploadFileName(""), _contentLength("0"), _contentType(""),
 		_code(200), _response("") {}
 
 Response::Response(Request & request, Config & config,
 	int port, std::string host) : _port(port), _host(host), _path(""),
-	_contentLength(""), _contentType(""), _code(request.getRet()),
+	_uploadFileName(""), _contentLength(""), _contentType(""), _code(request.getRet()),
 		_request(request), _config(config), _response(""),
 			_location(findLocation()){}
 
