@@ -34,6 +34,7 @@ Config& Config::operator=(const Config &src)
 	_name = src._name;
 	_errorPages = src._errorPages;
 	_maxBodySize = src._maxBodySize;
+	_route = src._route;
 	_locations = src._locations;
 	return (*this);
 }
@@ -46,7 +47,9 @@ void	Config::display( void )
 	displayVector(getHost(), "HOST");
 	displayElement(getName(), "NAME");
 	displayMap(getErrorPages(), "ERROR PAGE");
-	displayElement(getMaxBodySize(), "MAX BODY SIZE");
+	displayElement<unsigned long>(getMaxBodySize(), "MAX BODY SIZE");
+
+	_route.display();
 
 	std::cout << std::endl;
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
@@ -57,7 +60,29 @@ void	Config::display( void )
 	}
 }
 
-std::map<std::string, Location>	Config::extractLocations( void )
+std::vector<std::string>		Config::extractContent( std::vector<std::string> src )
+{
+	std::vector<std::string>	result;
+
+	std::string::iterator		it;
+	for (std::vector<std::string>::iterator start = src.begin(); start != src.end(); start++)
+	{
+		it = start->begin();
+		while (it != start->end() && (*it == ' ' or *it == '\t'))
+			it++;
+		if (start->substr(std::distance(start->begin(), it), sizeof("location") - 1) == "location" and (*(it + sizeof("location") - 1) == ' ' or *(it + sizeof("location") - 1) == '\t'))
+		{
+			while (not closeBrace(*start, 1))
+				start++;
+		}
+		else
+			result.push_back(*start);
+	}
+	
+	return (result);
+}
+
+std::map<std::string, Location>	Config::extractLocations( std::vector<std::string> src )
 {
 	std::map<std::string, Location>		result;
 
@@ -65,7 +90,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 
 	std::string::iterator				it;
 
-	for (start = _content.begin(); start != _content.end(); start++)
+	for (start = src.begin(); start != src.end(); start++)
 	{
 		it = start->begin();
 		while (*it == ' ' or *it == '\t')
@@ -104,7 +129,7 @@ std::map<std::string, Location>	Config::extractLocations( void )
 	return (result);
 }
 
-std::vector<int>	Config::extractPort( void )
+std::vector<int>	Config::extractPort( void ) const
 {
 	std::vector<int>			result;
 	std::vector<std::string>	content;
@@ -120,7 +145,7 @@ std::vector<int>	Config::extractPort( void )
 	return (result);
 }
 
-std::vector<std::string>	Config::extractHost( void )
+std::vector<std::string>	Config::extractHost( void ) const
 {
 	std::vector<std::string>	result;
 	std::vector<std::string>	content;
@@ -136,7 +161,7 @@ std::vector<std::string>	Config::extractHost( void )
 	return (result);
 }
 
-std::string	Config::extractName( void )
+std::string	Config::extractName( void ) const
 {
 	std::string	result;
 
@@ -147,7 +172,7 @@ std::string	Config::extractName( void )
 	return (result);
 }
 
-std::map<std::string, std::string>	Config::extractErrorPages( void )
+std::map<std::string, std::string>	Config::extractErrorPages( void ) const
 {
 	std::map<std::string, std::string>	result;
 	std::vector<std::string>			content;
@@ -187,7 +212,7 @@ std::map<std::string, std::string>	Config::extractErrorPages( void )
 	return (result);
 }
 
-unsigned long	Config::extractMaxBodySize( void )
+unsigned long	Config::extractMaxBodySize( void ) const
 {
 	unsigned long	result;
 	std::string		tmp;
@@ -212,6 +237,14 @@ unsigned long	Config::extractMaxBodySize( void )
 		else if (*it == 'K')
 			result *= 1000;
 	}
+	return (result);
+}
+
+Location	Config::extractRoute( void ) const
+{
+	Location	result;
+
+	result.setContent(getContent());
 	return (result);
 }
 
@@ -275,12 +308,15 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
+		it->second = getRouteApplyContent(it->second.getContent());
+		it->second.setRoot(it->second.extractRoot());
 		it->second.setAllowedMethods(it->second.extractAllowedMethods());
 		it->second.setRedirection(it->second.extractRedirection());
-		it->second.setRoot(it->second.extractRoot());
 		it->second.setIndex(it->second.extractIndex());
 		it->second.setListing(it->second.extractListing());
 		it->second.setAllowedCGI(it->second.extractAllowedCGI());
+		it->second.setCGIBin(it->second.extractCGIBin());
+		it->second.setUploadPath(it->second.extractUploadPath());
 		// if (it->second.getError() == true)
 		// {
 		// 	_locations.erase(it);
@@ -289,38 +325,62 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 	}
 }
 
-std::vector<std::string> 			Config::getContent( void ){
+void	Config::setRoute( const Location &src )
+{
+	_route.setRoot(src.extractRoot());
+	_route.setAllowedMethods(src.extractAllowedMethods());
+	_route.setRedirection(src.extractRedirection());
+	_route.setIndex(src.extractIndex());
+	_route.setListing(src.extractListing());
+	_route.setAllowedCGI(src.extractAllowedCGI());
+	_route.setCGIBin(src.extractCGIBin());
+	_route.setUploadPath(src.extractUploadPath());
+}
+
+std::vector<std::string> 			Config::getContent( void ) const {
 	return (_content);
 }
 
-bool				 				Config::getError( void ){
+bool				 				Config::getError( void ) const {
 	return (_error);
 }
 
-std::vector<int>					Config::getPort( void ){
+std::vector<int>					Config::getPort( void ) const {
 	return (_port);
 }
 
-std::vector<std::string>			Config::getHost( void ){
+std::vector<std::string>			Config::getHost( void ) const {
 	return (_host);
 }
 
-std::string							Config::getName( void ){
+std::string							Config::getName( void ) const {
 	return (_name);
 }
 
-std::map<std::string, std::string>	Config::getErrorPages( void ){
+std::map<std::string, std::string>	Config::getErrorPages( void ) const {
 	return (_errorPages);
 }
 
-std::string	Config::getErrorPages(const std::string &key){
+std::string							Config::getErrorPages(const std::string &key) {
 	return (_errorPages[key]);
 }
 
-unsigned long						Config::getMaxBodySize( void ){
+unsigned long						Config::getMaxBodySize( void ) const {
 	return (_maxBodySize);
 }
 
-std::map<std::string, Location>		Config::getLocations( void ){
+std::map<std::string, Location>		Config::getLocations( void ) const {
 	return (_locations);
+}
+
+Location							Config::getRoute( void ) const {
+	return (_route);
+}
+
+Location							Config::getRouteApplyContent( const std::vector<std::string> &content )
+{
+	Location	result(_route);
+
+	result.setContent(content);
+	return (result);
 }
