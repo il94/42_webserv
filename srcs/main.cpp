@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/09 15:41:39 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/11 18:19:48 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	main(int ac __attribute__((unused)), char **av __attribute((unused)))
 	// std::cout << "\tPort : 8080"		<< std::endl;
 
 
-	// server.run();
+	server.run();
 
 	
 	return 0;

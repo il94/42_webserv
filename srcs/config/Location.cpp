@@ -37,6 +37,7 @@ Location& Location::operator=(const Location &src)
 
 void	Location::display( void )
 {
+	displayElement(getPath(), "\tPATH");
 	displayVector(getAllowedMethods(), "\tALLOWED METHODS");
 	displayPair(getRedirection(), "\tREDIRECTION");
 	displayElement(getRoot(), "\tROOT");

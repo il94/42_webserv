@@ -309,6 +309,8 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
 		it->second = getRouteApplyContent(it->second.getContent());
+
+		it->second.setPath(it->first);
 		it->second.setRoot(it->second.extractRoot());
 		it->second.setAllowedMethods(it->second.extractAllowedMethods());
 		it->second.setRedirection(it->second.extractRedirection());
@@ -328,6 +330,7 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 void	Config::setRoute( const Location &src )
 {
 	_route.setRoot(src.extractRoot());
+	_route.setPath(src.getRoot());
 	_route.setAllowedMethods(src.extractAllowedMethods());
 	_route.setRedirection(src.extractRedirection());
 	_route.setIndex(src.extractIndex());

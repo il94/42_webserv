@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 13:07:19 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/11 18:54:24 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,7 +292,7 @@ bool		Response::findCGI()
 		== allowedCGI.end())
 		return false;
 
-	std::vector<std::string>					cgiPaths = _location.getCgi();
+	std::vector<std::string>					cgiPaths = _location.getCGIBin();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
 
 	std::vector<std::string>					splitedURL = _request.splitURL();
@@ -330,6 +330,13 @@ Location	Response::findLocation()
 	std::vector<std::string>					splitedURL = _request.splitURL();
 	std::vector<std::string>::const_iterator	it = splitedURL.begin();
 
+	// locationM["/css"].display();
+
+	// for (std::map<std::string, Location>::iterator ito = locationM.begin(); ito != locationM.end(); ito++)
+	// {
+	// 	ito->second.display();
+	// }
+
 	while (it != splitedURL.end())
 	{
 		if (locationM.find(*it) != locationM.end())
@@ -346,8 +353,9 @@ Location	Response::findLocation()
 		it++;
 	}
 
+	return _config.getRoute();
 
-	return locationM["/"];
+	// return locationM["/"];
 }
 
 /*============================= HTTP HEADER =================================*/
@@ -458,17 +466,27 @@ void	Response::setPath()
 
 	std::string	locationPath = _location.getPath();
 
-	locationPath = locationPath[locationPath.length() - 1] == '/' ?\
-		locationPath : locationPath + "/";
+
+	std::cout << "LOCATION PATH = " << locationPath << std::endl;
+
+
+
+
+	if (!locationPath.empty())
+		locationPath = locationPath[locationPath.length() - 1] == '/' ?\
+			locationPath : locationPath + "/";
 		
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
 	
 	_path.erase(_path.find(locationPath), locationPath.size());
+
+
 	if (isDir(_path))
 	{
 		_path = _path[_path.length() - 1] == '/' ? _path : _path + "/";
 		_path= _path + _location.getIndex()[0];
 	}
+	// _path = '/' + _path;
 }
 
 std::string	Response::getResponse() {return _response;}
