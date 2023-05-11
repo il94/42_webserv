@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 20:42:09 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/11 17:29:28 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,35 +279,48 @@ int	Response::isDir(std::string path)
 
 bool		Response::findCGI()
 {
-	// std::string	url = _request.getURL();
+	std::string	url = _request.getURL();
 
-	// if (url[url.size() - 1] == '/')
-	// 	return false;
+	if (url[url.size() - 1] == '/')
+		return false;
 
-	// std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
-	// std::string					urlFileName = url.substr(rfind(url, "/"), url.size() - 1);
-	// std::string					urlFileExtension = urlFileName.substr(rfind(url, "."), urlFileName.size() - 1);
+	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
+	std::string					urlFileName = url.substr(rfind(url, "/"));
+	std::string					urlFileExtension = urlFileName.substr(rfind(url, "."));
 
-	// if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
-	// 	== allowedCGI.end())
-	// 	return false;
+	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
+		== allowedCGI.end())
+		return false;
 
-	// std::string									urlFolder = url.substr(0, rfind(url, "/"));
-	// std::vector<std::string>					cgiPaths = _location.getCgi();
-	// std::vector<std::string>::const_iterator	it = cgiPaths.begin();
+	std::vector<std::string>					cgiPaths = _location.getCgi();
+	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
 
-	// while (it != cgiPaths.end())
-	// {
-	// 	if ((*it).find(urlFolder) != std::string::npos)
-	// 	{
-	// 		if (isFile(*it + urlFileName))
-	// 		{
-	// 			_path = *it + urlFileName;
-	// 			return true;
-	// 		}
-	// 	}
-	// 	it++;
-	// }
+	std::vector<std::string>					splitedURL = _request.splitURL();
+	std::vector<std::string>::const_iterator	yt;
+
+	std::string									newPath;
+
+	while (it != cgiPaths.end())
+	{
+		yt = splitedURL.begin();
+		while (yt != cgiPaths.end())
+		{
+			if ((*it).find(*yt) != std::string::npos)
+			{
+				newPath = *it;
+				newPath.erase(newPath.find(*yt), newPath.size() - newPath.find(*yt));
+				newPath = newPath[newPath.size() - 1] != '/' ? newPath + "/": newPath;
+				newPath += url;
+				if (isFile(newPath))
+				{
+					_path = newPath;
+					return true;
+				}
+			}
+			yt++;
+		}
+		it++;
+	}
 	return false;
 }
 
@@ -451,7 +464,6 @@ void	Response::setPath()
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
 	
 	_path.erase(_path.find(locationPath), locationPath.size());
-	std::cout << PURPLE << _path << END << std::endl;
 	if (isDir(_path))
 	{
 		_path = _path[_path.length() - 1] == '/' ? _path : _path + "/";
