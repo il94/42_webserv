@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:13:21 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 19:52:47 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
+		std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");
@@ -68,10 +69,6 @@ void	Request::parseHeader(const std::string & req)
 	if (badFirstLine())
 		return ;
 
-	if (_data[1][0] == '/')
-		_data[1] = _data[1].substr(_data[1].find("/") + 1, _data[1].size() - 1);
-
-	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
 	size_t	boundary = std::string::npos;
 	while (std::getline(stream, tmp))
@@ -108,7 +105,7 @@ void	Request::parseBody()
 	else if (getMethod() == "POST")
 	{
 		queryString = _reqBody;
-		queryString = queryString.substr(2 , queryString.size() - 1);
+		queryString = queryString.substr(2);
 	}
 	else
 		return ;
@@ -141,3 +138,5 @@ std::map<std::string, std::string>	Request::getHeaderM() { return _headerM; }
 std::string Request::getRequestBody() const { return _reqBody; }
 
 int	Request::getRet() const {return _ret; }
+
+void	Request::setRequestContent(std::string src) {_requestContent = src; }

@@ -55,10 +55,8 @@ class Server
 		typedef		std::vector<std::vector <std::string> >	t_vvString;
 
 							Server(void);
-							Server(const Server & src);
 							~Server(void);
 
-		Server			 &	operator=(const Server & srv);
 
 		void				run(void);
 		void				add2epoll(int cliSocket);
@@ -99,6 +97,8 @@ class Server
 		t_mEpollClient		_cliSocket;
 
 		void				_initSrv(void);
+		int					_acceptConnection(const int & j);
+		std::string		  &	_readRequest( const int cliSocket, const int & j, std::string & request );
 
 		size_t	  			_getNbSrv(void)					const;
 		const int		  &	_getEplFd(void)					const;
@@ -120,6 +120,9 @@ class Server
 		void				setContent( const t_vvString & );
 
 		void				_log(const int error, int i, const char *func, const int line, const char *msg);
+
+							Server(const Server & src);
+		Server			 &	operator=(const Server & srv);
 };
 
 #endif

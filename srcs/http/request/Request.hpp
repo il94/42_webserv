@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:55 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:12:06 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/10 19:51:26 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class	Request
 		std::map<std::string, std::string>	getHeaderM();
 		std::map<std::string, std::string>	getQueryMap() const;
 
+		void	setRequestContent(std::string str);
 		bool	badFirstLine();
 		std::vector<std::string>	splitURL();
 
