@@ -67,6 +67,7 @@ class Config
 	std::map<std::string, Location>		getLocations( void ) const ;
 
 	Location							getRoute( void ) const ;
+	Location							getRouteApplyContent( const std::vector<std::string> & );
 
 	private :
 

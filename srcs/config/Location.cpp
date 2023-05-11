@@ -29,6 +29,7 @@ Location& Location::operator=(const Location &src)
 	_index = src._index;
 	_allowedCGI = src._allowedCGI;
 	_CGIBin = src._CGIBin;
+	_uploadPath = src._uploadPath;
 	return (*this);
 }
 
@@ -40,9 +41,10 @@ void	Location::display( void )
 	displayPair(getRedirection(), "\tREDIRECTION");
 	displayElement(getRoot(), "\tROOT");
 	displayVector(getIndex(), "\tINDEX");
-	displayElement(getListing(), "\tLISTING");
+	displayElement<bool>(getListing(), "\tLISTING");
 	displayVector(getAllowedCGI(), "\tALLOWED CGI");
 	displayVector(getCGIBin(), "\tCGI BIN");
+	displayElement(getUploadPath(), "\tUPLOAD PATH");
 }
 
 std::vector<std::string>	Location::extractAllowedMethods( void ) const //verifier methodes invalides
@@ -50,13 +52,6 @@ std::vector<std::string>	Location::extractAllowedMethods( void ) const //verifie
 	std::vector<std::string>	result;
 
 	result = multipleFindInFileContent(_content, "allowed_method");
-
-	if (result.empty())
-	{
-		result.push_back("GET");
-		result.push_back("POST");
-		result.push_back("DELETE");
-	}
 	return (result);
 }
 
@@ -90,17 +85,15 @@ std::string	Location::extractRoot( void ) const
 	std::string	result;
 
 	result = findInFileContent(_content, "root");
-	if (result.empty())
-		result = "/";
 	return (result);
 }
 
-bool	Location::extractListing( void ) const
+std::string	Location::extractListing( void ) const
 {
 	std::string	result;
 
 	result = findInFileContent(_content, "autoindex");
-	return (not result.empty() or result == "on");
+	return (result);
 }
 
 std::vector<std::string>	Location::extractIndex( void ) const
@@ -108,11 +101,6 @@ std::vector<std::string>	Location::extractIndex( void ) const
 	std::vector<std::string>	result;
 
 	result = multipleFindInFileContent(_content, "index");
-	if (result.empty())
-	{
-		result.push_back(getPath() + "index.html");
-		result.push_back(getPath() + "index.php");
-	}
 	return (result);
 }
 
@@ -121,12 +109,6 @@ std::vector<std::string>	Location::extractAllowedCGI( void ) const
 	std::vector<std::string>	result;
 
 	result = multipleFindInFileContent(_content, "allowed_CGI");
-
-	if (result.empty())
-	{
-		result.push_back(".py");
-		result.push_back(".php");
-	}
 	return (result);
 }
 
@@ -135,9 +117,14 @@ std::vector<std::string>	Location::extractCGIBin( void ) const
 	std::vector<std::string>	result;
 
 	result = multipleFindInFileContent(_content, "CGI_bin");
+	return (result);
+}
 
-	if (result.empty())
-		result.push_back("/");
+std::string	Location::extractUploadPath( void ) const
+{
+	std::string	result;
+
+	result = findInFileContent(_content, "upload_path");
 	return (result);
 }
 
@@ -145,6 +132,14 @@ std::vector<std::string>	Location::extractCGIBin( void ) const
 
 void	Location::setContent(const std::vector<std::string> &src){
 	_content = src;
+}
+
+void	Location::pushContent( const std::string &src ){
+	_content.push_back(src);
+}
+
+bool	Location::emptyContent( void ){
+	return (_content.empty());
 }
 
 void	Location::setPath( const std::string &src ){
@@ -161,8 +156,6 @@ void	Location::setError(const bool &src){
 
 void	Location::setAllowedMethods(const std::vector<std::string> &src)
 {
-	_allowedMethods.clear();
-
 	std::vector<std::string>::const_iterator it = src.begin();
 
 	for (it = src.begin(); it != src.end(); it++)
@@ -180,28 +173,39 @@ void	Location::setAllowedMethods(const std::vector<std::string> &src)
 	}
 }
 
-void	Location::setRedirection(const std::pair<int, std::string> &src){
-	_redirection = src;
+void	Location::setRedirection(const std::pair<int, std::string> &src)
+{
+	if (src.second.empty() == false)
+		_redirection = src;
 }
 
 void	Location::setRoot(const std::string &src)
 {
-	if (not src.empty() and src[0] != '/')
-		_root = '/' + src;
-	else
-		_root = src;
+	if (src.empty() == false)
+	{
+		if (src[0] != '/')
+			_root = '/' + src;
+		else
+			_root = src;
+		if (_root.back() != '/')
+			_root += '/';
+	}
+
 }
 
 void	Location::setIndex(const std::vector<std::string> &src)
 {
-	_index.clear();
-
-	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
+	if (src.empty() == false)
 	{
-		if (getPath().back() == '/')
-			_index.push_back(getPath() + *it);
-		else
-			_index.push_back(getPath() + '/' + *it);
+		_index.clear();
+
+		for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
+		{
+			if ((*it)[0] == '/')
+				_index.push_back(getRoot() + it->substr(1, it->size() - 1));
+			else
+				_index.push_back(getRoot() + *it);
+		}
 	}
 }
 
@@ -209,21 +213,63 @@ void	Location::setListing(const bool &src){
 	_listing = src;
 }
 
-void	Location::setAllowedCGI(const std::vector<std::string> &src)
+void	Location::setListing(const std::string &src)
 {
-	_allowedCGI.clear();
-
-	for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
+	if (src.empty() == false)
 	{
-		if ((*it)[0] == '.')
-			_allowedCGI.push_back(*it);
+		if (src == "on")
+			_listing = true;
+		else if (src == "off")
+			_listing = false;
 	}
 }
 
-void	Location::setCGIBin(const std::vector<std::string> &src){
-	_CGIBin = src;
+void	Location::setAllowedCGI(const std::vector<std::string> &src)
+{
+	if (src.empty() == false)
+	{
+		for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
+		{
+			if (it->empty() == false and (*it)[0] == '.')
+				_allowedCGI.push_back(*it);
+		}
+	}
 }
 
+void	Location::setCGIBin(const std::vector<std::string> &src)
+{
+	if (src.empty() == false)
+	{
+		std::string	tmp;
+		for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); it++)
+		{
+			tmp.clear();
+
+			if ((*it)[0] == '/')
+				tmp = getRoot() + it->substr(1, it->size() - 1);
+			else
+				tmp = getRoot() + *it;
+			if (tmp.back() != '/')
+				tmp += '/';
+			_CGIBin.push_back(tmp);
+		}
+	}
+}
+
+void	Location::setUploadPath(const std::string &src)
+{
+	if (src.empty() == false)
+	{
+		_uploadPath.clear();
+
+		if (src[0] == '/')
+			_uploadPath = getRoot() + src.substr(1, src.size() - 1);
+		else
+			_uploadPath = getRoot() + src;
+		if (_uploadPath.back() != '/')
+			_uploadPath += '/';
+	}
+}
 
 std::vector<std::string> 	Location::getContent( void ) const {
 	return (_content);
@@ -265,11 +311,6 @@ std::vector<std::string>	Location::getCGIBin( void ) const {
 	return (_CGIBin);
 }
 
-
-void	Location::pushContent( const std::string &src ){
-	_content.push_back(src);
-}
-
-bool	Location::emptyContent( void ){
-	return (_content.empty());
+std::string					Location::getUploadPath( void ) const {
+	return (_uploadPath);
 }

@@ -47,7 +47,7 @@ void	Config::display( void )
 	displayVector(getHost(), "HOST");
 	displayElement(getName(), "NAME");
 	displayMap(getErrorPages(), "ERROR PAGE");
-	displayElement(getMaxBodySize(), "MAX BODY SIZE");
+	displayElement<unsigned long>(getMaxBodySize(), "MAX BODY SIZE");
 
 	_route.display();
 
@@ -308,14 +308,15 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 
 	for (std::map<std::string, Location>::iterator it = _locations.begin(); it != _locations.end(); it++)
 	{
-		// it->second = getRoute();
+		it->second = getRouteApplyContent(it->second.getContent());
+		it->second.setRoot(it->second.extractRoot());
 		it->second.setAllowedMethods(it->second.extractAllowedMethods());
 		it->second.setRedirection(it->second.extractRedirection());
-		it->second.setRoot(it->second.extractRoot());
 		it->second.setIndex(it->second.extractIndex());
 		it->second.setListing(it->second.extractListing());
 		it->second.setAllowedCGI(it->second.extractAllowedCGI());
 		it->second.setCGIBin(it->second.extractCGIBin());
+		it->second.setUploadPath(it->second.extractUploadPath());
 		// if (it->second.getError() == true)
 		// {
 		// 	_locations.erase(it);
@@ -326,13 +327,14 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 
 void	Config::setRoute( const Location &src )
 {
+	_route.setRoot(src.extractRoot());
 	_route.setAllowedMethods(src.extractAllowedMethods());
 	_route.setRedirection(src.extractRedirection());
-	_route.setRoot(src.extractRoot());
 	_route.setIndex(src.extractIndex());
 	_route.setListing(src.extractListing());
 	_route.setAllowedCGI(src.extractAllowedCGI());
 	_route.setCGIBin(src.extractCGIBin());
+	_route.setUploadPath(src.extractUploadPath());
 }
 
 std::vector<std::string> 			Config::getContent( void ) const {
@@ -375,6 +377,10 @@ Location							Config::getRoute( void ) const {
 	return (_route);
 }
 
-// Location							Config::getRoute( void ) const {
-// 	return (_route);
-// }
+Location							Config::getRouteApplyContent( const std::vector<std::string> &content )
+{
+	Location	result(_route);
+
+	result.setContent(content);
+	return (result);
+}

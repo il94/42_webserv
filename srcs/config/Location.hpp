@@ -27,13 +27,16 @@ class Location
 	std::vector<std::string>	extractAllowedMethods( void ) const;
 	std::pair<int, std::string>	extractRedirection( void ) const;
 	std::string					extractRoot( void ) const;
-	bool						extractListing( void ) const;
+	std::string					extractListing( void ) const;
 	std::vector<std::string>	extractIndex( void ) const;
 	std::vector<std::string>	extractAllowedCGI( void ) const;
 	std::vector<std::string>	extractCGIBin( void ) const;
+	std::string					extractUploadPath( void ) const;
 
 	/* Accessors */
 	void	setContent( const std::vector<std::string> & );
+	void	pushContent( const std::string & );
+	bool	emptyContent( void );
 	void	setPath( const std::string & );
 	void	setError( const bool & );
 
@@ -41,9 +44,11 @@ class Location
 	void	setRedirection( const std::pair<int, std::string> & );
 	void	setRoot( const std::string & );
 	void	setListing( const bool & );
+	void	setListing( const std::string & );
 	void	setIndex( const std::vector<std::string> & );
 	void	setAllowedCGI( const std::vector<std::string> & );
 	void	setCGIBin( const std::vector<std::string> & );
+	void	setUploadPath( const std::string & );
 
 	std::vector<std::string>	getContent( void ) const;
 	std::string					getPath( void ) const;
@@ -56,9 +61,8 @@ class Location
 	std::vector<std::string>	getIndex( void ) const;
 	std::vector<std::string>	getAllowedCGI( void ) const;
 	std::vector<std::string>	getCGIBin( void ) const;
+	std::string					getUploadPath( void ) const;
 
-	void	pushContent( const std::string & );
-	bool	emptyContent( void );
 
 
 	private :
@@ -75,6 +79,7 @@ class Location
 	std::vector<std::string>		_index;				//index *
 	std::vector<std::string>		_allowedCGI;		//allowed_CGI *
 	std::vector<std::string>		_CGIBin;			//cgi_bin *
+	std::string						_uploadPath;		//upload_path
 };
 
 #endif
