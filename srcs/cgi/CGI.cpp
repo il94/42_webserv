@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/05 17:31:09 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 13:50:33 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ std::string CGI::execCGI(std::string scriptPath)
 			close(pipefd_input[1]);
 
 			close(pipefd_output[1]);
-			char buffer[1024] = {0};;
+			char buffer[1024] = {0};
 			while (read(pipefd_output[0], buffer, 1023) > 0) {
 				output += buffer;
 			}

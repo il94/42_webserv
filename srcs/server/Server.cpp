@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/10 18:19:08 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 14:03:28 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,9 +218,9 @@ void	Server::setConfigs( char **av )
 		_names.push_back(DEFAULT_NAME);
 		_ports.push_back(DEFAULT_PORT);
 	}
-	for (int i = 0; i < _ports.size(); i++)
+	for (size_t i = 0; i < _ports.size(); i++)
 	{
-		for (int j = i + 1; j < _ports.size(); j++)
+		for (size_t j = i + 1; j < _ports.size(); j++)
 		{
 			while (_ports[j] == _ports[i])
 			{
@@ -240,7 +240,7 @@ void	Server::run(void)
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 	std::string		request;
 	size_t			sizeRequest	= 1000000;
-	size_t			rcv;
+	//size_t			rcv;
 
 
 	std::cout << "Server log : " << std::endl;
@@ -252,7 +252,7 @@ void	Server::run(void)
 		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
 		for (int i = 0; i < nbEvents; i++)
 		{
-			for (int j = 0; j < this->_getNbSrv(); j++)
+			for (size_t j = 0; j < this->_getNbSrv(); j++)
 			{
 				if ( cliEvents[i].data.fd == this->_getSrvFd( j ) )
 				{
@@ -270,25 +270,29 @@ void	Server::run(void)
 					// Receive client request
 					if ( cliEvents[i].events & EPOLLIN )
 					{
-						this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 						request = this->_readRequest( cliSocket, j, request );
-						std::cerr << YELLOW << request << END << std::endl;
-						Request	req;
-						req.parseHeader(request);
-						req.parseBody();
-						//_configs[j].getLocations()["/"].display();
-						Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
-						rep.generate();
+						if ( request.size() > 0 )
+						{
+							this->_log(LOG, j, __func__, __LINE__, "receiving client request");
+							std::cerr << YELLOW << request << END << std::endl;
+							Request	req;
+							req.parseHeader(request);
+							if (req.getRet() == 200)
+								req.parseBody();
+							//_configs[j].getLocations()["/"].display();
+							Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
+							rep.generate();
 
 
-						
-						std::cout << RED << rep.getResponse() << END << std::endl;
-						// index j tu peux recuperer name + port
-						// this->_getName( j ) pour avoir le nom
-						// this->_getPort( j ) pour avoir le port
-						// Testing page ====================
-						send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
-						// =================================
+							
+							std::cout << RED << rep.getResponse() << END << std::endl;
+							// index j tu peux recuperer name + port
+							// this->_getName( j ) pour avoir le nom
+							// this->_getPort( j ) pour avoir le port
+							// Testing page ====================
+							send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
+							// =================================
+						}
 					}
 				}
 				this->_log(LOG, j, __func__, __LINE__, "listening");
@@ -381,7 +385,7 @@ void	Server::_initSrv(void)
 
 std::string &	Server::_readRequest( const int cliSocket, const int & j, std::string & request)
 {
-	size_t	rcv = 0;
+	int	rcv = 0;
 
 	this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 	rcv = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
@@ -392,6 +396,7 @@ std::string &	Server::_readRequest( const int cliSocket, const int & j, std::str
 		request[ rcv ] = '\0';
 		request.resize( rcv );
 	}
+	//std::cout << "Size request =\t" << request.size() << " and request =\t" << request << std::endl;
 	// Uncomment the line below to pur on screen the request
 	//std::cout << std::endl << request << std::endl;
 	//std::cout << "size request = " << request.size() << " | rcv = " << rcv << std::endl;
@@ -408,6 +413,7 @@ int	Server::_acceptConnection(const int & j)
 		this->_log(ERROR, j, __func__, __LINE__, "accept");
 	else
 		this->_log(LOG, j, __func__, __LINE__, "connection established");
+	//fcntl( cliSocket, F_SETFL, O_NONBLOCK);
 	return( cliSocket );
 }
 
