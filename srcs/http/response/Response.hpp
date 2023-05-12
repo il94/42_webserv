@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:30 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 20:05:49 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 15:56:23 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <dirent.h>
-#include "../../cgi/CGI.hpp"
 #include "../../utils/utils.hpp"
 #include "../request/Request.hpp"
 #include "../../config/Config.hpp"
+#include "../../cgi/CGI.hpp"
 
 class Response
 {
@@ -41,6 +41,8 @@ class Response
 		void		setConfig(Config &config);
 		void		setPath();
 
+		std::string	getUploadFileName();
+		std::string	getUploadPath();
 		std::string	getResponse();
 
 		/*Response Utils*/
