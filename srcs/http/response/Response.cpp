@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 12:57:41 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 14:53:42 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,41 +73,40 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
-	std::cout << _path << std::endl;
-	// if (fileExist("./html/cgi_test/" + _request.getURL()))
-	// {
-	// 	CGI cgi(_request);
-	// 	_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
-	// 	std::cout << YELLOW << _response << END << std::endl;
-	// 	while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
-	// 		_response.erase(0, 1);
-	// 	size_t	bodyPosition = _response.find("\r\n\r\n");
-	// 	size_t	boundary = std::string::npos;
+	if (findCGI() == true)
+	{
+		CGI cgi(_request);
+		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+		std::cout << YELLOW << _response << END << std::endl;
+		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
+			_response.erase(0, 1);
+		size_t	bodyPosition = _response.find("\r\n\r\n");
+		size_t	boundary = std::string::npos;
 
-	// 	std::string			tmp;
-	// 	std::istringstream	stream(_response);
+		std::string			tmp;
+		std::istringstream	stream(_response);
 		
-	// 	while (std::getline(stream, tmp))
-	// 	{
-	// 		if (tmp == "")
-	// 			break;
-	// 		boundary = tmp.find(":");
-	// 		if (boundary != std::string::npos)
-	// 		{
-	// 			if (boundary > bodyPosition)
-	// 				break;
-	// 			std::string	key(tmp, 0, boundary);
-	// 			std::string	value(tmp, boundary + 2);
-	// 			if (key == "Status")
-	// 				_code = std::atoi(value.c_str());
-	// 			else if (key == "Content-Type")
-	// 				_contentType = value;
-	// 		}
-	// 	}
-	// 	_response = _response.substr(bodyPosition + 2);
-	// 	_response = generateHeader(_response.size(), "") + _response;
-	// 	return ;
-	// }
+		while (std::getline(stream, tmp))
+		{
+			if (tmp == "")
+				break;
+			boundary = tmp.find(":");
+			if (boundary != std::string::npos)
+			{
+				if (boundary > bodyPosition)
+					break;
+				std::string	key(tmp, 0, boundary);
+				std::string	value(tmp, boundary + 2);
+				if (key == "Status")
+					_code = std::atoi(value.c_str());
+				else if (key == "Content-Type")
+					_contentType = value;
+			}
+		}
+		_response = _response.substr(bodyPosition + 2);
+		_response = generateHeader(_response.size(), "") + _response;
+		return ;
+	}
 	if (_code == 200)
 		_code = readContent();
 	else
@@ -117,8 +116,7 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
-	std::cerr << RED << "./html/cgi_test" + _request.getURL() << END << std::endl;
-	if (fileExist("./html/cgi_test/" + _request.getURL()))
+	if (findCGI() == true)
 	{
 		updateContentIfBoundary();
 		CGI cgi(_request);
@@ -283,14 +281,14 @@ int	Response::isDir(std::string path)
 
 bool		Response::findCGI()
 {
+
 	std::string	url = _request.getURL();
 
 	if (url[url.size() - 1] == '/')
 		return false;
 
 	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
-	std::string					urlFileName = url.substr(rfind(url, "/"));
-	std::string					urlFileExtension = urlFileName.substr(rfind(url, "."));
+	std::string					urlFileExtension = url.substr(rfind(url, "."));
 
 	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
 		== allowedCGI.end())
@@ -303,11 +301,12 @@ bool		Response::findCGI()
 	std::vector<std::string>::const_iterator	yt;
 
 	std::string									newPath;
+	
 
 	while (it != cgiPaths.end())
 	{
 		yt = splitedURL.begin();
-		while (yt != cgiPaths.end())
+		while (yt != splitedURL.end())
 		{
 			if ((*it).find(*yt) != std::string::npos)
 			{
@@ -334,13 +333,6 @@ Location	Response::findLocation()
 	std::vector<std::string>					splitedURL = _request.splitURL();
 	std::vector<std::string>::const_iterator	it = splitedURL.begin();
 
-	// locationM["/css"].display();
-
-	// for (std::map<std::string, Location>::iterator ito = locationM.begin(); ito != locationM.end(); ito++)
-	// {
-	// 	ito->second.display();
-	// }
-
 	while (it != splitedURL.end())
 	{
 		if (locationM.find(*it) != locationM.end())
@@ -356,10 +348,8 @@ Location	Response::findLocation()
 		}
 		it++;
 	}
-
+	// need to verif / location
 	return _config.getRoute();
-
-	// return locationM["/"];
 }
 
 /*============================= HTTP HEADER =================================*/
@@ -470,10 +460,6 @@ void	Response::setPath()
 
 	std::string	locationPath = _location.getPath();
 
-
-	std::cout << "Location PATH = " << locationPath << std::endl;
-
-
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
 
 	if (locationPath.empty() == false)
@@ -483,17 +469,21 @@ void	Response::setPath()
 		_path.erase(_path.find(locationPath), locationPath.size() - 1);
 	}
 	
-	
-
-	std::cout << "1 PATH = " << _path << std::endl;
-	
-	std::cout << "2 PATH = " << _path << std::endl;
-
 	if (isDir(_path))
 	{
-		_path= _location.getIndex()[0];
+		std::vector<std::string>					indexs= _location.getIndex();
+		std::vector<std::string>::const_iterator	it = indexs.begin();
+
+		while (it != indexs.end())
+		{
+			if (isFile(*it))
+			{
+				_path = *it;
+				return ;
+			}
+			it++;
+		}
 	}
-	// _path = '/' + _path;
 }
 
 std::string	Response::getResponse() {return _response;}
