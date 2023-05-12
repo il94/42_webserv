@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 10:01:29 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 12:57:41 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,11 @@ Response::Response(void): _port(8000), _host("127.0.0.1"),
 Response::Response(Request & request, Config & config,
 	int port, std::string host) : _port(port), _host(host), _path(""),
 	_uploadFileName(""), _contentLength(""), _contentType(""), _code(request.getRet()),
-		_request(request), _config(config), _response(""),
-			_location(findLocation()){}
+		_request(request), _config(config), _response("")
+{
+	if (_code != 400)
+		_location = findLocation();
+}
 
 Response::~Response(void) {}
 
@@ -30,6 +33,7 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
+	std::cout << RED  << " code = " << _request.getRet() << std::endl;
 	if (_code == 400)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -467,21 +471,23 @@ void	Response::setPath()
 	std::string	locationPath = _location.getPath();
 
 
-	std::cout << "LOCATION PATH = " << locationPath << std::endl << "ROOT =  " << _location.getRoot() << std::endl;
+	std::cout << "Location PATH = " << locationPath << std::endl;
 
 
-
+	_path = root.substr(0, root.size() - 1) + _request.getURL();
 
 	if (locationPath.empty() == false)
 	{
 		locationPath = locationPath[locationPath.length() - 1] == '/' ?\
 			locationPath : locationPath + "/";
+		_path.erase(_path.find(locationPath), locationPath.size() - 1);
 	}
-		
-	_path = root.substr(0, root.size() - 1) + _request.getURL();
 	
-	_path.erase(_path.find(locationPath), locationPath.size());
+	
 
+	std::cout << "1 PATH = " << _path << std::endl;
+	
+	std::cout << "2 PATH = " << _path << std::endl;
 
 	if (isDir(_path))
 	{

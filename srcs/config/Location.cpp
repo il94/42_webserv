@@ -184,10 +184,7 @@ void	Location::setRoot(const std::string &src)
 {
 	if (src.empty() == false)
 	{
-		if (src[0] != '/')
-			_root = '/' + src;
-		else
-			_root = src;
+		_root = src;
 		if (_root.back() != '/')
 			_root += '/';
 	}

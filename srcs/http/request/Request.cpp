@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/10 19:52:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 12:30:54 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	Request::parseHeader(const std::string & req)
 	while (ss >> tmp)
 		_data.push_back(tmp);
 
-	if (badFirstLine())
+	if (badFirstLine() == true)
 		return ;
 
 	std::istringstream	stream(req);
