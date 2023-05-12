@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/11 18:54:24 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/12 10:01:29 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	Response::generate()
 		return ;
 	}
 	setPath();
-	std::cout << YELLOW << _path << END << std::endl;
+	std::cout << YELLOW << "path = " <<  _path << END << std::endl;
 	_location.display();
 
 	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
@@ -467,14 +467,16 @@ void	Response::setPath()
 	std::string	locationPath = _location.getPath();
 
 
-	std::cout << "LOCATION PATH = " << locationPath << std::endl;
+	std::cout << "LOCATION PATH = " << locationPath << std::endl << "ROOT =  " << _location.getRoot() << std::endl;
 
 
 
 
-	if (!locationPath.empty())
+	if (locationPath.empty() == false)
+	{
 		locationPath = locationPath[locationPath.length() - 1] == '/' ?\
 			locationPath : locationPath + "/";
+	}
 		
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
 	
@@ -483,8 +485,7 @@ void	Response::setPath()
 
 	if (isDir(_path))
 	{
-		_path = _path[_path.length() - 1] == '/' ? _path : _path + "/";
-		_path= _path + _location.getIndex()[0];
+		_path= _location.getIndex()[0];
 	}
 	// _path = '/' + _path;
 }
