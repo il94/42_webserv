@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 14:53:42 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 21:31:13 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
-	std::cout << RED  << " code = " << _request.getRet() << std::endl;
 	if (_code == 400)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -41,9 +40,7 @@ void	Response::generate()
 		return ;
 	}
 	setPath();
-	std::cout << YELLOW << "path = " <<  _path << END << std::endl;
-	_location.display();
-
+	
 	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
 		== _location.getAllowedMethods().end())
 			_code = 405;
@@ -283,12 +280,12 @@ bool		Response::findCGI()
 {
 
 	std::string	url = _request.getURL();
-
-	if (url[url.size() - 1] == '/')
+	if (url[url.size() - 1] == '/' or rfind(url, ".") == -1)
 		return false;
 
 	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
-	std::string					urlFileExtension = url.substr(rfind(url, "."));
+	
+	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
 	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
 		== allowedCGI.end())
@@ -348,6 +345,7 @@ Location	Response::findLocation()
 		}
 		it++;
 	}
+
 	// need to verif / location
 	return _config.getRoute();
 }
@@ -455,20 +453,13 @@ void	Response::setConfig(Config &config)
 void	Response::setPath()
 {
 	std::string	root = _location.getRoot();
-	
-	root = root[root.length() - 1] == '/' ? root : root + "/";
 
 	std::string	locationPath = _location.getPath();
 
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
-
-	if (locationPath.empty() == false)
-	{
-		locationPath = locationPath[locationPath.length() - 1] == '/' ?\
-			locationPath : locationPath + "/";
-		_path.erase(_path.find(locationPath), locationPath.size() - 1);
-	}
 	
+	if (root != locationPath)
+		_path.erase(_path.find(locationPath), locationPath.size() - 1);
 	if (isDir(_path))
 	{
 		std::vector<std::string>					indexs= _location.getIndex();

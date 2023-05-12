@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 12:30:54 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 18:42:15 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
-		std::cout << PURPLE << URL << END << std::endl;
+		// std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");

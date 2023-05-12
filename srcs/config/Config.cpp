@@ -108,6 +108,10 @@ std::map<std::string, Location>	Config::extractLocations( std::vector<std::strin
 					element.first += *it;
 					it++;
 				}
+				if (element.first.front() != '/')
+					element.first = '/' + element.first;
+				if (element.first.back() != '/')
+					element.first += '/';
 				element.second.setPath(element.first);
 
 				if (openBrace(*start, std::distance(start->begin(), it + 1)))
@@ -330,7 +334,7 @@ void	Config::setLocations(const std::map<std::string, Location> &src)
 void	Config::setRoute( const Location &src )
 {
 	_route.setRoot(src.extractRoot());
-	_route.setPath(src.getRoot());
+	_route.setPath(_route.getRoot());
 	_route.setAllowedMethods(src.extractAllowedMethods());
 	_route.setRedirection(src.extractRedirection());
 	_route.setIndex(src.extractIndex());

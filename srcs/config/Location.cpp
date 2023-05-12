@@ -143,10 +143,9 @@ bool	Location::emptyContent( void ){
 	return (_content.empty());
 }
 
-void	Location::setPath( const std::string &src ){
-	if (not src.empty() and src[0] != '/')
-		_path = '/' + src;
-	else
+void	Location::setPath( const std::string &src )
+{
+	if (src.empty() == false)
 		_path = src;
 }
 
@@ -178,6 +177,11 @@ void	Location::setRedirection(const std::pair<int, std::string> &src)
 {
 	if (src.second.empty() == false)
 		_redirection = src;
+	else
+	{
+		_redirection.first = 200;
+		_redirection.second = "OK";
+	}
 }
 
 void	Location::setRoot(const std::string &src)
