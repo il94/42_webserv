@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 13:50:33 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 17:55:28 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,15 @@
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request){}
+CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath(""){}
 
 CGI::~CGI(){}
+
+void	CGI::setUploadInfo(std::string uploadFilename, std::string uploadPath)
+{
+	_uploadFilename = uploadFilename;
+	_uploadPath = uploadPath;
+}
 
 void	CGI::setEnv()
 {
@@ -24,6 +30,8 @@ void	CGI::setEnv()
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
 	header["QUERY_STRING"] = _request.getRequestContent();
+	header["FILE_NAME"] = _uploadFilename;
+	header["UPLOAD_PATH"] = _uploadPath;
 
 	_env = new char *[header.size() + 1];
 	int	j = 0;

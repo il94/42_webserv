@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 14:53:42 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/12 18:12:23 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,8 +119,11 @@ void	Response::POST(void)
 	if (findCGI() == true)
 	{
 		updateContentIfBoundary();
+		std::cout << RED << _path << END << std::endl;
+		//_path = "./html/cgi_test/cgi-bin/upload.sh";
 		CGI cgi(_request);
-		_response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
+		cgi.setUploadInfo(_uploadFileName, _location.getUploadPath());
+		_response = cgi.execCGI(_path);
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 			_response.erase(0, 1);
 		size_t	bodyPosition = _response.find("\r\n\r\n");
@@ -485,5 +488,9 @@ void	Response::setPath()
 		}
 	}
 }
+
+std::string	Response::getUploadFileName() {return _uploadFileName;}
+
+std::string	Response::getUploadPath() {return _location.getUploadPath();}
 
 std::string	Response::getResponse() {return _response;}
