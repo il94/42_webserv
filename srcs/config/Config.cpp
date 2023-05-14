@@ -10,8 +10,10 @@ Config::Config() : _error(false) {
 	_name = DEFAULT_NAME;
 	_maxBodySize = DEFAULT_MAX_BODY_SIZE;
 	_errorPages.insert(std::pair<std::string, std::string>("400", "default_files/400.html"));
+	_errorPages.insert(std::pair<std::string, std::string>("403", "default_files/403.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("404", "default_files/404.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("405", "default_files/405.html"));
+	_errorPages.insert(std::pair<std::string, std::string>("413", "default_files/413.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("500", "default_files/500.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("default", "default_files/defaultError.html"));
 	_defaultLocation.setIndex("default_files/index.html");

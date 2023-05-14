@@ -1,0 +1,83 @@
+body{
+	max-width: 1920px;
+	max-height: 1080px;
+}
+
+nav input{
+text-align: center;
+border-radius: 0;
+border: 1px solid #2F54F2;
+}
+
+#avocat{
+    padding: 0.6em 1em;
+    background-color: white;
+    color: #2F54F2;
+    font-weight: bold;
+}
+
+#connexion{
+    text-align: center;
+    border: 1px solid #2F54F2;
+    padding: 0.6em 1em;
+    background-color: #2F54F2;
+    color: white;
+    font-weight: bold;
+}
+
+section{
+	display: flex;
+	width: 100%;
+	height: 700px;
+
+	align-items: center;
+	padding-left: 5%;
+
+	background-size:100% 100%;
+	background-position: center;
+	background-color: #0c207a;
+}
+
+.formulaire{
+	position: absolute;
+	display: flex;
+	width: 30%;
+	height: 30%;
+	box-shadow: 0px 2px 3px 1px #656565;
+
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	justify-content: space-around;
+	background-color: white;
+}
+
+.formulaire > h1{
+	text-align: center;
+	font-weight: bold;
+	font-size: 120%;
+}
+
+.formulaire > input{
+	min-width: 80%;
+	min-height: 10%;
+	max-width: 80%;
+	max-height: 20%;
+	width: 20em;
+	height: 40px;
+	border: 0px;
+	background-color: rgba(226, 226, 225, 0.902);
+	/* color:#BBB; */
+	box-shadow: 0px 1px 2px 0px #656565;
+	text-align: center;
+	font-size: 95%;
+	display: block;
+	background-position-y: 50%;
+	background-repeat: no-repeat;
+}
+
+#rechercher{
+	background-color: #2F54F2;
+	font-weight: bold;
+	color: white;
+}

@@ -73,7 +73,7 @@ void	Request::parseHeader(const std::string & req)
 	}
 	size_t	bodyPosition = req.find("\r\n\r\n");
 	if (bodyPosition != std::string::npos)
-		_reqBody = req.substr(bodyPosition + 2);
+		_reqBody = req.substr(bodyPosition + 4);
 }
 
 void	Request::parseBody()
@@ -93,7 +93,7 @@ void	Request::parseBody()
 	else if (getMethod() == "POST")
 	{
 		queryString = _reqBody;
-		queryString = queryString.substr(2);
+		// queryString = queryString.substr(2);
 	}
 	else
 		return ;

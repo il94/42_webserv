@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/14 14:00:42 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/14 19:52:29 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,16 @@ void	Response::generate()
 	}
 	setPath();
 	
-	if (std::find(_location.getAllowedMethods().begin(), _location.getAllowedMethods().end(), _request.getMethod())\
-		== _location.getAllowedMethods().end())
+	std::vector<std::string> tmpAllowedMethods = _location.getAllowedMethods();
+	
+	std::cout << GREEN << "TAILLE = " << _request.getRequestBody().size() << END << std::endl;		
+	if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
+		== tmpAllowedMethods.end())
 			_code = 405;
 	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
+	{
 		_code = 413;
+	}
 	if (_code == 405 || _code == 413)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -148,12 +153,12 @@ void	Response::POST(void)
 		}
 		_response = _response.substr(bodyPosition + 2);
 	}
-	else
+	else if (_code != 403)
 	{
 		_code = 204;
 		_response = "";
 	}
-	if (_code == 500)
+	if (_code == 403 or _code == 500)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = generateHeader(_response.size(), "") + _response;
 }
@@ -216,15 +221,14 @@ std::string	Response::readErrorPage(const std::string & path)
 	{
 		file.open(path.c_str(), std::ifstream::in);
 		if (!file.is_open())
-			return ("<!DOCTYPE html>\n<html><title>404</title><body> Cant open error page !</body></html>\n");
+			return (readErrorPage(_config.getErrorPages("500")));
 		buffer << file.rdbuf();
 		file.close();
 		_contentType = "text/html";
 		return (buffer.str());
 	}
-	return ("<!DOCTYPE html>\n<html><title>404</title><body>Error page does not exist </body></html>\n");
+	return (readErrorPage(_config.getErrorPages("404")));
 }
-
 
 void	Response::updateContentIfBoundary()
 {
@@ -290,9 +294,19 @@ bool		Response::findCGI()
 	
 	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
+	std::cout << GREEN << urlFileExtension << END << std::endl;
+
+	if (urlFileExtension != ".py" and urlFileExtension != ".php" and urlFileExtension != ".sh")
+		return (false);
+	
 	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\
 		== allowedCGI.end())
+	{
+		_code = 403;
 		return false;
+	}
+
+	std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	std::vector<std::string>					cgiPaths = _location.getCGIBin();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();

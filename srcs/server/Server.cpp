@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/14 14:49:49 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/14 17:02:01 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,7 +277,7 @@ void	Server::run(void)
 							Request	req;
 							req.parseHeader(request);
 							if (req.getRet() == 200)
-								req.parseBody();
+								req.parseBody();								
 							//_configs[j].getLocations()["/"].display();
 							Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
 							rep.generate();
