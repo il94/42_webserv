@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/12 21:45:49 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/14 14:00:42 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -350,7 +350,7 @@ Location	Response::findLocation()
 	}
 
 	// need to verif / location
-	return _config.getRoute();
+	return _config.getDefaultLocation();
 }
 
 /*============================= HTTP HEADER =================================*/

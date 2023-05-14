@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/12 21:46:02 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/14 14:49:49 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,14 +189,13 @@ void	Server::setConfigs( char **av )
 
 		tmp.setContent(tmp.extractContent(*it));
 
+		tmp.setPort(tmp.extractPort());
 		tmp.setHost(tmp.extractHost());
 		tmp.setName(tmp.extractName());
-		tmp.setPort(tmp.extractPort());
-		tmp.setErrorPages(tmp.extractErrorPages());
 		tmp.setMaxBodySize(tmp.extractMaxBodySize());
 
-		tmp.setRoute(tmp.extractRoute());
-
+		tmp.setDefaultLocation(tmp.extractDefaultLocation());
+		tmp.setErrorPages(tmp.extractErrorPages());
 		tmp.setLocations(tmp.extractLocations(*it));
 
 		if (tmp.getError() == false)
