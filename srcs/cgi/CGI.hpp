@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   CGI.hpp                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/11 22:09:47 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 15:55:05 by auzun            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef CGI_HPP
 # define CGI_HPP
 
@@ -29,11 +17,16 @@ class CGI
 		CGI();
 		CGI(Request &request);
 		~CGI();
-
+		
+		
+		void	setUploadInfo(std::string uploadFilename, std::string uploadPath);
 		void	setEnv();
 		std::string	execCGI(std::string scriptName);
 	private:
 		Request			_request;
+		std::string		_uploadFilename;
+		std::string		_uploadPath;
+
 		char				**_env;
 };
 

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   string.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/02 22:08:07 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/30 19:36:05 by ilandols         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "utils.hpp"
 
 #include "utils.hpp"
@@ -39,6 +27,11 @@ std::string	to_string(size_t n)
 
 std::vector<std::string> fileToVector( std::string path )
 {
+	std::vector<std::string>	result;
+	
+	if (path.empty() == true)
+		return (result);
+
 	std::ifstream	toRead(path.c_str());
 
 	if	(!toRead.good())
@@ -48,7 +41,6 @@ std::vector<std::string> fileToVector( std::string path )
 	}
 
 	std::string 				buffer;
-	std::vector<std::string>	result;
 
 	while (std::getline(toRead, buffer))
 		result.push_back(buffer);
@@ -71,28 +63,6 @@ bool	openBrace(std::string &src, const int index)
 	while (it != src.end() and (*it == ' ' or *it == '\t'))
 		it++;
 	return (*it == '{');
-}
-
-std::vector<std::vector <std::string> > extractServers(std::string path)
-{
-	std::vector<std::vector <std::string> > result;
-
-	std::vector<std::string>			fileContent = fileToVector(path);
-	std::vector<std::string>::iterator	start;
-	std::vector<std::string>::iterator	end;
-
-	for (start = fileContent.begin(); start != fileContent.end(); start = end)
-	{
-		end = start + 1;
-		if (static_cast<int>(start->rfind("server", 0, sizeof("server") - 1)) != -1 and openBrace(*start, start->find("server", 0) + sizeof("server")))
-		{
-			while (end != fileContent.end() and (*end)[0] != '}')
-				end++;
-			if (end != fileContent.end() and (*end)[0] == '}')
-				result.push_back(std::vector<std::string>(start + 1, end));
-		}
-	}
-	return (result);
 }
 
 std::string	findInFileContent(const std::vector<std::string> &file, const std::string &src)

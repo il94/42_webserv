@@ -1,29 +1,26 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   CGI.cpp                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/11 22:09:53 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/24 15:54:52 by auzun            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "CGI.hpp"
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request){}
+CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath(""){}
 
 CGI::~CGI(){}
+
+void	CGI::setUploadInfo(std::string uploadFilename, std::string uploadPath)
+{
+	_uploadFilename = uploadFilename;
+	_uploadPath = uploadPath;
+}
 
 void	CGI::setEnv()
 {
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	
+	header["QUERY_STRING"] = _request.getRequestContent();
+	header["FILE_NAME"] = _uploadFilename;
+	header["UPLOAD_PATH"] = _uploadPath;
+
 	_env = new char *[header.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
@@ -79,8 +76,8 @@ std::string CGI::execCGI(std::string scriptPath)
 			close(pipefd_input[1]);
 
 			close(pipefd_output[1]);
-			char buffer[1024];
-			while (read(pipefd_output[0], buffer, 1024) > 0) {
+			char buffer[1024] = {0};
+			while (read(pipefd_output[0], buffer, 1023) > 0) {
 				output += buffer;
 			}
 			close(pipefd_output[0]);

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Request.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/31 12:50:45 by auzun             #+#    #+#             */
-/*   Updated: 2023/04/23 17:13:21 by auzun            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Request.hpp"
 
 /*=============================== Constructors ===============================*/
@@ -50,6 +38,7 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
+		// std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");
@@ -65,13 +54,9 @@ void	Request::parseHeader(const std::string & req)
 	while (ss >> tmp)
 		_data.push_back(tmp);
 
-	if (badFirstLine())
+	if (badFirstLine() == true)
 		return ;
 
-	if (_data[1][0] == '/')
-		_data[1] = _data[1].substr(_data[1].find("/") + 1, _data[1].size() - 1);
-
-	std::cout << _data[1] << std::endl;
 	std::istringstream	stream(req);
 	size_t	boundary = std::string::npos;
 	while (std::getline(stream, tmp))
@@ -88,7 +73,7 @@ void	Request::parseHeader(const std::string & req)
 	}
 	size_t	bodyPosition = req.find("\r\n\r\n");
 	if (bodyPosition != std::string::npos)
-		_reqBody = req.substr(bodyPosition + 2);
+		_reqBody = req.substr(bodyPosition + 4);
 }
 
 void	Request::parseBody()
@@ -108,7 +93,7 @@ void	Request::parseBody()
 	else if (getMethod() == "POST")
 	{
 		queryString = _reqBody;
-		queryString = queryString.substr(2 , queryString.size() - 1);
+		// queryString = queryString.substr(2);
 	}
 	else
 		return ;
@@ -141,3 +126,5 @@ std::map<std::string, std::string>	Request::getHeaderM() { return _headerM; }
 std::string Request::getRequestBody() const { return _reqBody; }
 
 int	Request::getRet() const {return _ret; }
+
+void	Request::setRequestContent(std::string src) {_requestContent = src; }

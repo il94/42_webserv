@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/03 18:12:38 by halvarez         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
@@ -42,16 +30,17 @@ typedef struct s_config
 class Server
 {
 	public:
-		typedef		struct sockaddr				t_sockaddr;
-		typedef 	struct sockaddr_in			t_sockaddr_in;
-		typedef		struct epoll_event			t_epollEv;
-		typedef		std::vector < std::string >	t_vString;
-		typedef		std::vector < int		 >	t_vInt;
-		typedef		std::vector < t_epollEv	 >	t_vEplEv;
-		typedef		std::vector	< t_sockaddr >	t_vSockaddr;
-		typedef		std::vector < t_flag	 >	t_vFlag;
-		typedef		std::vector	< Config >		t_vConfig;
-		typedef		std::map< int, t_epollEv >	t_mEpollClient;
+		typedef		struct sockaddr							t_sockaddr;
+		typedef 	struct sockaddr_in						t_sockaddr_in;
+		typedef		struct epoll_event						t_epollEv;
+		typedef		std::vector < std::string >				t_vString;
+		typedef		std::vector < int		 >				t_vInt;
+		typedef		std::vector < t_epollEv	 >				t_vEplEv;
+		typedef		std::vector	< t_sockaddr >				t_vSockaddr;
+		typedef		std::vector < t_flag	 >				t_vFlag;
+		typedef		std::vector	< Config >					t_vConfig;
+		typedef		std::map< int, t_epollEv >				t_mEpollClient;
+		typedef		std::vector<std::vector <std::string> >	t_vvString;
 
 							Server(void);
 							~Server(void);
@@ -60,8 +49,12 @@ class Server
 		void				run(void);
 		void				add2epoll(int cliSocket);
 		void				closeCliSocket(int cliSocket);
+
 		void				display(void);
-		void				setConfigs(std::vector<std::vector <std::string> > & srv);
+		t_vvString			extractContent( const std::string & ) ;
+		// void				setConfigs( const std::string & );
+		void				setConfigs( char **av );
+
 
 		class WrongSize : public std::exception {
 			public:
@@ -77,6 +70,8 @@ class Server
 		};
 
 	private:
+		std::vector<std::vector <std::string> >	_content;
+
 		t_vConfig			_configs;
 		int					_eplfd;
 		int					_nbSrv; //= listen port number (ie = _ports.size())
@@ -102,11 +97,15 @@ class Server
 		const t_epollEv	  &	_getEpollEv(const size_t & i)	const;
 		size_t				_getNbSockets(void)				const;
 
+		t_vvString			getContent( void ) const ;
+
 		void				_setName(const std::string & name);
 		void				_setPort(const int & port);
 		void				_setSrvFd(const int & fd);
 		void				_setSockaddr(void);
 		void				_setEplevs(void);
+
+		void				setContent( const t_vvString & );
 
 		void				_log(const int error, int i, const char *func, const int line, const char *msg);
 

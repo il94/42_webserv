@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/28 14:29:41 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/02 17:15:27 by ilandols         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <iostream>
 
 #include <string>
@@ -25,13 +13,12 @@
 int	main(int ac __attribute__((unused)), char **av __attribute((unused)))
 {		
 	Server	server;
-	
-	std::vector<std::vector <std::string> > _configs;
 
-	if (av[0] and av[1])
-		_configs = extractServers(av[1]);
+	// if (av[0] and av[1])
+	// 	server.setConfigs(av[1]);
 
-	server.setConfigs(_configs);
+	server.setConfigs(av);
+
 
 	server.display();
 
