@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/14 19:52:29 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/15 14:51:28 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,11 @@ void	Response::generate()
 	
 	std::vector<std::string> tmpAllowedMethods = _location.getAllowedMethods();
 	
-	std::cout << GREEN << "TAILLE = " << _request.getRequestBody().size() << END << std::endl;		
 	if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
 		== tmpAllowedMethods.end())
 			_code = 405;
 	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
-	{
 		_code = 413;
-	}
 	if (_code == 405 || _code == 413)
 	{
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -186,8 +183,8 @@ int	Response::readContent(void)
 	std::ifstream	file;
 	std::stringstream	buffer;
 
-	_response = "";
-	if (fileExist(_path))
+	_response = "";	
+	if (isFile(_path))
 	{
 		file.open(_path.c_str(), std::ifstream::in);
 		if (file.is_open() == false)
@@ -203,6 +200,11 @@ int	Response::readContent(void)
 	{
 		_response = generateAutoIndex();
 		_contentType = "text/html";
+	}
+	else if (isDir(_path) == true)
+	{
+		_response = readErrorPage(_config.getErrorPages("422"));
+		return (422);
 	}
 	else
 	{
@@ -227,7 +229,7 @@ std::string	Response::readErrorPage(const std::string & path)
 		_contentType = "text/html";
 		return (buffer.str());
 	}
-	return (readErrorPage(_config.getErrorPages("404")));
+	return (readErrorPage(_config.getErrorPages("default_404")));
 }
 
 void	Response::updateContentIfBoundary()
@@ -418,6 +420,7 @@ void	Response::initStatusMsg()
 	_statusMsg[403] = "Forbidden";
 	_statusMsg[404] = "Not Found";
 	_statusMsg[405] = "Method Not Allowed";
+	_statusMsg[422] = "Unprocessable Entity";
 	_statusMsg[500] = "Internal Server Error";
 }
 
@@ -474,9 +477,9 @@ void	Response::setPath()
 	std::string	locationPath = _location.getPath();
 
 	_path = root.substr(0, root.size() - 1) + _request.getURL();
-	
+
 	if (root != locationPath)
-		_path.erase(_path.find(locationPath), locationPath.size() - 1);
+		_path.erase(_path.find(locationPath.substr(0, locationPath.size() - 1)), locationPath.size() - 1);
 	if (isDir(_path))
 	{
 		std::vector<std::string>					indexs= _location.getIndex();
@@ -484,7 +487,7 @@ void	Response::setPath()
 
 		while (it != indexs.end())
 		{
-			if (isFile(*it))
+			if (isFile(*it) and it->find(_path) != std::string::npos)
 			{
 				_path = *it;
 				return ;

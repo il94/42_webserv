@@ -2,10 +2,13 @@
 
 std::string	Response::generateAutoIndex()
 {
-	std::string	path = "." + _request.getURL();
+	std::string	path = _path;
 	DIR 		*dir = opendir(path.c_str());
 	std::vector<std::string>	hosts = _config.getHost();
 	std::vector<int>			ports = _config.getPort();
+
+	std::cout << GREEN << "SHIT = " << path << END << std::endl;
+	std::cout << GREEN << "PATH = " << _path << END << std::endl;		
 
 	if (dir == NULL)
 	{
@@ -27,8 +30,8 @@ std::string	Response::generateAutoIndex()
 	struct dirent	*readedDir = readdir(dir);
 	while (readedDir)
 	{
-		autoIndex += "\t\t<p><a href=\"http://" + _host\
-			+ ":" + to_string(_port) + "/" + path + "/" + std::string(readedDir->d_name)\
+		autoIndex += "\t\t<p><a href=\"http://" + std::string("localhost") \
+			+ ":" + to_string(_port) +  _request.getURL() + "/" + std::string(readedDir->d_name)\
 			+ "\">" + std::string(readedDir->d_name) + "</a></p>\n";
 		readedDir = readdir(dir);
 	}
