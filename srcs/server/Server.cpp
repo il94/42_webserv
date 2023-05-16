@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/14 17:02:01 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/16 21:35:56 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 #include "../http/request/Request.hpp"
 #include "../http/response/Response.hpp"
 
-#define DEF_PORT	8080
 #define MAX_EVENTS	64
 
 // Constructors ============================================================= //

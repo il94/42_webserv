@@ -1,3 +1,4 @@
+
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
@@ -5,19 +6,20 @@
 #include <sys/epoll.h>
 
 #include "../config/Config.hpp"
+#include "Client.hpp"
 
-typedef enum e_fd
-{
-	SRV,
-	EPL
-}			t_fd;
+//typedef enum e_fd
+//{
+//	SRV,
+//	EPL
+//}			t_fd;
 
 typedef enum e_flag
 {
-	LOG				= 0,
-	EMPTY 			= 0,
-	ERROR 			= 1 << 0,
-}	t_flag;
+	LOG			= 0,
+	NO_ERROR	= 0,
+	ERROR		= 1 << 0
+}			t_flag;
 
 typedef struct s_config
 {
