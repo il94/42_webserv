@@ -8,12 +8,6 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
-//typedef enum e_fd
-//{
-//	SRV,
-//	EPL
-//}			t_fd;
-
 typedef enum e_flag
 {
 	LOG			= 0,
