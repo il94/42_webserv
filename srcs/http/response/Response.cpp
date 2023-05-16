@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/15 14:51:28 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/16 18:47:30 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,7 +289,7 @@ bool		Response::findCGI()
 {
 
 	std::string	url = _request.getURL();
-	if (url[url.size() - 1] == '/' or rfind(url, ".") == -1)
+	if (url[url.size() - 1] == '/' or rfind(url, ".") == static_cast< size_t >( -1 ))
 		return false;
 
 	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
