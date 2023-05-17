@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 17:23:11 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 18:24:01 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,8 +258,14 @@ void	Server::run(void)
 					if ( cliEvents[i].events & EPOLLOUT )
 					{
 						// send response
-						std::cout << client.rep << std::endl;
-						send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+						if ( client.rep.size() )
+						{
+							std::cout << client.rep << std::endl;
+							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+							exit( 42 );
+							client.rep.clear();
+						}
+						//exit( 42 );
 					}
 					if ( cliEvents[i].events & EPOLLIN )
 					{
@@ -269,21 +275,20 @@ void	Server::run(void)
 						// Receive client request
 						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 						{
-							request = this->_readRequest( cliSocket, j, request );
+							request = this->_readRequest( cliSocket, -1, request );
 							if ( request.size() > 0 )
 							{
-								this->_log(LOG, j, __func__, __LINE__, "receiving client request");
+								//this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 								//std::cerr << YELLOW << request << END << std::endl;
 								Request	req;
 								req.parseHeader(request);
 								if (req.getRet() == 200)
 									req.parseBody();								
 								//_configs[j].getLocations()["/"].display();
-								Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
+								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 
 								rep.generate();
 								client.rep = rep.getResponse();
-								//std::cout << client.rep << std::endl;
 								//std::cout << RED << rep.getResponse() << END << std::endl;
 								// Testing send ====================
 								//send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
@@ -398,7 +403,7 @@ int	Server::_acceptConnection(const int & j, Client & client __attribute__((unus
 	else
 	{
 		this->_log(LOG, j, __func__, __LINE__, "connection established");
-		if ( client.add( cliSocket ) == false )
+		if ( client.add( cliSocket, this->_getPort( j ), this->_getName( j ) ) == false )
 		{
 			close( cliSocket );
 			return ( -1 );

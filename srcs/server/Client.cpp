@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 16:39:16 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 18:25:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,12 @@
 #include "Client.hpp"
 
 // Constructors ============================================================= //
-Client::Client( void ) : _eplfd( ), _socket( ), _flag( ), _buffer(  ) 
+Client::Client( void ) : _eplfd( ), _socket( ), _port(  ), _name(  ), _flag( ), _buffer(  ) 
 {
 	return;
 }
 
-Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _flag( ), _buffer(  ) 
+Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _port(  ), _name(  ),  _flag( ), _buffer(  ) 
 {
 	return;
 }
@@ -57,7 +57,7 @@ int	Client::find( const int & socket ) const
 	return ( -1 );
 }
 
-bool	Client::add( const int & socket )
+bool	Client::add( const int & socket, const int & port, const std::string & name )
 {
 	struct epoll_event	ev;
 	bool				is_set	= this->setSocket( socket );
@@ -69,9 +69,9 @@ bool	Client::add( const int & socket )
 		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1
 		)
 	{
-		// create a no error flag
+		this->_port.insert( std::pair< int, int >( socket, port ) );
+		this->_name.insert( std::pair< int, std::string >( socket, name ) );
 		this->_flag.insert( std::pair< int, t_flag >( socket, NO_ERROR ) );
-		// create an empty buffer
 		this->_buffer[ socket ];
 		return ( true );
 	}
@@ -142,6 +142,16 @@ const int &	Client::getEpollFd( void ) const
 size_t	Client::size( void ) const
 {
 	return ( this->_socket.size() );
+}
+
+const int &	Client::getPort( const int & socket ) const
+{
+	return ( this->_port.at( socket)  );
+}
+
+const std::string &	Client::getName( const int & socket ) const
+{
+	return ( this->_name.at( socket ) );
 }
 
 const t_flag &	Client::getFlag( const int & socket ) const
