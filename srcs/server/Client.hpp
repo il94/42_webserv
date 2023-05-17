@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 18:05:53 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 21:27:11 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@
 
 typedef enum e_flag
 {
-	LOG			= 0,
 	NO_ERROR	= 0,
 	ERROR		= 1 << 0
 }			t_flag;
@@ -38,7 +37,7 @@ class Client
 		// Socket management ---------------------------------------------------
 		int								find( const int & socket ) const;
 		bool							add( const int & socket, const int & port, const std::string & name );
-		void							remove( const int & socket );
+		void							remove( int & socket );
 		
 		// Response management -------------------------------------------------
 		// void							newResponse( const int & socket, const Response rep );

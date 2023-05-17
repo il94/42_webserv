@@ -8,15 +8,6 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
-/*
-typedef enum e_flag
-{
-	LOG			= 0,
-	NO_ERROR	= 0,
-	ERROR		= 1 << 0
-}			t_flag;
-*/
-
 typedef struct s_config
 {
 	size_t						size;
@@ -31,12 +22,12 @@ class Server
 		typedef		struct sockaddr							t_sockaddr;
 		typedef 	struct sockaddr_in						t_sockaddr_in;
 		typedef		struct epoll_event						t_epollEv;
-		typedef		std::vector < std::string >				t_vString;
-		typedef		std::vector < int		 >				t_vInt;
-		typedef		std::vector < t_epollEv	 >				t_vEplEv;
-		typedef		std::vector	< t_sockaddr >				t_vSockaddr;
-		typedef		std::vector < t_flag	 >				t_vFlag;
-		typedef		std::vector	< Config >					t_vConfig;
+		typedef		std::vector < std::string	>			t_vString;
+		typedef		std::vector < int			>			t_vInt;
+		typedef		std::vector < t_epollEv		>			t_vEplEv;
+		typedef		std::vector	< t_sockaddr	>			t_vSockaddr;
+		typedef		std::vector < t_flag		>			t_vFlag;
+		typedef		std::vector	< Config		>			t_vConfig;
 		typedef		std::vector<std::vector <std::string> >	t_vvString;
 
 							Server(void);
@@ -78,7 +69,7 @@ class Server
 
 		void				_initSrv(void);
 		int					_acceptConnection(const int & j, Client & client);
-		std::string		  &	_readRequest( int & cliSocket, const int & j, std::string & request );
+		std::string		  &	_readRequest( Client & client, int & cliSocket, std::string & request );
 
 		size_t	  			_getNbSrv(void)					const;
 		const int		  &	_getEplFd(void)					const;

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 20:38:25 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 21:26:12 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,24 +259,26 @@ void	Server::run(void)
 				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
 					cliSocket = cliEvents[i].data.fd;
-					if ( cliEvents[i].events & EPOLLOUT )
+					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT )
 					{
 						// send response
 						if ( client.rep.size() )
 						{
-							std::cout << client.rep << std::endl;
+							//std::cout << client.rep << std::endl;
 							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+							client.remove( cliSocket );
 							client.rep.clear();
+							client.rep.resize( 0 );
 						}
 						//std::cout << "Inside EPOLLOUT client loop" << std::endl;
 					}
-					if ( cliEvents[i].events & EPOLLIN )
+					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
 						request.clear();
 						request.resize( sizeRequest );
 						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 						{
-							request = this->_readRequest( cliSocket, -1, request );
+							request = this->_readRequest( client, cliSocket, request );
 							if ( request.size() > 0 )
 							{
 								//std::cout << YELLOW << request << END << std::endl;
@@ -375,22 +377,28 @@ void	Server::_initSrv(void)
 	return;
 }
 
-std::string &	Server::_readRequest( int & cliSocket, const int & j __attribute__((unused)), std::string & request)
+std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string & request)
 {
-	int	rcv = 0;
+	int	bytes = 0;
 
-	rcv = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
-	if ( rcv == -1 )
+	bytes = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
+	if ( bytes == 0 || bytes == -1 )
 	{
 		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
-		if ( close( cliSocket ) == -1 )
-			this->_displayError( __func__, __LINE__, "_readRequest/close" );
+		try
+		{
+			client.remove( cliSocket );
+		}
+		catch ( std::exception & e )
+		{
+			std::cerr << e.what() << std::endl;
+		}
 		cliSocket = -1;
 	}
 	else
 	{
-		request[ rcv ] = '\0';
-		request.resize( rcv );
+		request[ bytes ] = '\0';
+		request.resize( bytes );
 	}
 	return ( request );
 }

@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 20:26:27 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 21:26:58 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 	return ( false );
 }
 
-void	Client::remove( const int & socket )
+void	Client::remove( int & socket )
 {
 	struct epoll_event								ev;
 	std::vector< int >::iterator					itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
@@ -117,6 +117,7 @@ void	Client::remove( const int & socket )
 	// close socket
 	if ( close( socket ) == -1 )
 		std::cerr << "Error: closing client socket" << std::endl;
+	socket = -1;
 	return;
 }
 
