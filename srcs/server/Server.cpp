@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 15:55:30 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 17:23:11 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 #include "../http/request/Request.hpp"
 #include "../http/response/Response.hpp"
 
-#define MAX_EVENTS	64
+#define MAX_EVENTS	16
 
 // Constructors ============================================================= //
 Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockaddr( ), _eplevs( ),
@@ -249,54 +249,60 @@ void	Server::run(void)
 		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
 		for (int i = 0; i < nbEvents; i++)
 		{
-			for (size_t j = 0; j < this->_getNbSrv(); j++)
-			{
-				if ( cliEvents[i].data.fd == this->_getSrvFd( j ) )
-				{
-					// Clear and set request buffer
-					request.clear();
-					request.resize( sizeRequest );
-					// Accepting connections
-					cliSocket = this->_acceptConnection( j, client );
-					// Receive client request
-					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
-					{
-						request = this->_readRequest( cliSocket, j, request );
-						if ( request.size() > 0 )
-						{
-							this->_log(LOG, j, __func__, __LINE__, "receiving client request");
-							//std::cerr << YELLOW << request << END << std::endl;
-							Request	req;
-							req.parseHeader(request);
-							if (req.getRet() == 200)
-								req.parseBody();								
-							//_configs[j].getLocations()["/"].display();
-							Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
-
-							rep.generate();
-							//std::cout << RED << rep.getResponse() << END << std::endl;
-							// Testing page ====================
-							send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
-							//fcntl( cliSocket, F_SETFL, O_NONBLOCK );
-							// =================================
-						}
-					}
-				}
-				this->_log(LOG, j, __func__, __LINE__, "listening");
-			}
-			for ( size_t k = 0; k < client.size(); k++ )
+			cliSocket = -1;
+			for ( size_t j = 0; j < client.size(); j++ )
 			{
 				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
+					cliSocket = cliEvents[i].data.fd;
 					if ( cliEvents[i].events & EPOLLOUT )
 					{
 						// send response
-						std::cout << 1 << std::endl;
+						std::cout << client.rep << std::endl;
+						send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+					}
+					if ( cliEvents[i].events & EPOLLIN )
+					{
+						// Clear and set request buffer
+						request.clear();
+						request.resize( sizeRequest );
+						// Receive client request
+						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
+						{
+							request = this->_readRequest( cliSocket, j, request );
+							if ( request.size() > 0 )
+							{
+								this->_log(LOG, j, __func__, __LINE__, "receiving client request");
+								//std::cerr << YELLOW << request << END << std::endl;
+								Request	req;
+								req.parseHeader(request);
+								if (req.getRet() == 200)
+									req.parseBody();								
+								//_configs[j].getLocations()["/"].display();
+								Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
+
+								rep.generate();
+								client.rep = rep.getResponse();
+								//std::cout << client.rep << std::endl;
+								//std::cout << RED << rep.getResponse() << END << std::endl;
+								// Testing send ====================
+								//send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
+								// =================================
+							}
+						}
 					}
 				}
 			}
-			if ( cliSocket != -1 )
-				closeCliSocket( cliSocket ); //will be remove
+			for (size_t k = 0; k < this->_getNbSrv(); k++)
+			{
+				if ( cliEvents[i].data.fd == this->_getSrvFd( k ) )
+				{
+					cliSocket = this->_acceptConnection( k, client );
+				}
+				this->_log(LOG, k, __func__, __LINE__, "listening");
+			}
+			//if ( cliSocket != -1 )
+			//	closeCliSocket( cliSocket ); //will be remove
 		}
 	}
 	// ====================================================================== //
@@ -378,10 +384,6 @@ std::string &	Server::_readRequest( const int cliSocket, const int & j, std::str
 		request[ rcv ] = '\0';
 		request.resize( rcv );
 	}
-	//std::cout << "Size request =\t" << request.size() << " and request =\t" << request << std::endl;
-	// Uncomment the line below to pur on screen the request
-	//std::cout << std::endl << request << std::endl;
-	//std::cout << "size request = " << request.size() << " | rcv = " << rcv << std::endl;
 	return ( request );
 }
 
@@ -396,13 +398,11 @@ int	Server::_acceptConnection(const int & j, Client & client __attribute__((unus
 	else
 	{
 		this->_log(LOG, j, __func__, __LINE__, "connection established");
-		/*
 		if ( client.add( cliSocket ) == false )
 		{
 			close( cliSocket );
 			return ( -1 );
 		}
-		*/
 	}
 	return( cliSocket );
 }

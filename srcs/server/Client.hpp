@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 15:56:08 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:25:59 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sys/epoll.h>
 
 #include "../config/Config.hpp"
+#include "../http/response/Response.hpp"
 #include "Server.hpp"
 
 typedef enum e_flag
@@ -28,6 +29,7 @@ typedef enum e_flag
 class Client
 {
 	public:
+		std::string rep;
 		// Constructor ---------------------------------------------------------
 										Client( const int & eplfd );
 		// Destructor ----------------------------------------------------------

@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 15:58:56 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:39:16 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool	Client::add( const int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	if (	is_set == true
-		&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
+		//&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
 		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1
 		)
 	{
