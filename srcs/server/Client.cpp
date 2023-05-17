@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 21:26:58 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 21:33:23 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,23 +97,27 @@ void	Client::remove( int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// delete port
-	if ( itPort != this->_port.end() )
-		this->_port.erase( socket );
-	// delete name
-	if ( itName != this->_name.end() )
-		this->_name.erase( socket );
-	// delete socket flags
-	if ( itFlag != this->_flag.end() )
-		this->_flag.erase( socket );
-	// delete response buffer
-	if ( itBuf != this->_buffer.end() )
-		this->_buffer.erase( socket );
-	// remove from epoll instance
-	if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
-		std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
-	// remove from socket vector
-	if ( itSock != this->_socket.end() )
-		this->_socket.erase( itSock );
+	try {
+		if ( itPort != this->_port.end() )
+			this->_port.erase( socket );
+		// delete name
+		if ( itName != this->_name.end() )
+			this->_name.erase( socket );
+		// delete socket flags
+		if ( itFlag != this->_flag.end() )
+			this->_flag.erase( socket );
+		// delete response buffer
+		if ( itBuf != this->_buffer.end() )
+			this->_buffer.erase( socket );
+		// remove from epoll instance
+		if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
+			std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
+		// remove from socket vector
+		if ( itSock != this->_socket.end() )
+			this->_socket.erase( itSock );
+	} catch ( std::exception & e ) {
+		std::cerr << e.what() << std::endl;
+	}
 	// close socket
 	if ( close( socket ) == -1 )
 		std::cerr << "Error: closing client socket" << std::endl;

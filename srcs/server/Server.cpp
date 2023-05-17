@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 21:26:12 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 21:53:57 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,8 +265,14 @@ void	Server::run(void)
 						if ( client.rep.size() )
 						{
 							//std::cout << client.rep << std::endl;
+							/*
+							std::ofstream analyze;
+							analyze.open("webserv_page");
+							analyze << client.rep;
+							analyze.close();
+							*/
 							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
-							client.remove( cliSocket );
+							//client.remove( cliSocket );
 							client.rep.clear();
 							client.rep.resize( 0 );
 						}
@@ -286,6 +292,7 @@ void	Server::run(void)
 								req.parseHeader(request);
 								if (req.getRet() == 200)
 									req.parseBody();								
+								// Check client.getPort
 								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 
 								rep.generate();
@@ -308,8 +315,8 @@ void	Server::run(void)
 					cliSocket = -1;
 				}
 			}
-			if ( cliSocket != -1 )
-				client.remove( cliSocket );
+			//if ( cliSocket != -1 )
+			//	client.remove( cliSocket );
 		}
 	}
 	// ====================================================================== //
