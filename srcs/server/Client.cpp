@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 09:50:10 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 10:22:28 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ bool	Client::add( const int & socket )
 	{
 		this->_socket.pop_back();
 		if ( close( socket ) == -1 )
-			std::cer << "Error: closing client socket" << std::endl;
+			std::cerr << "Error: closing client socket" << std::endl;
 		return ( false );
 	}
 	return ( false );
@@ -70,22 +70,24 @@ bool	Client::add( const int & socket )
 
 void	Client::remove( const int & socket )
 {
-	std::vector< int >::iterator	it = this->_socket.find( socket );
-	struct epoll_event				ev;
+	std::vector< int >::iterator		itSock = find( this->_socket.begin(), this->_socket.end(), socket );
+	//std::map< int, t_flag >::iterator	ifFlag;
+	//std::map< int, char * >::iterator	itBuf;
+	struct epoll_event					ev;
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
-	// clear response buffer
 	// clear socket flags
+	// clear response buffer
 	// remove from epoll instance
 	if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
 		std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
 	// remove from socket vector
-	if ( it != this->_socket.end() )
-		this->_socket.erase( it );
+	if ( itSock != this->_socket.end() )
+		this->_socket.erase( itSock );
 	// close socket
 	if ( close( socket ) == -1 )
-		std::cer << "Error: closing client socket" << std::endl;
+		std::cerr << "Error: closing client socket" << std::endl;
 	return;
 }
 
@@ -94,7 +96,7 @@ void	Client::remove( const int & socket )
 // Setters ---------------------------------------------------------------------
 bool	Client::setSocket( const int & socket )
 {
-	std::vector< int >::iterator	it = this->_socket.find( socket );
+	std::vector< int >::iterator		it = find( this->_socket.begin(), this->_socket.end(), socket );
 
 	if (	socket != -1
 		&&	this->_socket.size() > 0
