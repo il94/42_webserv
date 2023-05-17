@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 12:25:47 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 14:00:50 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Client
 
 		// Getters -------------------------------------------------------------
 		const int					&	getEpollFd( void )				const;
+		size_t							size( void )					const;
 		const t_flag				&	getFlag( const int & socket )	const;
 
 	private:

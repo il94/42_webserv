@@ -67,7 +67,7 @@ DEP = $(addprefix $(OBJ_DIR), $(SRC:.o=.d))
 
 all : $(NAME)
 
-$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp Makefile $(HEAD)
+$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp #Makefile $(HEAD)
 	mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

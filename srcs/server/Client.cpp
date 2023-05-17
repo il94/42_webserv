@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 12:00:28 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 14:01:09 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ bool	Client::add( const int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	if (	is_set == true
-		&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
+		//&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
 		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1 )
 	{
 		// create a no error flag
@@ -128,6 +128,11 @@ void	Client::setFlag( const int & socket, const t_flag flag )
 const int &	Client::getEpollFd( void ) const
 {
 	return ( this->_eplfd );
+}
+
+size_t	Client::size( void ) const
+{
+	return ( this->_socket.size() );
 }
 
 const t_flag &	Client::getFlag( const int & socket ) const

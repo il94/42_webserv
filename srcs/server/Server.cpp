@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 12:56:34 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 15:23:45 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@
 
 // Constructors ============================================================= //
 Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockaddr( ), _eplevs( ),
-	_srvfd( ), _cliSocket(  )
+	_srvfd( )//, _cliSocket(  )
 {
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
@@ -39,7 +39,7 @@ Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockad
 }
 
 Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), /*_flags( ),*/ _names( srv._names ),
-	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  ), _cliSocket(  )
+	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )//, _cliSocket(  )
 {
 	size_t	i	= 0;
 
@@ -234,7 +234,7 @@ void	Server::setConfigs( char **av )
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
-	Client			clients __attribute__((unused)) ( this->_getEplFd() );
+	Client			client __attribute__((unused)) ( this->_getEplFd() );
 	int				nbEvents	= -1;
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 	std::string		request;
@@ -257,15 +257,9 @@ void	Server::run(void)
 					request.clear();
 					request.resize( sizeRequest );
 					// Accepting connections
-					cliSocket = this->_acceptConnection( j );
-					// Sending data to client, example : end of a download or curl request
-					if ( cliEvents[i].events & EPOLLOUT )
-					{
-						this->_log(LOG, j, __func__, __LINE__, "sending response");
-						//send( cliSocket, response.getResponse().c_str(), response.getResponse().size(), 0 );
-					}
+					cliSocket = this->_acceptConnection( j, client );
 					// Receive client request
-					if ( cliEvents[i].events & EPOLLIN )
+					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
 						request = this->_readRequest( cliSocket, j, request );
 						if ( request.size() > 0 )
@@ -283,11 +277,20 @@ void	Server::run(void)
 							//std::cout << RED << rep.getResponse() << END << std::endl;
 							// Testing page ====================
 							send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
+							//fcntl( cliSocket, F_SETFL, O_NONBLOCK );
 							// =================================
 						}
 					}
 				}
 				this->_log(LOG, j, __func__, __LINE__, "listening");
+			}
+			for ( size_t k = 0; k < client.size(); k++ )
+			{
+				if ( cliEvents[i].events & EPOLLOUT )
+				{
+					// send response
+					std::cout << 1 << std::endl;
+				}
 			}
 			closeCliSocket( cliSocket ); //will be remove
 		}
@@ -296,6 +299,7 @@ void	Server::run(void)
 	return;
 }
 
+/*
 void	Server::add2epoll(int cliSocket)
 {
 	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
@@ -313,9 +317,11 @@ void	Server::add2epoll(int cliSocket)
 		std::cerr << "Error: client socket=" << cliSocket << " is already stored" << std::endl;
 	return;
 }
+*/
 
 void	Server::closeCliSocket(int cliSocket)
 {
+	/*
 	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
 
 	if ( it != this->_cliSocket.end() )
@@ -324,6 +330,7 @@ void	Server::closeCliSocket(int cliSocket)
 			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
 		this->_cliSocket.erase( cliSocket );
 	}
+	*/
 	if ( close( cliSocket ) == -1 )
 		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
 	return;
@@ -355,7 +362,6 @@ void	Server::_initSrv(void)
 			this->_ports.erase( this->_ports.begin() + i );
 			this->_sockaddr.erase( this->_sockaddr.begin() + i );
 			this->_eplevs.erase( this->_eplevs.begin() + i );
-			//this->_srvfd.erase( this->_srvfd.begin() + i );
 			this->_nbSrv--;
 		}
 		else
@@ -369,8 +375,7 @@ void	Server::_initSrv(void)
 				if ( listen( this->_getSrvFd( i ), 100 ) == -1 )
 				{
 					this->_log(ERROR, i, __func__, __LINE__, "listen");
-					if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL,
-							this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
+					if ( epoll_ctl( this->_getEplFd(), EPOLL_CTL_DEL, this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
 						this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
 				}
 			}
@@ -406,7 +411,7 @@ std::string &	Server::_readRequest( const int cliSocket, const int & j, std::str
 	return ( request );
 }
 
-int	Server::_acceptConnection(const int & j)
+int	Server::_acceptConnection(const int & j, Client & client __attribute__((unused)) )
 {
 	int			cliSocket;
 	socklen_t	addrlen		= sizeof( t_sockaddr );
@@ -417,7 +422,13 @@ int	Server::_acceptConnection(const int & j)
 	else
 	{
 		this->_log(LOG, j, __func__, __LINE__, "connection established");
-		//fcntl( cliSocket, F_SETFL, O_NONBLOCK);
+		/*
+		if ( client.add( cliSocket ) == false )
+		{
+			close( cliSocket );
+			return ( -1 );
+		}
+		*/
 	}
 	return( cliSocket );
 }

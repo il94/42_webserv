@@ -37,20 +37,16 @@ class Server
 		typedef		std::vector	< t_sockaddr >				t_vSockaddr;
 		typedef		std::vector < t_flag	 >				t_vFlag;
 		typedef		std::vector	< Config >					t_vConfig;
-		typedef		std::map< int, t_epollEv >				t_mEpollClient;
 		typedef		std::vector<std::vector <std::string> >	t_vvString;
 
 							Server(void);
 							~Server(void);
 
-
 		void				run(void);
-		void				add2epoll(int cliSocket);
 		void				closeCliSocket(int cliSocket);
 
 		void				display(void);
 		t_vvString			extractContent( const std::string & ) ;
-		// void				setConfigs( const std::string & );
 		void				setConfigs( char **av );
 
 
@@ -72,18 +68,16 @@ class Server
 
 		t_vConfig			_configs;
 		int					_eplfd;
-		int					_nbSrv; //= listen port number (ie = _ports.size())
-		//t_vFlag				_flags;
+		int					_nbSrv;
 		
 		t_vString			_names;
 		t_vInt				_ports;
 		t_vSockaddr			_sockaddr;
 		t_vEplEv			_eplevs;
 		t_vInt				_srvfd;
-		t_mEpollClient		_cliSocket;
 
 		void				_initSrv(void);
-		int					_acceptConnection(const int & j);
+		int					_acceptConnection(const int & j, Client & client);
 		std::string		  &	_readRequest( const int cliSocket, const int & j, std::string & request );
 
 		size_t	  			_getNbSrv(void)					const;
