@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 20:00:54 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 20:27:06 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,7 @@ void	Server::run(void)
 						// send response
 						//send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
 						//client.rep.clear();
-						std::cout << "Insited EPOLLOUT client loop" << std::endl;
+						std::cout << "Inside EPOLLOUT client loop" << std::endl;
 					}
 					if ( cliEvents[i].events & EPOLLIN )
 					{

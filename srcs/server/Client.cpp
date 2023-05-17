@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 18:33:09 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 20:26:27 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,15 +89,23 @@ void	Client::remove( const int & socket )
 {
 	struct epoll_event								ev;
 	std::vector< int >::iterator					itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
+	std::map< int, int >::iterator					itPort = this->_port.find( socket );
+	std::map< int, std::string >::iterator			itName = this->_name.find( socket );
 	std::map< int, t_flag >::iterator				itFlag = this->_flag.find( socket );
 	std::map< int, std::vector< char * >>::iterator	itBuf  = this->_buffer.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
-	// clear socket flags
+	// delete port
+	if ( itPort != this->_port.end() )
+		this->_port.erase( socket );
+	// delete name
+	if ( itName != this->_name.end() )
+		this->_name.erase( socket );
+	// delete socket flags
 	if ( itFlag != this->_flag.end() )
 		this->_flag.erase( socket );
-	// clear response buffer
+	// delete response buffer
 	if ( itBuf != this->_buffer.end() )
 		this->_buffer.erase( socket );
 	// remove from epoll instance
