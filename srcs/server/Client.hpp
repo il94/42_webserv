@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 12:16:52 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 12:25:47 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,17 +38,16 @@ class Client
 		void							remove( const int & socket );
 		
 		// Response management -------------------------------------------------
-		void							newResponse( const int & socket, const Response rep );
-		Response						getRsponse( const int & socket );
-		
+		// void							newResponse( const int & socket, const Response rep );
+		// Response						getResponse( const int & socket );
 
 		// Setters -------------------------------------------------------------
 		bool							setSocket( const int & socket );
-		bool							setFlag( const int & socket, const t_flag flag );
+		void							setFlag( const int & socket, const t_flag flag );
 
 		// Getters -------------------------------------------------------------
 		const int					&	getEpollFd( void )				const;
-		const t_flag				&	getFlag( const int socket )		const;
+		const t_flag				&	getFlag( const int & socket )	const;
 
 	private:
 		// Private attributes --------------------------------------------------

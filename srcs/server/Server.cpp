@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/16 21:35:56 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 12:24:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,12 +234,11 @@ void	Server::setConfigs( char **av )
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
+	Client			clients __attribute__((unused)) ( this->_getEplFd() );
 	int				nbEvents	= -1;
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 	std::string		request;
 	size_t			sizeRequest	= 1000000;
-	//size_t			rcv;
-
 
 	std::cout << "Server log : " << std::endl;
 	// Creates sockets if they don't exist
@@ -272,21 +271,16 @@ void	Server::run(void)
 						if ( request.size() > 0 )
 						{
 							this->_log(LOG, j, __func__, __LINE__, "receiving client request");
-							std::cerr << YELLOW << request << END << std::endl;
+							//std::cerr << YELLOW << request << END << std::endl;
 							Request	req;
 							req.parseHeader(request);
 							if (req.getRet() == 200)
 								req.parseBody();								
 							//_configs[j].getLocations()["/"].display();
 							Response	rep(req, _configs[0], this->_getPort(j), this->_getName(j));
+
 							rep.generate();
-
-
-							
-							std::cout << RED << rep.getResponse() << END << std::endl;
-							// index j tu peux recuperer name + port
-							// this->_getName( j ) pour avoir le nom
-							// this->_getPort( j ) pour avoir le port
+							//std::cout << RED << rep.getResponse() << END << std::endl;
 							// Testing page ====================
 							send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
 							// =================================
