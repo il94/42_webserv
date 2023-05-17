@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/16 22:16:47 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 09:03:40 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,25 +36,24 @@ class Client
 										~Client( void );
 
 		// Socket management ---------------------------------------------------
-		void							add( const int & socket );
+		bool							add( const int & socket );
 		void							remove( const int & socket );
-		void							close( const int & socket );
 		
 		// Response management -------------------------------------------------
 		
 
 		// Setters -------------------------------------------------------------
-		void								setEpollFd( const int & eplfd );
+		bool								setSocket( const int & socket );
 		//const int 					&	setFlag( const t_flag flag );
 
 		// Getters -------------------------------------------------------------
-		int									getEpollFd( void )				const;
+		const int						&	getEpollFd( void )				const;
 		//const int 					&	getFlag( const int socket );
 
 
 	private:
 		// Private attributes --------------------------------------------------
-		int								_eplfd;
+		const int						_eplfd;
 		std::vector	< int			>	_socket;
 		//std::map	< int, t_flag	>	_flag	__attribute__((unused));
 		std::map	< int, char *	>	_buffer	__attribute__((unused));

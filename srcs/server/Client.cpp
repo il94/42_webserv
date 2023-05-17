@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/16 22:23:14 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 09:50:10 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,40 +35,79 @@ Client::~Client( void )
 
 	while ( it != this->_socket.end() )
 	{
-		if ( *it != -1 && ::close( *it ) == -1 )
-			std::cerr << "Error: closing client socket in destructor" << std::endl;
+		if ( *it != -1 && close( *it ) == -1 )
+			std::cerr << "Error: closing client socket failed in destructor" << std::endl;
 		it++;
 	}
 	return;
 }
 
-//// Public member functions ================================================== ///
-void	Client::add( const int & socket )
+//// Public member functions ===================================================
+// Socket management -----------------------------------------------------------
+bool	Client::add( const int & socket )
 {
-	struct epoll_event ev;
+	struct epoll_event	ev;
+	bool				is_set	= this->setSocket( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
-	if (	socket != -1
-		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) == -1 )
+	if (	is_set == true
+		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1 )
 	{
-		std::cerr << "Error: add socket to epoll instance failed" << std::endl;
-		::close( socket );
+		// create flag
+		// create buffer
+		return ( true );
 	}
+	else if ( is_set == true )
+	{
+		this->_socket.pop_back();
+		if ( close( socket ) == -1 )
+			std::cer << "Error: closing client socket" << std::endl;
+		return ( false );
+	}
+	return ( false );
+}
 
+void	Client::remove( const int & socket )
+{
+	std::vector< int >::iterator	it = this->_socket.find( socket );
+	struct epoll_event				ev;
+
+	ev.events = EPOLLIN | EPOLLOUT;
+	ev.data.fd = socket;
+	// clear response buffer
+	// clear socket flags
+	// remove from epoll instance
+	if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
+		std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
+	// remove from socket vector
+	if ( it != this->_socket.end() )
+		this->_socket.erase( it );
+	// close socket
+	if ( close( socket ) == -1 )
+		std::cer << "Error: closing client socket" << std::endl;
+	return;
 }
 
 // Private member functions ================================================= ///
 
 // Setters ---------------------------------------------------------------------
-void	Client::setEpollFd( const int & eplfd )
+bool	Client::setSocket( const int & socket )
 {
-	this->_eplfd = eplfd;
-	return;
+	std::vector< int >::iterator	it = this->_socket.find( socket );
+
+	if (	socket != -1
+		&&	this->_socket.size() > 0
+		&&	it == this->_socket.end() )
+	{
+		this->_socket.push_back( socket );
+		return ( true );
+	}
+	return ( false );
 }
 
 // Getters ---------------------------------------------------------------------
-int	Client::getEpollFd( void ) const
+const int &	Client::getEpollFd( void ) const
 {
 	return ( this->_eplfd );
 }
