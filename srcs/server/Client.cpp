@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 10:35:53 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 12:00:28 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,12 @@
 #include "Client.hpp"
 
 // Constructors ============================================================= //
-Client::Client( void ) : _eplfd( ), _socket( ), /*_flag( ),*/ _buffer(  ) 
+Client::Client( void ) : _eplfd( ), _socket( ), _flag( ), _buffer(  ) 
 {
 	return;
 }
 
-Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), /*_flag( ),*/ _buffer(  ) 
+Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _flag( ), _buffer(  ) 
 {
 	return;
 }
@@ -41,6 +41,8 @@ Client::~Client( void )
 			std::cerr << "Error: closing client socket failed in destructor" << std::endl;
 		it++;
 	}
+	this->_flag.clear();
+	this->_buffer.clear();
 	return;
 }
 
@@ -57,8 +59,10 @@ bool	Client::add( const int & socket )
 		&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
 		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1 )
 	{
-		// create flag
-		// create buffer
+		// create a no error flag
+		this->_flag.insert( std::pair< int, t_flag >( socket, NO_ERROR ) );
+		// create an empty buffer
+		this->_buffer[ socket ];
 		return ( true );
 	}
 	else if ( is_set == true )
@@ -73,15 +77,19 @@ bool	Client::add( const int & socket )
 
 void	Client::remove( const int & socket )
 {
-	std::vector< int >::iterator		itSock = find( this->_socket.begin(), this->_socket.end(), socket );
-	//std::map< int, t_flag >::iterator	ifFlag;
-	//std::map< int, char * >::iterator	itBuf;
-	struct epoll_event					ev;
+	struct epoll_event								ev;
+	std::vector< int >::iterator					itSock = find( this->_socket.begin(), this->_socket.end(), socket );
+	std::map< int, t_flag >::iterator				itFlag = this->_flag.find( socket );
+	std::map< int, std::vector< char * >>::iterator	itBuf  = this->_buffer.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// clear socket flags
+	if ( itFlag != this->_flag.end() )
+		this->_flag.erase( socket );
 	// clear response buffer
+	if ( itBuf != this->_buffer.end() )
+		this->_buffer.erase( socket );
 	// remove from epoll instance
 	if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
 		std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
@@ -95,7 +103,6 @@ void	Client::remove( const int & socket )
 }
 
 // Private member functions ================================================= ///
-
 // Setters ---------------------------------------------------------------------
 bool	Client::setSocket( const int & socket )
 {
@@ -111,11 +118,20 @@ bool	Client::setSocket( const int & socket )
 	return ( false );
 }
 
+void	Client::setFlag( const int & socket, const t_flag flag )
+{
+	this->_flag[ socket ] = flag;
+	return;
+}
+
 // Getters ---------------------------------------------------------------------
 const int &	Client::getEpollFd( void ) const
 {
 	return ( this->_eplfd );
 }
 
-// Exceptions =============================================================== ///
+const t_flag &	Client::getFlag( const int & socket ) const
+{
+	return( this->_flag.at( socket ) );
+}
 
