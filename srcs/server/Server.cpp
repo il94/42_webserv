@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 12:24:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 12:56:34 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -349,27 +349,38 @@ void	Server::_initSrv(void)
 		if ( setsockopt( srvfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
 			this->_log(ERROR, i, __func__, __LINE__, "setsockopt");
 		if ( bind( srvfd, &this->_getSockaddr( i ), sizeof( t_sockaddr ) ) == -1 )
+		{
 			this->_log(ERROR, i, __func__, __LINE__, "bind");
-		this->_setSrvFd( srvfd );
-		if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD,
-				this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
-			this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl");
-		try
+			this->_names.erase( this->_names.begin() + i );
+			this->_ports.erase( this->_ports.begin() + i );
+			this->_sockaddr.erase( this->_sockaddr.begin() + i );
+			this->_eplevs.erase( this->_eplevs.begin() + i );
+			//this->_srvfd.erase( this->_srvfd.begin() + i );
+			this->_nbSrv--;
+		}
+		else
 		{
-			if ( listen( this->_getSrvFd( i ), 100 ) == -1 )
+			this->_setSrvFd( srvfd );
+			if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD,
+					this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
+				this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl");
+			try
 			{
-				this->_log(ERROR, i, __func__, __LINE__, "listen");
-				if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL,
-						this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
-					this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
+				if ( listen( this->_getSrvFd( i ), 100 ) == -1 )
+				{
+					this->_log(ERROR, i, __func__, __LINE__, "listen");
+					if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL,
+							this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
+						this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
+				}
 			}
+			catch (std::exception & e)
+			{
+				std::cerr << e.what() << std::endl;
+			}
+			this->_log(LOG, i, __func__, __LINE__, "listening");
+			i++;
 		}
-		catch (std::exception & e)
-		{
-			std::cerr << e.what() << std::endl;
-		}
-		this->_log(LOG, i, __func__, __LINE__, "listening");
-		i++;
 	}
 
 	return;
@@ -397,15 +408,17 @@ std::string &	Server::_readRequest( const int cliSocket, const int & j, std::str
 
 int	Server::_acceptConnection(const int & j)
 {
-	int	cliSocket;
-	int	addrlen		= 1;
+	int			cliSocket;
+	socklen_t	addrlen		= sizeof( t_sockaddr );
 
-	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), reinterpret_cast<socklen_t *>(&addrlen) );
+	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), &addrlen );
 	if ( cliSocket == -1 )
 		this->_log(ERROR, j, __func__, __LINE__, "accept");
 	else
+	{
 		this->_log(LOG, j, __func__, __LINE__, "connection established");
-	//fcntl( cliSocket, F_SETFL, O_NONBLOCK);
+		//fcntl( cliSocket, F_SETFL, O_NONBLOCK);
+	}
 	return( cliSocket );
 }
 
