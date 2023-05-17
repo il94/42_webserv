@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 15:23:45 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 15:55:30 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,51 +286,25 @@ void	Server::run(void)
 			}
 			for ( size_t k = 0; k < client.size(); k++ )
 			{
-				if ( cliEvents[i].events & EPOLLOUT )
+				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
-					// send response
-					std::cout << 1 << std::endl;
+					if ( cliEvents[i].events & EPOLLOUT )
+					{
+						// send response
+						std::cout << 1 << std::endl;
+					}
 				}
 			}
-			closeCliSocket( cliSocket ); //will be remove
+			if ( cliSocket != -1 )
+				closeCliSocket( cliSocket ); //will be remove
 		}
 	}
 	// ====================================================================== //
 	return;
 }
 
-/*
-void	Server::add2epoll(int cliSocket)
-{
-	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
-	t_epollEv					ev;
-
-	ev.events					= EPOLLIN | EPOLLOUT;
-	ev.data.fd					= cliSocket;
-	if ( it == this->_cliSocket.end() )
-	{
-		this->_cliSocket[cliSocket]	= ev;
-		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_ADD, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
-			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
-	}
-	else
-		std::cerr << "Error: client socket=" << cliSocket << " is already stored" << std::endl;
-	return;
-}
-*/
-
 void	Server::closeCliSocket(int cliSocket)
 {
-	/*
-	t_mEpollClient::iterator	it	= this->_cliSocket.find( cliSocket );
-
-	if ( it != this->_cliSocket.end() )
-	{
-		if ( epoll_ctl( this->_getEplFd( ), EPOLL_CTL_DEL, cliSocket, &this->_cliSocket[cliSocket] ) == -1 )
-			this->_log(ERROR, -1, __func__, __LINE__, "epoll_ctl ADD");
-		this->_cliSocket.erase( cliSocket );
-	}
-	*/
 	if ( close( cliSocket ) == -1 )
 		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
 	return;

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 14:00:50 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 15:56:08 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Client
 										~Client( void );
 
 		// Socket management ---------------------------------------------------
+		int								find( const int & socket ) const;
 		bool							add( const int & socket );
 		void							remove( const int & socket );
 		
