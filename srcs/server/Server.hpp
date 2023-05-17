@@ -78,7 +78,7 @@ class Server
 
 		void				_initSrv(void);
 		int					_acceptConnection(const int & j, Client & client);
-		std::string		  &	_readRequest( const int cliSocket, const int & j, std::string & request );
+		std::string		  &	_readRequest( int & cliSocket, const int & j, std::string & request );
 
 		size_t	  			_getNbSrv(void)					const;
 		const int		  &	_getEplFd(void)					const;
@@ -99,7 +99,7 @@ class Server
 
 		void				setContent( const t_vvString & );
 
-		void				_log(const int error, int i, const char *func, const int line, const char *msg);
+		void				_displayError(const char *func, const int line, const char *msg);
 
 							Server(const Server & src);
 		Server			 &	operator=(const Server & srv);

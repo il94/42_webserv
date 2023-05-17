@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 18:24:01 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 20:00:54 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,9 @@ Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockad
 {
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
-	fcntl( this->_eplfd, F_SETFL, O_NONBLOCK);
+		this->_displayError( __func__, __LINE__, "Server/epoll_create" );
+	if ( fcntl( this->_eplfd, F_SETFL, O_NONBLOCK) == -1 )
+		this->_displayError( __func__, __LINE__, "Server/fcntl" );
 	return;
 }
 
@@ -51,8 +52,9 @@ Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), /*_flags( ),*/ _nam
 	}
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
-	fcntl( this->_eplfd, F_SETFL, O_NONBLOCK);
+		this->_displayError( __func__, __LINE__, "Server/epoll_create" );
+	if ( fcntl( this->_eplfd, F_SETFL, O_NONBLOCK) == -1 )
+		this->_displayError( __func__, __LINE__, "Server/fcntl" );
 	return;
 }
 
@@ -64,11 +66,11 @@ Server::~Server(void)
 	while ( i < this->_getNbSrv() )
 	{
 		if ( close( this->_getSrvFd( i ) ) == -1 )
-			this->_log(ERROR, -1, __func__, __LINE__, "close server socket");
+			this->_displayError( __func__, __LINE__, "~Server/close" );
 		i++;
 	}
 	if ( close( this->_getEplFd() ) == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "close epoll instance");
+		this->_displayError( __func__, __LINE__, "~Server/close" );
 	return;
 }
 
@@ -96,7 +98,7 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)))
 	}
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "epoll_create");
+		this->_displayError( __func__, __LINE__, "Operator=/epoll_create" );
 	return ( *this );
 }
 
@@ -234,7 +236,7 @@ void	Server::setConfigs( char **av )
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
-	Client			client __attribute__((unused)) ( this->_getEplFd() );
+	Client			client( this->_getEplFd() );
 	int				nbEvents	= -1;
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 	std::string		request;
@@ -247,6 +249,8 @@ void	Server::run(void)
 	while ( 1 )
 	{
 		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
+		if ( nbEvents == -1 )
+			this->_displayError( __func__, __LINE__, "run/epoll_wait" );
 		for (int i = 0; i < nbEvents; i++)
 		{
 			cliSocket = -1;
@@ -258,37 +262,29 @@ void	Server::run(void)
 					if ( cliEvents[i].events & EPOLLOUT )
 					{
 						// send response
-						if ( client.rep.size() )
-						{
-							std::cout << client.rep << std::endl;
-							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
-							exit( 42 );
-							client.rep.clear();
-						}
-						//exit( 42 );
+						//send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+						//client.rep.clear();
+						std::cout << "Insited EPOLLOUT client loop" << std::endl;
 					}
 					if ( cliEvents[i].events & EPOLLIN )
 					{
-						// Clear and set request buffer
 						request.clear();
 						request.resize( sizeRequest );
-						// Receive client request
 						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 						{
 							request = this->_readRequest( cliSocket, -1, request );
 							if ( request.size() > 0 )
 							{
-								//this->_log(LOG, j, __func__, __LINE__, "receiving client request");
-								//std::cerr << YELLOW << request << END << std::endl;
+								std::cout << YELLOW << request << END << std::endl;
 								Request	req;
 								req.parseHeader(request);
 								if (req.getRet() == 200)
 									req.parseBody();								
-								//_configs[j].getLocations()["/"].display();
 								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 
 								rep.generate();
 								client.rep = rep.getResponse();
+								//std::cout << client.rep << std::endl;
 								//std::cout << RED << rep.getResponse() << END << std::endl;
 								// Testing send ====================
 								//send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
@@ -304,7 +300,6 @@ void	Server::run(void)
 				{
 					cliSocket = this->_acceptConnection( k, client );
 				}
-				this->_log(LOG, k, __func__, __LINE__, "listening");
 			}
 			//if ( cliSocket != -1 )
 			//	closeCliSocket( cliSocket ); //will be remove
@@ -317,7 +312,7 @@ void	Server::run(void)
 void	Server::closeCliSocket(int cliSocket)
 {
 	if ( close( cliSocket ) == -1 )
-		this->_log(ERROR, -1, __func__, __LINE__, "close cliSocket");
+		this->_displayError( __func__, __LINE__, "closeCliSocket/close" );
 	return;
 }
 
@@ -337,12 +332,12 @@ void	Server::_initSrv(void)
 		srvfd = -1;
 		srvfd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
 		if ( srvfd == -1 )
-			this->_log(ERROR, i, __func__, __LINE__, "socket");
+			this->_displayError( __func__, __LINE__, "_initSrv/socket" );
 		if ( setsockopt( srvfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
-			this->_log(ERROR, i, __func__, __LINE__, "setsockopt");
+			this->_displayError( __func__, __LINE__, "_initSrv/setsockopt" );
 		if ( bind( srvfd, &this->_getSockaddr( i ), sizeof( t_sockaddr ) ) == -1 )
 		{
-			this->_log(ERROR, i, __func__, __LINE__, "bind");
+			this->_displayError( __func__, __LINE__, "_initSrv/bind" );
 			this->_names.erase( this->_names.begin() + i );
 			this->_ports.erase( this->_ports.begin() + i );
 			this->_sockaddr.erase( this->_sockaddr.begin() + i );
@@ -352,38 +347,41 @@ void	Server::_initSrv(void)
 		else
 		{
 			this->_setSrvFd( srvfd );
-			if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD,
-					this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
-				this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl");
+			if ( epoll_ctl( this->_getEplFd(  ), EPOLL_CTL_ADD, this->_getSrvFd( i ), &this->_eplevs[i] )== -1)
+				this->_displayError( __func__, __LINE__, "_initSrv/epoll_ctl ADD" );
 			try
 			{
 				if ( listen( this->_getSrvFd( i ), 100 ) == -1 )
 				{
-					this->_log(ERROR, i, __func__, __LINE__, "listen");
+					this->_displayError( __func__, __LINE__, "_initSrv/listen" );
 					if ( epoll_ctl( this->_getEplFd(), EPOLL_CTL_DEL, this->_getSrvFd( i ), &this->_eplevs[i] ) == -1 )
-						this->_log(ERROR, i, __func__, __LINE__, "epoll_ctl DEL");
+						this->_displayError( __func__, __LINE__, "_initSrv/epoll_ctl DEL" );
 				}
+				std::cout << "\t" << this->_getName( i ) << "[" << this->_getPort( i ) << "]\t: ";
+				std::cout << "listening" << std::endl;
 			}
 			catch (std::exception & e)
 			{
 				std::cerr << e.what() << std::endl;
 			}
-			this->_log(LOG, i, __func__, __LINE__, "listening");
 			i++;
 		}
 	}
-
 	return;
 }
 
-std::string &	Server::_readRequest( const int cliSocket, const int & j, std::string & request)
+std::string &	Server::_readRequest( int & cliSocket, const int & j __attribute__((unused)), std::string & request)
 {
 	int	rcv = 0;
 
-	this->_log(LOG, j, __func__, __LINE__, "receiving client request");
 	rcv = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
 	if ( rcv == -1 )
-		this->_log(ERROR, j, __func__, __LINE__, "recv");
+	{
+		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
+		if ( close( cliSocket ) == -1 )
+			this->_displayError( __func__, __LINE__, "_readRequest/close" );
+		cliSocket = -1;
+	}
 	else
 	{
 		request[ rcv ] = '\0';
@@ -399,13 +397,14 @@ int	Server::_acceptConnection(const int & j, Client & client __attribute__((unus
 
 	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), &addrlen );
 	if ( cliSocket == -1 )
-		this->_log(ERROR, j, __func__, __LINE__, "accept");
+		this->_displayError( __func__, __LINE__, "_acceptConnection/accept" );
 	else
 	{
-		this->_log(LOG, j, __func__, __LINE__, "connection established");
 		if ( client.add( cliSocket, this->_getPort( j ), this->_getName( j ) ) == false )
 		{
-			close( cliSocket );
+			std::cerr << "Error: adding socket bind on " << this->_getPort( j ) << " failed." <<std::endl;
+			if ( close( cliSocket ) == -1 )
+				this->_displayError( __func__, __LINE__, "_acceptConnection/close" );
 			return ( -1 );
 		}
 	}
@@ -413,27 +412,10 @@ int	Server::_acceptConnection(const int & j, Client & client __attribute__((unus
 }
 
 // log function ============================================================= //
-void	Server::_log(const int error, int i, const char *func, const int line, const char *msg) 
+void	Server::_displayError(const char *func, const int line, const char *msg) 
 {
-	if ( error && i == -1)
-	{
-		std::cerr << func << ":" << line - 1 << ":";
-		perror(msg);
-		//this->_flag = ERROR;
-	}
-	else if ( error && i != -1 )
-	{
-		std::cout << "\t" << this->_getName( i );
-		std::cout << "[" << this->_getPort( i ) << "]\t: ";
-		std::cerr << func << ":" << line - 1 << ":";
-		perror( msg );
-	}
-	else
-	{
-		std::cout << "\t" << ( (i > -1) ? this->_getName( i ) : "Epoll instance" );
-		std::cout << "[" << ( (i > -1) ? this->_getPort( i ) : -1 ) << "]\t: ";
-		std::cout << msg << std::endl;
-	}
+	std::cerr << func << ":" << line - 1 << ":";
+	perror(msg);
 	return;
 }
 
