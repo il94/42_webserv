@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 21:53:57 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 22:38:17 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,7 +285,7 @@ void	Server::run(void)
 						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 						{
 							request = this->_readRequest( client, cliSocket, request );
-							if ( request.size() > 0 )
+							if ( cliSocket != -1 && request.size() > 0 )
 							{
 								//std::cout << YELLOW << request << END << std::endl;
 								Request	req;
@@ -293,6 +293,13 @@ void	Server::run(void)
 								if (req.getRet() == 200)
 									req.parseBody();								
 								// Check client.getPort
+								try{
+									client.getPort( cliSocket );
+								}
+								catch ( std::exception & e ) {
+									std::cerr << "getport execption" << e.what() << std::endl;
+									exit( 42 );
+								}
 								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 
 								rep.generate();
