@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 20:27:06 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 20:38:25 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,9 +262,13 @@ void	Server::run(void)
 					if ( cliEvents[i].events & EPOLLOUT )
 					{
 						// send response
-						//send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
-						//client.rep.clear();
-						std::cout << "Inside EPOLLOUT client loop" << std::endl;
+						if ( client.rep.size() )
+						{
+							std::cout << client.rep << std::endl;
+							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+							client.rep.clear();
+						}
+						//std::cout << "Inside EPOLLOUT client loop" << std::endl;
 					}
 					if ( cliEvents[i].events & EPOLLIN )
 					{
@@ -275,7 +279,7 @@ void	Server::run(void)
 							request = this->_readRequest( cliSocket, -1, request );
 							if ( request.size() > 0 )
 							{
-								std::cout << YELLOW << request << END << std::endl;
+								//std::cout << YELLOW << request << END << std::endl;
 								Request	req;
 								req.parseHeader(request);
 								if (req.getRet() == 200)
@@ -299,10 +303,11 @@ void	Server::run(void)
 				if ( cliEvents[i].data.fd == this->_getSrvFd( k ) )
 				{
 					cliSocket = this->_acceptConnection( k, client );
+					cliSocket = -1;
 				}
 			}
-			//if ( cliSocket != -1 )
-			//	closeCliSocket( cliSocket ); //will be remove
+			if ( cliSocket != -1 )
+				client.remove( cliSocket );
 		}
 	}
 	// ====================================================================== //
