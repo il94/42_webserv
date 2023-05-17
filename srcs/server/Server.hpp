@@ -8,12 +8,14 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
+/*
 typedef enum e_flag
 {
 	LOG			= 0,
 	NO_ERROR	= 0,
 	ERROR		= 1 << 0
 }			t_flag;
+*/
 
 typedef struct s_config
 {

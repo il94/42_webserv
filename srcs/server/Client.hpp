@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 09:03:40 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/17 10:33:53 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,12 @@
 #include "../config/Config.hpp"
 #include "Server.hpp"
 
-/*
 typedef enum e_flag
 {
 	LOG			= 0,
 	NO_ERROR	= 0,
 	ERROR		= 1 << 0
 }			t_flag;
-*/
 
 class Client
 {
