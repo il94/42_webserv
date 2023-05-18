@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 15:06:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 15:41:36 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,6 +253,7 @@ void	Server::run(void)
 	t_epollEv		cliEvents[ MAX_EVENTS ];
 	std::string		request;
 	size_t			sizeRequest	= 1000000;
+	int				size = 0;
 
 	std::cout << "Server log : " << std::endl;
 	// Creates sockets if they don't exist
@@ -274,7 +275,7 @@ void	Server::run(void)
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response
-						this->_sendResponse( cliSocket, client );
+						this->_sendResponse( cliSocket, client, size );
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
@@ -284,7 +285,7 @@ void	Server::run(void)
 						{
 							request = this->_readRequest( client, cliSocket, request );
 							if ( cliSocket != -1 && request.size() > 0 )
-								this->_storeRequest( client, cliSocket, request );
+								size = this->_storeResponse( client, cliSocket, request );
 						}
 					}
 				}
@@ -408,7 +409,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 	return ( request );
 }
 
-void	Server::_storeRequest( Client & client, const int & cliSocket, std::string & request )
+int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
 	Request	req;
 
@@ -416,21 +417,29 @@ void	Server::_storeRequest( Client & client, const int & cliSocket, std::string 
 	req.parseHeader(request);
 	if (req.getRet() == 200)
 		req.parseBody();								
+
 	Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 	rep.generate();
 	client.newResponse( cliSocket, rep.getResponse() );
-	return;
+	return ( rep.getResponse().size() );
 }
 
-void	Server::_sendResponse( int & cliSocket, Client & client )
+void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )
 {
 	int		bytes = 0;
 	size_t	sizeResp = client.responseSize( cliSocket );
 
+	if ( sizeResp != size )
+		exit(42);
+	/*
 	bytes = send( cliSocket,
-			static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
-			sizeResp,
-			0 );
+				static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
+				sizeResp,
+				0 );
+	*/
+	bytes = write( cliSocket,
+				static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
+				sizeResp );
 	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp )
 	{
 		client.remove( cliSocket );
