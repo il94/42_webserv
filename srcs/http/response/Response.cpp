@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/16 18:47:30 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 18:12:23 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void	Response::generate()
 		return ;
 	}
 	setPath();
-	
+
 	std::vector<std::string> tmpAllowedMethods = _location.getAllowedMethods();
 	
 	if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
@@ -118,10 +118,11 @@ void	Response::POST(void)
 	if (findCGI() == true)
 	{
 		updateContentIfBoundary();
-		std::cout << RED << _path << END << std::endl;
 		//_path = "./html/cgi_test/cgi-bin/upload.sh";
 		CGI cgi(_request);
 		cgi.setUploadInfo(_uploadFileName, _location.getUploadPath());
+		
+
 		_response = cgi.execCGI(_path);
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 			_response.erase(0, 1);
@@ -148,7 +149,11 @@ void	Response::POST(void)
 					_contentType = value;
 			}
 		}
+		std::cout << PURPLE << "HERE" << END << std::endl;
+		std::cout << PURPLE << _response << END << std::endl;
 		_response = _response.substr(bodyPosition + 2);
+		std::cout << PURPLE << "HERE" << END << std::endl;
+		std::cout << PURPLE << _response << END << std::endl;
 	}
 	else if (_code != 403)
 	{
@@ -296,8 +301,6 @@ bool		Response::findCGI()
 	
 	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
-	std::cout << GREEN << urlFileExtension << END << std::endl;
-
 	if (urlFileExtension != ".py" and urlFileExtension != ".php" and urlFileExtension != ".sh")
 		return (false);
 	
@@ -307,8 +310,6 @@ bool		Response::findCGI()
 		_code = 403;
 		return false;
 	}
-
-	std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	std::vector<std::string>					cgiPaths = _location.getCGIBin();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
