@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 21:27:11 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 08:55:39 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ class Client
 		std::map	< int, int						>	_port;
 		std::map	< int, std::string				>	_name;
 		std::map	< int, t_flag					>	_flag;
-		std::map	< int, std::vector< char *	>	>	_buffer;
+		std::map	< int, std::vector< std::string	> >	_buffer;
 
 		// Private functions ---------------------------------------------------
 										Client( void );

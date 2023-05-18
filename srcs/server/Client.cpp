@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 21:33:23 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 08:56:20 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,12 +87,12 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 
 void	Client::remove( int & socket )
 {
-	struct epoll_event								ev;
-	std::vector< int >::iterator					itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
-	std::map< int, int >::iterator					itPort = this->_port.find( socket );
-	std::map< int, std::string >::iterator			itName = this->_name.find( socket );
-	std::map< int, t_flag >::iterator				itFlag = this->_flag.find( socket );
-	std::map< int, std::vector< char * >>::iterator	itBuf  = this->_buffer.find( socket );
+	struct epoll_event										ev;
+	std::vector< int >::iterator							itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
+	std::map< int, int >::iterator							itPort = this->_port.find( socket );
+	std::map< int, std::string >::iterator					itName = this->_name.find( socket );
+	std::map< int, t_flag >::iterator						itFlag = this->_flag.find( socket );
+	std::map< int, std::vector< std::string >>::iterator	itBuf  = this->_buffer.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;

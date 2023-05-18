@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/17 22:38:17 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 08:45:22 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,6 +233,18 @@ void	Server::setConfigs( char **av )
 	_nbSrv = _ports.size();
 }
 
+// to be delete ----------------------------------------------------------------
+void	putInfile( std::string file, std::string content )
+{
+	std::ofstream ofs;
+
+	ofs.open( file.c_str() );
+	ofs << content;
+	ofs.close();
+	return;
+}
+// -----------------------------------------------------------------------------
+
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
@@ -264,19 +276,21 @@ void	Server::run(void)
 						// send response
 						if ( client.rep.size() )
 						{
-							//std::cout << client.rep << std::endl;
-							/*
-							std::ofstream analyze;
-							analyze.open("webserv_page");
-							analyze << client.rep;
-							analyze.close();
-							*/
-							send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
-							//client.remove( cliSocket );
-							client.rep.clear();
-							client.rep.resize( 0 );
+							int	bytes = 0;
+
+							bytes = send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
+							if ( bytes == -1 || static_cast< size_t >( bytes ) != client.rep.size() )
+							{
+								client.remove( cliSocket );
+								std::cerr << "Error : send response to client failed, the socket has been closed." << std::endl;
+							}
+							else
+							{
+								client.rep.clear();
+								client.rep.resize( 0 );
+								std::cerr << "The response was cleared" << std::endl;
+							}
 						}
-						//std::cout << "Inside EPOLLOUT client loop" << std::endl;
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
@@ -304,11 +318,6 @@ void	Server::run(void)
 
 								rep.generate();
 								client.rep = rep.getResponse();
-								//std::cout << client.rep << std::endl;
-								//std::cout << RED << rep.getResponse() << END << std::endl;
-								// Testing send ====================
-								//send( cliSocket, ( rep.getResponse() ).c_str(), ( rep.getResponse() ).size(), 0 );
-								// =================================
 							}
 						}
 					}
@@ -399,14 +408,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 	if ( bytes == 0 || bytes == -1 )
 	{
 		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
-		try
-		{
-			client.remove( cliSocket );
-		}
-		catch ( std::exception & e )
-		{
-			std::cerr << e.what() << std::endl;
-		}
+		client.remove( cliSocket );
 		cliSocket = -1;
 	}
 	else
@@ -441,7 +443,7 @@ int	Server::_acceptConnection(const int & j, Client & client __attribute__((unus
 // log function ============================================================= //
 void	Server::_displayError(const char *func, const int line, const char *msg) 
 {
-	std::cerr << func << ":" << line - 1 << ":";
+	std::cerr << "\t" << func << ":" << line - 1 << ":";
 	perror(msg);
 	return;
 }
