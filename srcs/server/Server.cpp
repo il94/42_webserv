@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 14:47:45 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 14:51:51 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,21 +275,6 @@ void	Server::run(void)
 					{
 						// send response
 						this->_sendResponse( cliSocket, client );
-						/*
-						int		bytes = 0;
-						size_t	sizeResp = client.responseSize( cliSocket );
-
-						bytes = send( cliSocket,
-								static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
-								sizeResp,
-								0 );
-						if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp )
-						{
-							client.remove( cliSocket );
-							std::cerr << "\tError : send response to client failed, ";
-							std::cerr << "the socket has been closed and cleared." << std::endl;
-						}
-						*/
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
