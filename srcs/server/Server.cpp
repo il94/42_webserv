@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 12:28:48 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 14:47:45 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,6 +274,8 @@ void	Server::run(void)
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response
+						this->_sendResponse( cliSocket, client );
+						/*
 						int		bytes = 0;
 						size_t	sizeResp = client.responseSize( cliSocket );
 
@@ -287,6 +289,7 @@ void	Server::run(void)
 							std::cerr << "\tError : send response to client failed, ";
 							std::cerr << "the socket has been closed and cleared." << std::endl;
 						}
+						*/
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
@@ -388,6 +391,27 @@ void	Server::_initSrv(void)
 	return;
 }
 
+int	Server::_acceptConnection(const int & j, Client & client __attribute__((unused)) )
+{
+	int			cliSocket;
+	socklen_t	addrlen		= sizeof( t_sockaddr );
+
+	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), &addrlen );
+	if ( cliSocket == -1 )
+		this->_displayError( __func__, __LINE__, "_acceptConnection/accept" );
+	else
+	{
+		if ( client.add( cliSocket, this->_getPort( j ), this->_getName( j ) ) == false )
+		{
+			std::cerr << "Error: adding socket bind on " << this->_getPort( j ) << " failed." <<std::endl;
+			if ( close( cliSocket ) == -1 )
+				this->_displayError( __func__, __LINE__, "_acceptConnection/close" );
+			return ( -1 );
+		}
+	}
+	return( cliSocket );
+}
+
 std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string & request)
 {
 	int	bytes = 0;
@@ -409,25 +433,22 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 	return ( request );
 }
 
-int	Server::_acceptConnection(const int & j, Client & client __attribute__((unused)) )
+void	Server::_sendResponse( int & cliSocket, Client & client )
 {
-	int			cliSocket;
-	socklen_t	addrlen		= sizeof( t_sockaddr );
+	int		bytes = 0;
+	size_t	sizeResp = client.responseSize( cliSocket );
 
-	cliSocket = accept( this->_getSrvFd( j ), const_cast< t_sockaddr* >( &this->_getSockaddr( j ) ), &addrlen );
-	if ( cliSocket == -1 )
-		this->_displayError( __func__, __LINE__, "_acceptConnection/accept" );
-	else
+	bytes = send( cliSocket,
+			static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
+			sizeResp,
+			0 );
+	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp )
 	{
-		if ( client.add( cliSocket, this->_getPort( j ), this->_getName( j ) ) == false )
-		{
-			std::cerr << "Error: adding socket bind on " << this->_getPort( j ) << " failed." <<std::endl;
-			if ( close( cliSocket ) == -1 )
-				this->_displayError( __func__, __LINE__, "_acceptConnection/close" );
-			return ( -1 );
-		}
+		client.remove( cliSocket );
+		std::cerr << "\tError : send response to client failed, ";
+		std::cerr << "the socket has been closed and cleared." << std::endl;
 	}
-	return( cliSocket );
+	return;
 }
 
 // log function ============================================================= //
