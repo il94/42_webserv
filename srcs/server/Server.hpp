@@ -8,7 +8,7 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
-#define DBG 1
+#define DBG 0
 
 typedef struct s_config
 {
@@ -18,6 +18,24 @@ typedef struct s_config
 	std::vector< int		 >	srvfd;
 }								t_config;
 
+/*
+ * Server execution order :
+ * 	1/ set :
+ * 		_nbSrv
+ * 		_names
+ * 		_ports
+ * 		_sockkaddr
+ * 		_eplevs
+ * 		_eplfd
+ * 	2/ initsrv :
+ * 		make socket
+ * 		setsockopt
+ * 		bind
+ * 		epoll_ctl ADD socket into epoll instance survey
+ * 		set socket into struct epoll_event
+ * 		listen on each port
+ * 		run
+ */ 
 
 class Server
 {
@@ -75,6 +93,7 @@ class Server
 		std::string		  &	_readRequest( Client & client, int & cliSocket, std::string & request );
 		int					_storeResponse( Client & client, const int & cliSocket, std::string & request );
 		void				_sendResponse( int & cliSocket, Client & client, size_t size );
+		void				_displayError(const char *func, const int line, const char *msg);
 
 		size_t	  			_getNbSrv(void)					const;
 		const int		  &	_getEplFd(void)					const;
@@ -85,39 +104,17 @@ class Server
 		const t_epollEv	  &	_getEpollEv(const size_t & i)	const;
 		size_t				_getNbSockets(void)				const;
 
-		t_vvString			getContent( void ) const ;
-
 		void				_setName(const std::string & name);
 		void				_setPort(const int & port);
 		void				_setSrvFd(const int & fd);
 		void				_setSockaddr(void);
 		void				_setEplevs(void);
+		t_vvString			getContent( void )				const ;
 
 		void				setContent( const t_vvString & );
-
-		void				_displayError(const char *func, const int line, const char *msg);
 
 							Server(const Server & src);
 		Server			 &	operator=(const Server & srv);
 };
 
 #endif
-
-/*
- * Server execution order :
- * 	1/ set :
- * 		_nbSrv
- * 		_names
- * 		_ports
- * 		_sockkaddr
- * 		_eplevs
- * 		_eplfd
- * 	2/ initsrv :
- * 		socket
- * 		setsockopt
- * 		bind
- * 		epoll_ctl ADD socket into epoll instance survey
- * 		set socket into epoll event struct
- * 		listen
- */ 
-

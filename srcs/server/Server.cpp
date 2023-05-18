@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 17:00:17 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:09:34 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,10 @@
 #include "../http/request/Request.hpp"
 #include "../http/response/Response.hpp"
 
-#define MAX_EVENTS	16
+#define MAX_EVENTS	128
 
 // Constructors ============================================================= //
-Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockaddr( ), _eplevs( ),
-	_srvfd( )//, _cliSocket(  )
+Server::Server(void) : _nbSrv( 0 ), _names( ), _ports( ), _sockaddr( ), _eplevs( ), _srvfd( )
 {
 	this->_eplfd = epoll_create( 1 );
 	if ( this->_eplfd == -1 )
@@ -39,8 +38,8 @@ Server::Server(void) : _nbSrv( 0 ), /*_flags( ),*/ _names( ), _ports( ), _sockad
 	return;
 }
 
-Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), /*_flags( ),*/ _names( srv._names ),
-	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )//, _cliSocket(  )
+Server::Server( const Server & srv ) : _nbSrv( srv._nbSrv ), _names( srv._names ),
+	_ports( srv._ports ), _sockaddr( srv._sockaddr ), _eplevs( srv._eplevs ), _srvfd(  )
 {
 	size_t	i	= 0;
 
@@ -75,7 +74,7 @@ Server::~Server(void)
 }
 
 // Operators ================================================================ //
-Server &	Server::operator=(const Server & srv __attribute__((unused)))
+Server &	Server::operator=(const Server & srv )
 {
 	size_t	i	= 0;
 
@@ -102,26 +101,7 @@ Server &	Server::operator=(const Server & srv __attribute__((unused)))
 	return ( *this );
 }
 
-// Testing functions ======================================================== ///
-std::string	testing_data(void)
-{
-	// Testing data = will be removed ======================================= //
-	std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ";
-	int hfd = open("./html/index.html", O_RDONLY );
-	char b[30000];
-
-	read( hfd, b, 30000);
-	std::string html(b);
-
-	std::ostringstream oss;
-    oss << html.size();
-	hello = hello + oss.str() + "\n" + b;
-	// ====================================================================== //
-	return ( hello );
-}
-
 // Public member functions ================================================== //
-
 void	Server::display(void)
 {
 	std::cout << std::endl << "========================================" << std::endl << std::endl;
@@ -206,7 +186,7 @@ void	Server::setConfigs( char **av )
 			_ports.insert(_ports.end(), tmpPorts.begin(), tmpPorts.end());
 			for (size_t i = 0; i < tmpPorts.size(); i++)
 				_names.push_back(tmp.getName());
-				
+
 			_configs.push_back(tmp);
 		}
 		else
@@ -232,18 +212,6 @@ void	Server::setConfigs( char **av )
 
 	_nbSrv = _ports.size();
 }
-
-// to be delete ----------------------------------------------------------------
-void	putInfile( std::string file, std::string content )
-{
-	std::ofstream ofs;
-
-	ofs.open( file.c_str() );
-	ofs << content;
-	ofs.close();
-	return;
-}
-// -----------------------------------------------------------------------------
 
 void	Server::run(void)
 {
@@ -276,6 +244,7 @@ void	Server::run(void)
 					{
 						// send response
 						this->_sendResponse( cliSocket, client, size );
+						client.remove( cliSocket );
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
@@ -303,18 +272,8 @@ void	Server::run(void)
 					cliSocket = -1;
 				}
 			}
-			//if ( cliSocket != -1 )
-			//	client.remove( cliSocket );
 		}
 	}
-	// ====================================================================== //
-	return;
-}
-
-void	Server::closeCliSocket(int cliSocket)
-{
-	if ( close( cliSocket ) == -1 )
-		this->_displayError( __func__, __LINE__, "closeCliSocket/close" );
 	return;
 }
 
@@ -374,7 +333,7 @@ void	Server::_initSrv(void)
 	return;
 }
 
-int	Server::_acceptConnection(const int & j, Client & client __attribute__((unused)) )
+int	Server::_acceptConnection(const int & j, Client & client )
 {
 	int			cliSocket;
 	socklen_t	addrlen		= sizeof( t_sockaddr );
@@ -441,19 +400,15 @@ void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )
 	int		bytes = 0;
 	size_t	sizeResp = client.responseSize( cliSocket );
 
-	if ( sizeResp != size || sizeResp != size )
-		exit(42);
 	bytes = send( cliSocket,
-				static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
-				sizeResp,
-				0 );
-	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp || size != (size_t)bytes )
+			static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
+			sizeResp,
+			0 );
+	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp || size != static_cast< size_t >( bytes ) )
 	{
 		client.remove( cliSocket );
-		std::cerr << "\tError : send response to client failed, ";
+		std::cerr << "\tError: send response to client failed, ";
 		std::cerr << "\tthe socket has been closed and cleared." << std::endl;
-		std::cerr << "\tSize to be send = " << size << " - real size sent = " << bytes << std::endl;
-		exit( 42 );
 	}
 	return;
 }
@@ -479,35 +434,35 @@ const int & Server::_getEplFd(void) const
 
 const std::string &	Server::_getName(const size_t & i) const
 {
-	if ( /*i < 0 ||*/ i >= this->_getNbSrv() )
+	if ( i >= this->_getNbSrv() )
 		throw WrongSize();
 	return ( this->_names[i] );
 }
 
 size_t 	Server::_getPort(const size_t & i) const
 {
-	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_ports.size() )
+	if ( i >= this->_getNbSrv() || i >= this->_ports.size() )
 		throw WrongSize();
 	return ( this->_ports[i] );
 }
 
 const int &	Server::_getSrvFd(const size_t & i) const
 {
-	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_srvfd.size() )
+	if ( i >= this->_getNbSrv() || i >= this->_srvfd.size() )
 		throw WrongSize();
 	return ( this->_srvfd[i] );
 }
 
 const Server::t_sockaddr &	Server::_getSockaddr(const size_t & i) const
 {
-	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_sockaddr.size() )
+	if ( i >= this->_getNbSrv() || i >= this->_sockaddr.size() )
 		throw WrongSize();
 	return ( this->_sockaddr[i] );
 }
 
 const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
 {
-	if ( /*i < 0 ||*/ i >= this->_getNbSrv() || i >= this->_eplevs.size() )
+	if ( i >= this->_getNbSrv() || i >= this->_eplevs.size() )
 		throw WrongSize();
 	return ( this->_eplevs[i] );
 }
@@ -515,7 +470,6 @@ const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
 std::vector<std::vector <std::string> >	Server::getContent( void ) const {
 	return (_content);
 }
-
 
 // Setters ================================================================== //
 void	Server::_setName(const std::string & name)

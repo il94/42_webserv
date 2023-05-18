@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 16:09:53 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:13:05 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,14 @@
 #include "Client.hpp"
 
 // Constructors ============================================================= //
-Client::Client( void ) : _eplfd( ), _socket( ), _port(  ), _name(  ), _flag( ), _buffer(  ) 
+Client::Client( void ) : _eplfd( ), _socket( ), _port(  ), _name(  ), _flag( ),
+	_buffer(  ) 
 {
 	return;
 }
 
-Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _port(  ), _name(  ),  _flag( ), _buffer(  ) 
+Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _port(  ),
+	_name(  ),  _flag( ), _buffer(  ) 
 {
 	return;
 }
@@ -62,10 +64,9 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 	struct epoll_event	ev;
 	bool				is_set	= this->setSocket( socket );
 
-	ev.events = EPOLLIN | EPOLLOUT;
-	ev.data.fd = socket;
+	ev.events	= EPOLLIN | EPOLLOUT;
+	ev.data.fd	= socket;
 	if (	is_set == true
-		//&&	fcntl( socket, F_SETFL, O_NONBLOCK ) != -1
 		&&	epoll_ctl( this->getEpollFd(), EPOLL_CTL_ADD, socket, &ev) != -1
 		)
 	{
@@ -96,7 +97,7 @@ void	Client::remove( int & socket )
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
-	// delete port
+	// delete socket client and all associated data
 	try {
 		if ( itPort != this->_port.end() )
 			this->_port.erase( socket );
@@ -138,6 +139,7 @@ void	Client::newResponse( const int & socket, std::string res )
 		{
 			std::cout << "------------------------- print response -------------------------" << std::endl;
 			std::cout << res << std::endl;
+			std::cout << "Response size = " << res.size() << std::endl;
 		}
 	}
 	catch ( std::exception & e )
@@ -220,5 +222,3 @@ const int &	Client::getFlag( const int & socket ) const
 {
 	return( this->_flag.at( socket ) );
 }
-
-// Private member functions ================================================= ///
