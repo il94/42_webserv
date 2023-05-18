@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 12:28:41 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 16:09:53 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,8 +134,11 @@ void	Client::newResponse( const int & socket, std::string res )
 	{
 		this->_buffer.at( socket ).push_back( ures );
 		this->setFlag( socket, CONTENT );
-		std::cout << "------------------------- print response -------------------------" << std::endl;
-		std::cout << res << std::endl;
+		if ( DBG )
+		{
+			std::cout << "------------------------- print response -------------------------" << std::endl;
+			std::cout << res << std::endl;
+		}
 	}
 	catch ( std::exception & e )
 	{

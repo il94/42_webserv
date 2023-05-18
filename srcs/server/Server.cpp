@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 15:41:36 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 16:14:14 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,17 +275,24 @@ void	Server::run(void)
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response
-						this->_sendResponse( cliSocket, client, size );
+						// this->_sendResponse( cliSocket, client, size );
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
+						// clean local request buffer
 						request.clear();
 						request.resize( sizeRequest );
 						if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 						{
+							// read the request
 							request = this->_readRequest( client, cliSocket, request );
+							// parse request and generate response
 							if ( cliSocket != -1 && request.size() > 0 )
+							{
 								size = this->_storeResponse( client, cliSocket, request );
+								this->_sendResponse( cliSocket, client, size );
+
+							}
 						}
 					}
 				}
@@ -404,8 +411,11 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		request[ bytes ] = '\0';
 		request.resize( bytes );
 	}
-	std::cout << "------------------------- print request -------------------------" << std::endl;
-	std::cout << request << std::endl;
+	if ( DBG )
+	{
+		std::cout << "------------------------- print request -------------------------" << std::endl;
+		std::cout << request << std::endl;
+	}
 	return ( request );
 }
 
@@ -413,7 +423,8 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 {
 	Request	req;
 
-	//std::cout << YELLOW << request << END << std::endl;
+	if ( DBG )
+		std::cout << YELLOW << request << END << std::endl;
 	req.parseHeader(request);
 	if (req.getRet() == 200)
 		req.parseBody();								
@@ -429,22 +440,19 @@ void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )
 	int		bytes = 0;
 	size_t	sizeResp = client.responseSize( cliSocket );
 
-	if ( sizeResp != size )
+	if ( sizeResp != size || sizeResp != size )
 		exit(42);
-	/*
 	bytes = send( cliSocket,
 				static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
 				sizeResp,
 				0 );
-	*/
-	bytes = write( cliSocket,
-				static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
-				sizeResp );
-	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp )
+	if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp || size != (size_t)bytes )
 	{
 		client.remove( cliSocket );
 		std::cerr << "\tError : send response to client failed, ";
-		std::cerr << "the socket has been closed and cleared." << std::endl;
+		std::cerr << "\tthe socket has been closed and cleared." << std::endl;
+		std::cerr << "size to be send = " << size << " - real size sent = " << bytes << std::endl;
+		exit( 42 );
 	}
 	return;
 }

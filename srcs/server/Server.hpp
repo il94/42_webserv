@@ -8,6 +8,8 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
+#define DBG 0
+
 typedef struct s_config
 {
 	size_t						size;
@@ -15,6 +17,7 @@ typedef struct s_config
 	std::vector< int		 >	ports;
 	std::vector< int		 >	srvfd;
 }								t_config;
+
 
 class Server
 {
