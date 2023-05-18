@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 11:59:51 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 12:28:48 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,6 +404,8 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		request[ bytes ] = '\0';
 		request.resize( bytes );
 	}
+	std::cout << "------------------------- print request -------------------------" << std::endl;
+	std::cout << request << std::endl;
 	return ( request );
 }
 

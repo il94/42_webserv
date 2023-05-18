@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 11:35:42 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 12:28:41 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,10 +128,14 @@ void	Client::remove( int & socket )
 // Response management ---------------------------------------------------------
 void	Client::newResponse( const int & socket, std::string res )
 {
+	ustring	ures = *(reinterpret_cast< ustring * >( &res ));
+
 	try
 	{
-		this->_buffer.at( socket ).push_back( *(reinterpret_cast< ustring * >( &res )) );
+		this->_buffer.at( socket ).push_back( ures );
 		this->setFlag( socket, CONTENT );
+		std::cout << "------------------------- print response -------------------------" << std::endl;
+		std::cout << res << std::endl;
 	}
 	catch ( std::exception & e )
 	{
