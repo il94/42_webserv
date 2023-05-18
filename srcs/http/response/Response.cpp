@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/18 22:56:24 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/19 00:05:57 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,8 @@ void	Response::generate()
 	if (_uploadStatu == WAITING)
 	{
 		POST();
-	} 
-	else 
+	}
+	else
 	{
 		if (_code == 400)
 		{
@@ -286,7 +286,7 @@ void	Response::upload()
 	    /*if the _uploadFileName is already set we just open it*/
 	if (_uploadFileName != "")
 	{ 
-		outfile.open(_uploadPath + _uploadFileName);
+		outfile.open(_uploadPath + _uploadFileName, std::ios_base::app);
 		if (outfile.is_open() == false)
 		{
 			_code = 400;
@@ -340,19 +340,19 @@ void	Response::upload()
 		}
 	}
 	/*===========================================================================================================*/
-	it = _content.begin();
+	std::vector<unsigned char>::iterator	yt = _content.begin();
 	/*in this loop while checking if we arrive at the end of _content or at the end of the all form 
 	or of a form we will increment size which will allow us to have the complete size of the body, 
 	we will also update the control while removing its first element then adding the character
 	 *it in the file in question*/
-	while (it != _content.end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
+	while (yt != _content.end() && it != _content.end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
 		&& _controler.find(_boundary + "--") == std::string::npos))
 	{
 		_size++;
-		_controler += *it;
-		_controler.erase(0, 1);
-		outfile << *it;
-		it = _content.erase(it);
+		_controler += *it;//
+		_controler.erase(0, 1);//
+		outfile << *yt;
+		yt = _content.erase(yt);
 	}
 	outfile.close();
 	/*_boundary + -- means we have completed all forms so we can stop the upload process*/
