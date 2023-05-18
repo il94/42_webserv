@@ -38,7 +38,6 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
-		// std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");
@@ -91,22 +90,10 @@ void	Request::parseBody()
 		queryString = URL.substr(queryPos + 1);
 	}
 	else if (getMethod() == "POST")
-	{
 		queryString = _reqBody;
-		// queryString = queryString.substr(2);
-	}
 	else
 		return ;
 	_requestContent = queryString;
-	while (queryString != "")
-	{
-		std::string	subQuery = queryString.substr(0, queryString.find("&"));
-		_queryM[subQuery.substr(0, subQuery.find("="))] = subQuery.substr(subQuery.find("=") + 1);
-		if (queryString.find("&") != std::string::npos)
-			queryString = queryString.substr(queryString.find("&") + 1);
-		else
-			queryString = "";
-	}
 }
 
 /*================================ Accessors =================================*/
