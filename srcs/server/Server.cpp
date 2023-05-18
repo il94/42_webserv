@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 15:03:33 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 15:06:02 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,20 +284,7 @@ void	Server::run(void)
 						{
 							request = this->_readRequest( client, cliSocket, request );
 							if ( cliSocket != -1 && request.size() > 0 )
-							{
 								this->_storeRequest( client, cliSocket, request );
-								/*
-								//std::cout << YELLOW << request << END << std::endl;
-								Request	req;
-								req.parseHeader(request);
-								if (req.getRet() == 200)
-									req.parseBody();								
-								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
-
-								rep.generate();
-								client.newResponse( cliSocket, rep.getResponse() );
-								*/
-							}
 						}
 					}
 				}
