@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 09:48:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 11:35:42 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,8 +71,8 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 	{
 		this->_port.insert( std::pair< int, int >( socket, port ) );
 		this->_name.insert( std::pair< int, std::string >( socket, name ) );
-		this->_flag.insert( std::pair< int, t_flag >( socket, NO_ERROR ) );
-		this->_buffer[ socket ];
+		this->_flag.insert( std::pair< int, int >( socket, EMPTY ) );
+		this->_buffer.insert( std::make_pair( socket, std::vector< ustring >() ) );
 		return ( true );
 	}
 	else if ( is_set == true )
@@ -91,7 +91,7 @@ void	Client::remove( int & socket )
 	std::vector< int >::iterator						itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
 	std::map< int, int >::iterator						itPort = this->_port.find( socket );
 	std::map< int, std::string >::iterator				itName = this->_name.find( socket );
-	std::map< int, t_flag >::iterator					itFlag = this->_flag.find( socket );
+	std::map< int, int >::iterator						itFlag = this->_flag.find( socket );
 	std::map< int, std::vector< ustring >>::iterator	itBuf  = this->_buffer.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
@@ -126,11 +126,12 @@ void	Client::remove( int & socket )
 }
 
 // Response management ---------------------------------------------------------
-void	Client::newResponse( const int & socket, std::string & res )
+void	Client::newResponse( const int & socket, std::string res )
 {
 	try
 	{
 		this->_buffer.at( socket ).push_back( *(reinterpret_cast< ustring * >( &res )) );
+		this->setFlag( socket, CONTENT );
 	}
 	catch ( std::exception & e )
 	{
@@ -150,6 +151,8 @@ Client::ustring	Client::getResponse( const int & socket )
 			response = this->_buffer.at( socket ).front();
 			it = this->_buffer.at( socket ).begin();
 			this->_buffer.at( socket ).erase( it );
+			if ( this->_buffer.at( socket ).size() == 0 )
+				this->setFlag( socket, ~CONTENT );
 		}
 		catch ( std::exception & e ) {
 			std::cerr << "\tError : couldn't access to the next response." <<std::endl;
@@ -157,6 +160,11 @@ Client::ustring	Client::getResponse( const int & socket )
 		}
 	}
 	return ( response );
+}
+
+size_t	Client::responseSize( const int & socket ) const
+{
+	return ( ( this->_buffer.at( socket ).front() ).size() );
 }
 
 // Setters ---------------------------------------------------------------------
@@ -174,9 +182,9 @@ bool	Client::setSocket( const int & socket )
 	return ( false );
 }
 
-void	Client::setFlag( const int & socket, const t_flag flag )
+void	Client::setFlag( const int & socket, const int flag )
 {
-	this->_flag[ socket ] = flag;
+	this->_flag.at( socket ) |= flag;
 	return;
 }
 
@@ -201,7 +209,7 @@ const std::string &	Client::getName( const int & socket ) const
 	return ( this->_name.at( socket ) );
 }
 
-const t_flag &	Client::getFlag( const int & socket ) const
+const int &	Client::getFlag( const int & socket ) const
 {
 	return( this->_flag.at( socket ) );
 }

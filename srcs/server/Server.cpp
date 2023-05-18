@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 08:45:22 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 11:59:51 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,25 +271,21 @@ void	Server::run(void)
 				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
 					cliSocket = cliEvents[i].data.fd;
-					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT )
+					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response
-						if ( client.rep.size() )
-						{
-							int	bytes = 0;
+						int		bytes = 0;
+						size_t	sizeResp = client.responseSize( cliSocket );
 
-							bytes = send( cliSocket, ( client.rep ).c_str(), ( client.rep ).size(), 0 );
-							if ( bytes == -1 || static_cast< size_t >( bytes ) != client.rep.size() )
-							{
-								client.remove( cliSocket );
-								std::cerr << "Error : send response to client failed, the socket has been closed." << std::endl;
-							}
-							else
-							{
-								client.rep.clear();
-								client.rep.resize( 0 );
-								std::cerr << "The response was cleared" << std::endl;
-							}
+						bytes = send( cliSocket,
+								static_cast< const unsigned char* >( ( client.getResponse( cliSocket ) ).c_str() ),
+								sizeResp,
+								0 );
+						if ( bytes == -1 || static_cast< size_t >( bytes ) != sizeResp )
+						{
+							client.remove( cliSocket );
+							std::cerr << "\tError : send response to client failed, ";
+							std::cerr << "the socket has been closed and cleared." << std::endl;
 						}
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
@@ -306,18 +302,10 @@ void	Server::run(void)
 								req.parseHeader(request);
 								if (req.getRet() == 200)
 									req.parseBody();								
-								// Check client.getPort
-								try{
-									client.getPort( cliSocket );
-								}
-								catch ( std::exception & e ) {
-									std::cerr << "getport execption" << e.what() << std::endl;
-									exit( 42 );
-								}
 								Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 
 								rep.generate();
-								client.rep = rep.getResponse();
+								client.newResponse( cliSocket, rep.getResponse() );
 							}
 						}
 					}
