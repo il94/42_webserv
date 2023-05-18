@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 19:13:05 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:26:58 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ Client::~Client( void )
 	while ( it != this->_socket.end() )
 	{
 		if ( *it != -1 && close( *it ) == -1 )
-			std::cerr << "Error: closing client socket failed in destructor" << std::endl;
+			std::cerr << "\tError: closing client socket failed in destructor" << std::endl;
 		it++;
 	}
 	this->_flag.clear();
@@ -80,7 +80,7 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 	{
 		this->_socket.pop_back();
 		if ( close( socket ) == -1 )
-			std::cerr << "Error: closing client socket" << std::endl;
+			std::cerr << "\tError: closing client socket" << std::endl;
 		return ( false );
 	}
 	return ( false );
@@ -112,16 +112,16 @@ void	Client::remove( int & socket )
 			this->_buffer.erase( socket );
 		// remove from epoll instance
 		if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
-			std::cerr << "Error: remove client socket from epoll instance failed" << std::endl;
+			std::cerr << "\tError: remove client socket from epoll instance failed" << std::endl;
 		// remove from socket vector
 		if ( itSock != this->_socket.end() )
 			this->_socket.erase( itSock );
 	} catch ( std::exception & e ) {
-		std::cerr << e.what() << std::endl;
+		std::cerr << "\t" << e.what() << std::endl;
 	}
 	// close socket
 	if ( close( socket ) == -1 )
-		std::cerr << "Error: closing client socket" << std::endl;
+		std::cerr << "\tError: closing client socket" << std::endl;
 	socket = -1;
 	return;
 }
@@ -144,7 +144,7 @@ void	Client::newResponse( const int & socket, std::string res )
 	}
 	catch ( std::exception & e )
 	{
-		std::cerr << "newResponse error: " << e.what() << std::endl;
+		std::cerr << "\tnewResponse error: " << e.what() << std::endl;
 	}
 	return;
 }
