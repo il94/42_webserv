@@ -70,6 +70,7 @@ class Server
 		void				_initSrv(void);
 		int					_acceptConnection(const int & j, Client & client);
 		std::string		  &	_readRequest( Client & client, int & cliSocket, std::string & request );
+		void				_storeRequest( Client & client, const int & cliSocket, std::string & request );
 		void				_sendResponse( int & cliSocket, Client & client );
 
 		size_t	  			_getNbSrv(void)					const;

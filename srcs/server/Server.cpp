@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 14:51:51 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 15:03:33 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,6 +285,8 @@ void	Server::run(void)
 							request = this->_readRequest( client, cliSocket, request );
 							if ( cliSocket != -1 && request.size() > 0 )
 							{
+								this->_storeRequest( client, cliSocket, request );
+								/*
 								//std::cout << YELLOW << request << END << std::endl;
 								Request	req;
 								req.parseHeader(request);
@@ -294,6 +296,7 @@ void	Server::run(void)
 
 								rep.generate();
 								client.newResponse( cliSocket, rep.getResponse() );
+								*/
 							}
 						}
 					}
@@ -416,6 +419,20 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 	std::cout << "------------------------- print request -------------------------" << std::endl;
 	std::cout << request << std::endl;
 	return ( request );
+}
+
+void	Server::_storeRequest( Client & client, const int & cliSocket, std::string & request )
+{
+	Request	req;
+
+	//std::cout << YELLOW << request << END << std::endl;
+	req.parseHeader(request);
+	if (req.getRet() == 200)
+		req.parseBody();								
+	Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
+	rep.generate();
+	client.newResponse( cliSocket, rep.getResponse() );
+	return;
 }
 
 void	Server::_sendResponse( int & cliSocket, Client & client )
