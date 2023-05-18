@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/16 18:47:30 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 12:25:27 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,7 @@ bool		Response::findCGI()
 	
 	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
-	std::cout << GREEN << urlFileExtension << END << std::endl;
+	// std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	if (urlFileExtension != ".py" and urlFileExtension != ".php" and urlFileExtension != ".sh")
 		return (false);
@@ -308,7 +308,7 @@ bool		Response::findCGI()
 		return false;
 	}
 
-	std::cout << GREEN << urlFileExtension << END << std::endl;
+	// std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	std::vector<std::string>					cgiPaths = _location.getCGIBin();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();

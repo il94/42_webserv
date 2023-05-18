@@ -4,15 +4,12 @@
 
 NAME = webserv
 
-#Default build version called with make rule = release
-build	:= san
-
 #==============================================================================#
 #                                   COMMANDS                                   #
 #==============================================================================#
 
 CXX = c++ -g3
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP -fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory
@@ -46,7 +43,7 @@ SRC = main.cpp \
 		\
 		http/request/Request.cpp http/response/Response.cpp http/response/listing.cpp\
 		\
-		server/Server.cpp \
+		server/Server.cpp server/Client.cpp \
 		\
 		utils/string.cpp \
 		\
@@ -70,7 +67,7 @@ DEP = $(addprefix $(OBJ_DIR), $(SRC:.o=.d))
 
 all : $(NAME)
 
-$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp Makefile $(HEAD)
+$(OBJ_DIR)%.o : $(SRC_DIR)%.cpp #Makefile $(HEAD)
 	mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
