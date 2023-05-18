@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 08:56:20 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 09:48:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,12 +87,12 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 
 void	Client::remove( int & socket )
 {
-	struct epoll_event										ev;
-	std::vector< int >::iterator							itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
-	std::map< int, int >::iterator							itPort = this->_port.find( socket );
-	std::map< int, std::string >::iterator					itName = this->_name.find( socket );
-	std::map< int, t_flag >::iterator						itFlag = this->_flag.find( socket );
-	std::map< int, std::vector< std::string >>::iterator	itBuf  = this->_buffer.find( socket );
+	struct epoll_event									ev;
+	std::vector< int >::iterator						itSock = std::find( this->_socket.begin(), this->_socket.end(), socket );
+	std::map< int, int >::iterator						itPort = this->_port.find( socket );
+	std::map< int, std::string >::iterator				itName = this->_name.find( socket );
+	std::map< int, t_flag >::iterator					itFlag = this->_flag.find( socket );
+	std::map< int, std::vector< ustring >>::iterator	itBuf  = this->_buffer.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
@@ -123,6 +123,40 @@ void	Client::remove( int & socket )
 		std::cerr << "Error: closing client socket" << std::endl;
 	socket = -1;
 	return;
+}
+
+// Response management ---------------------------------------------------------
+void	Client::newResponse( const int & socket, std::string & res )
+{
+	try
+	{
+		this->_buffer.at( socket ).push_back( *(reinterpret_cast< ustring * >( &res )) );
+	}
+	catch ( std::exception & e )
+	{
+		std::cerr << "newResponse error: " << e.what() << std::endl;
+	}
+	return;
+}
+
+Client::ustring	Client::getResponse( const int & socket )
+{
+	ustring								response;
+	std::vector< ustring >::iterator	it;
+
+	if ( this->_buffer.at( socket ).size() )
+	{
+		try {
+			response = this->_buffer.at( socket ).front();
+			it = this->_buffer.at( socket ).begin();
+			this->_buffer.at( socket ).erase( it );
+		}
+		catch ( std::exception & e ) {
+			std::cerr << "\tError : couldn't access to the next response." <<std::endl;
+			response.clear();
+		}
+	}
+	return ( response );
 }
 
 // Setters ---------------------------------------------------------------------

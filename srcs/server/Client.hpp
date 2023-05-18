@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 08:55:39 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 09:47:10 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ typedef enum e_flag
 class Client
 {
 	public:
+		typedef std::basic_string<unsigned char> ustring;
+
 		std::string rep;
 		// Constructor ---------------------------------------------------------
 										Client( const int & eplfd );
@@ -40,8 +42,8 @@ class Client
 		void							remove( int & socket );
 		
 		// Response management -------------------------------------------------
-		// void							newResponse( const int & socket, const Response rep );
-		// Response						getResponse( const int & socket );
+		void							newResponse( const int & socket, std::string & res );
+		ustring 						getResponse( const int & socket );
 
 		// Setters -------------------------------------------------------------
 		bool							setSocket( const int & socket );
@@ -61,7 +63,7 @@ class Client
 		std::map	< int, int						>	_port;
 		std::map	< int, std::string				>	_name;
 		std::map	< int, t_flag					>	_flag;
-		std::map	< int, std::vector< std::string	> >	_buffer;
+		std::map	< int, std::vector< ustring	>	>	_buffer;
 
 		// Private functions ---------------------------------------------------
 										Client( void );
