@@ -8,7 +8,7 @@
 #include "../config/Config.hpp"
 #include "Client.hpp"
 
-#define DBG 0
+#define DBG 1
 
 typedef struct s_config
 {

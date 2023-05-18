@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 16:14:14 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 17:00:17 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,7 @@ void	Server::run(void)
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response
-						// this->_sendResponse( cliSocket, client, size );
+						this->_sendResponse( cliSocket, client, size );
 					}
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLIN )
 					{
@@ -290,8 +290,6 @@ void	Server::run(void)
 							if ( cliSocket != -1 && request.size() > 0 )
 							{
 								size = this->_storeResponse( client, cliSocket, request );
-								this->_sendResponse( cliSocket, client, size );
-
 							}
 						}
 					}
@@ -334,10 +332,10 @@ void	Server::_initSrv(void)
 	while ( i < this->_getNbSrv() )
 	{
 		srvfd = -1;
-		srvfd = socket( AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0 ); 
-		if ( srvfd == -1 )
+		srvfd = socket( AF_INET, SOCK_STREAM, 0 ); 
+		if ( srvfd == -1  || fcntl( srvfd, F_SETFL, O_NONBLOCK ) == -1 )
 			this->_displayError( __func__, __LINE__, "_initSrv/socket" );
-		if ( setsockopt( srvfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) ) == -1 )
+		if ( setsockopt( srvfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt) ) == -1 )
 			this->_displayError( __func__, __LINE__, "_initSrv/setsockopt" );
 		if ( bind( srvfd, &this->_getSockaddr( i ), sizeof( t_sockaddr ) ) == -1 )
 		{
@@ -347,6 +345,8 @@ void	Server::_initSrv(void)
 			this->_sockaddr.erase( this->_sockaddr.begin() + i );
 			this->_eplevs.erase( this->_eplevs.begin() + i );
 			this->_nbSrv--;
+			if ( srvfd != -1 )
+				close( srvfd );
 		}
 		else
 		{
@@ -405,6 +405,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
 		client.remove( cliSocket );
 		cliSocket = -1;
+		std::cerr << "\tRead bytes = " << bytes << std::endl;
 	}
 	else
 	{
@@ -451,7 +452,7 @@ void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )
 		client.remove( cliSocket );
 		std::cerr << "\tError : send response to client failed, ";
 		std::cerr << "\tthe socket has been closed and cleared." << std::endl;
-		std::cerr << "size to be send = " << size << " - real size sent = " << bytes << std::endl;
+		std::cerr << "\tSize to be send = " << size << " - real size sent = " << bytes << std::endl;
 		exit( 42 );
 	}
 	return;
