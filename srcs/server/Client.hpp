@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 11:37:15 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/19 13:58:07 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,6 @@ typedef enum e_flag
 	EMPTY	= 0,
 	ERROR	= 1 << 0,
 	CONTENT	= 1 << 1,
-	START	= 1 << 2,
-	STOP	= 1 << 3,
-	WAITING	= 1 << 4
 }			t_flag;
 
 class Client
