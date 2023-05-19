@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 16:20:38 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/19 16:23:50 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ void	Client::remove( int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// check for flags keeping alive the socket
-	std::cout << RED << "\t------FLAG VALUE = " << this->getFlag( socket) <<END<< std::endl;
 	if ( this->getFlag( socket ) & STOP )
 		return;
 	// delete socket client and all associated data

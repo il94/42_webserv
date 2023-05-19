@@ -174,7 +174,7 @@ void	Response::POST(void)
 	if (_uploadStatu == READ || findCGI() == true)
 	{
 		/*==========================================================*/
-		upload();
+		//upload();
 		if (_uploadStatu == READ)
 			return ;
 		/*==========================================================*/
