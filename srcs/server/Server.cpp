@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 14:34:38 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:09:34 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,8 +356,7 @@ int	Server::_acceptConnection(const int & j, Client & client )
 
 std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string & request)
 {
-	int			bytes = 0;
-	std::string	strUpload;
+	int	bytes = 0;
 
 	bytes = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
 	if ( bytes == 0 || bytes == -1 )
@@ -372,11 +371,6 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		request[ bytes ] = '\0';
 		request.resize( bytes );
 	}
-	if ( request.find( "\r\n\r\n" ) != std::string::npos )
-	{
-		strUpload = request.substr( request.find( "\r\n\r\n" ) + 4 );
-		client.str2upload( cliSocket, strUpload );
-	}
 	if ( DBG )
 	{
 		std::cout << "------------------------- print request -------------------------" << std::endl;
@@ -388,20 +382,14 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
 	Request	req;
-	Response rep;
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;
-	if ( client.getFlag( cliSocket ) & EMPTY )
-	{
-		req.parseHeader(request);
-		if (req.getRet() == 200)
-			req.parseBody();
-		// client.setFlag( cliSocket, flag_value );
-		client.setClassResponse( cliSocket, _configs[0], req ); // a coder
-	}
-	rep = client.getClassResponse( cliSocket );
+	req.parseHeader(request);
+	if (req.getRet() == 200)
+		req.parseBody();								
 
+	Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 	rep.generate();
 	client.newResponse( cliSocket, rep.getResponse() );
 	return ( rep.getResponse().size() );

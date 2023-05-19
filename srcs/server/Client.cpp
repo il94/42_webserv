@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 14:35:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/18 19:26:58 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@
 
 // Constructors ============================================================= //
 Client::Client( void ) : _eplfd( ), _socket( ), _port(  ), _name(  ), _flag( ),
-	_Response( ), _buffer(  ) 
+	_buffer(  ) 
 {
 	return;
 }
 
 Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _port(  ),
-	_name(  ),  _flag( ), _Response( ), _buffer(  ) 
+	_name(  ),  _flag( ), _buffer(  ) 
 {
 	return;
 }
@@ -73,7 +73,6 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 		this->_port.insert( std::pair< int, int >( socket, port ) );
 		this->_name.insert( std::pair< int, std::string >( socket, name ) );
 		this->_flag.insert( std::pair< int, int >( socket, EMPTY ) );
-		this->_Response.insert( std::make_pair( socket, Response() ) );
 		this->_buffer.insert( std::make_pair( socket, std::vector< ustring >() ) );
 		return ( true );
 	}
@@ -94,15 +93,10 @@ void	Client::remove( int & socket )
 	std::map< int, int >::iterator						itPort = this->_port.find( socket );
 	std::map< int, std::string >::iterator				itName = this->_name.find( socket );
 	std::map< int, int >::iterator						itFlag = this->_flag.find( socket );
-	std::map< int, Response >::iterator					itRes  = this->_Response.find( socket );
 	std::map< int, std::vector< ustring >>::iterator	itBuf  = this->_buffer.find( socket );
-	std::map< int, std::vector< unsigned char >>::iterator itUp = this->_upload.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
-	// check for flags keeping alive the socket
-	//if ( this->getFlag( socket ) & /*flag val*/ )
-	//	return;
 	// delete socket client and all associated data
 	try {
 		if ( itPort != this->_port.end() )
@@ -113,15 +107,9 @@ void	Client::remove( int & socket )
 		// delete socket flags
 		if ( itFlag != this->_flag.end() )
 			this->_flag.erase( socket );
-		// delete Response class
-		if ( itRes != this->_Response.end() )
-			this->_Response.erase( socket );
 		// delete response buffer
 		if ( itBuf != this->_buffer.end() )
 			this->_buffer.erase( socket );
-		// delete upload buffer
-		if ( itUp != this->_upload.end() )
-			this->_upload.erase( socket );
 		// remove from epoll instance
 		if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
 			std::cerr << "\tError: remove client socket from epoll instance failed" << std::endl;
@@ -161,7 +149,6 @@ void	Client::newResponse( const int & socket, std::string res )
 	return;
 }
 
-
 Client::ustring	Client::getResponse( const int & socket )
 {
 	ustring								response;
@@ -189,18 +176,6 @@ size_t	Client::responseSize( const int & socket ) const
 	return ( ( this->_buffer.at( socket ).front() ).size() );
 }
 
-void	Client::str2upload( const int & socket, std::string & str )
-{
-	std::string::iterator	it = str.begin();
-
-	while ( it != str.end() )
-	{
-		this->_upload.at( socket ).push_back( *it );
-		it++;
-	}
-	return;
-}
-
 // Setters ---------------------------------------------------------------------
 bool	Client::setSocket( const int & socket )
 {
@@ -219,14 +194,6 @@ bool	Client::setSocket( const int & socket )
 void	Client::setFlag( const int & socket, const int flag )
 {
 	this->_flag.at( socket ) |= flag;
-	return;
-}
-
-void	Client::setClassResponse( const int & socket, Config & conf, Request & req  )
-{
-	Response	res( req, conf, this->getPort( socket ), this->getName( socket ) );
-
-	this->_Response[socket] = res;
 	return;
 }
 
@@ -254,9 +221,4 @@ const std::string &	Client::getName( const int & socket ) const
 const int &	Client::getFlag( const int & socket ) const
 {
 	return( this->_flag.at( socket ) );
-}
-
-Response &	Client::getClassResponse( const int & socket )
-{
-	return ( this->_Response.at( socket ) );
 }
