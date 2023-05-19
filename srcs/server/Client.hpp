@@ -23,7 +23,10 @@ typedef enum e_flag
 {
 	EMPTY	= 0,
 	ERROR	= 1 << 0,
-	CONTENT	= 1 << 1
+	CONTENT	= 1 << 1,
+	START	= 1 << 2,
+	STOP	= 1 << 3,
+	WAITING	= 1 << 4
 }			t_flag;
 
 class Client
@@ -56,6 +59,7 @@ class Client
 		const int					&	getPort( const int & socket )	const;
 		const std::string			&	getName( const int & socket )	const;
 		const int					&	getFlag( const int & socket )	const;
+		Response					&	getClassResponse( const int & socket);
 
 	private:
 		// Private attributes --------------------------------------------------
@@ -64,6 +68,7 @@ class Client
 		std::map	< int, int						>	_port;
 		std::map	< int, std::string				>	_name;
 		std::map	< int, int						>	_flag;
+		std::map	< int, Response					>	_Response;
 		std::map	< int, std::vector< ustring	>	>	_buffer;
 
 		// Private functions ---------------------------------------------------

@@ -382,14 +382,21 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
 	Request	req;
+	Response rep;
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;
-	req.parseHeader(request);
-	if (req.getRet() == 200)
-		req.parseBody();								
+	if ( client.getFlag( cliSocket ) & EMPTY )
+	{
+		req.parseHeader(request);
+		if (req.getRet() == 200)
+			req.parseBody();
+		// client.setFlag( cliSocket, flag_value );
+		Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
+		client.setClassResponse( req, cliSocket, _config[0] ); // a coder
+	}
+	rep = client.getClasseResponse(cliSocket);						
 
-	Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
 	rep.generate();
 	client.newResponse( cliSocket, rep.getResponse() );
 	return ( rep.getResponse().size() );
