@@ -23,7 +23,6 @@ class	Request
 		std::string	getRequestContent() const;
 		std::string	getElInHeader(const std::string & key);
 		std::map<std::string, std::string>	getHeaderM();
-		std::map<std::string, std::string>	getQueryMap() const;
 
 		void	setRequestContent(std::string str);
 		bool	badFirstLine();

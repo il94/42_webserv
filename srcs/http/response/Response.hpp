@@ -53,6 +53,8 @@ class Response
 		
 		/*UPLOAD*/
 		void			setContent(std::vector<unsigned char> & vec);
+		void			uploadFailed();
+		void			uploadSucess();
 		void			upload();
 		std::string		getMPFD_Header();
 
@@ -82,11 +84,12 @@ class Response
 
 		/*Upload*/
 		t_uploadStatus				_uploadStatu;
-		size_t						_size;
 		std::string					_boundary;
 		std::string					_uploadPath;
 		std::string					_uploadFileName;
 		std::string					_controler;
+		std::vector<std::string>	_files;
+		std::vector<std::string>	_headerName;
 		std::vector<unsigned char>	_content;
 
 		/*Header*/

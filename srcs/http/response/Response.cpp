@@ -6,22 +6,64 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/19 00:05:57 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/19 14:01:20 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
 /*=============================== Constructors ===============================*/
-Response::Response(void): _port(8000), _host("127.0.0.1"),
-	_path(""), _boundary(""), _uploadFileName(""), _contentLength("0"), _contentType(""),
-		_code(200), _response("") {}
-
-Response::Response(Request & request, Config & config,
-	int port, std::string host) : _port(port), _host(host), _path(""), _boundary(""),
-	_uploadFileName(""), _contentLength(""), _contentType(""), _code(request.getRet()),
-		_request(request), _config(config), _response("")
+Response::Response(void)
 {
+	
+	_port = 8000;
+	_host = "127.0.0.1";
+
+	_path = "";
+
+	/*Upload*/
+	_uploadStatu = START;
+	_boundary = "";
+	_uploadPath = "./";
+	_uploadFileName = "";
+	_controler = "";
+	/*=====*/
+
+	/*Header*/
+	_contentLength = "0"; 
+	_contentType = "";
+	_code = 200;
+	/*=====*/
+
+	_response = "";
+}
+
+Response::Response(Request & request, Config & config, int port, std::string host)
+{
+	_port = port;
+	_host = host;
+
+	_path = "";
+
+	/*Upload*/
+	_uploadStatu = START;
+	_boundary = "";
+	_uploadPath = "./";
+	_uploadFileName = "";
+	_controler = "";
+	/*=====*/
+
+	/*Header*/
+	_contentLength = "0"; 
+	_contentType = "";
+	_code = request.getRet();
+	/*=====*/
+
+	_request = request;
+	_config = config;
+
+	_response = "";
+
 	if (_code != 400)
 		_location = findLocation();
 }
@@ -52,8 +94,15 @@ void	Response::generate()
 		if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
 			== tmpAllowedMethods.end())
 				_code = 405;
-		else if (_config.getMaxBodySize() < _request.getRequestBody().size())
-			_code = 413;
+
+		unsigned long	bodySize = 0;
+		std::map<std::string, std::string> header = _request.getHeaderM();
+		if (header.find("Content-Length") != header.end())
+		{
+			bodySize = atol((header["Content-Length"]).c_str());
+			if (_config.getMaxBodySize() < bodySize)
+				_code = 413;
+		}
 		if (_code == 405 || _code == 413)
 		{
 			_response = readErrorPage(_config.getErrorPages(to_string(_code)));
@@ -122,7 +171,7 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
-	if (findCGI() == true)
+	if (_uploadStatu == WAITING || findCGI() == true)
 	{
 		/*==========================================================*/
 		upload();
@@ -167,7 +216,7 @@ void	Response::POST(void)
 		_code = 204;
 		_response = "";
 	}
-	if (_code != 200 || _code != 203)
+	if (_code != 200 && _code != 203)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = generateHeader(_response.size(), "") + _response;
 }
@@ -252,11 +301,48 @@ std::string	Response::getMPFD_Header()
 
 	while (it != _content.end() && _controler.find("\r\n\r\n") == std::string::npos)
 	{
-		_size++;
 		_controler += *it;
 		it = _content.erase(it);
 	}
 	return (_controler);
+}
+
+void	Response::uploadFailed()
+{
+	std::vector<std::string>::iterator	it = _files.begin();
+	std::string	path;
+
+	_code = 400;
+	_uploadStatu = STOP;
+	while (it != _files.end())
+	{
+		path = _uploadPath + *it;
+		if (isFile(path))
+		{
+			if (remove(path.c_str()) != 0)
+				_code = 403;
+		}
+		it++;
+	}
+}
+
+void	Response::uploadSucess()
+{
+	std::string	newRequestContent = "";
+
+	std::vector<std::string>::iterator	it = _files.begin();
+	std::vector<std::string>::iterator	yt = _headerName.begin();
+
+	while (it != _files.end() && yt != _headerName.end())
+	{
+		newRequestContent += "&" + *yt + "=" + _uploadPath + *it;
+		yt++;
+		it++;
+	}
+	if (newRequestContent[0] == '&')
+		newRequestContent.erase(0, 1);
+	_request.setRequestContent(newRequestContent);
+	_uploadStatu = STOP;
 }
 
 void	Response::upload()
@@ -269,7 +355,7 @@ void	Response::upload()
 		{
 			size_t	boundaryPos = Content_type.find("boundary=");
 			if (boundaryPos != std::string::npos)
-				_boundary = Content_type.substr(Content_type.find("boundary=" + 9));
+				_boundary = Content_type.substr(Content_type.find("boundary=") + 9);
 			else
 				return ;
 			_uploadPath = _location.getUploadPath();
@@ -289,8 +375,7 @@ void	Response::upload()
 		outfile.open(_uploadPath + _uploadFileName, std::ios_base::app);
 		if (outfile.is_open() == false)
 		{
-			_code = 400;
-			_uploadStatu = STOP;
+			uploadFailed();
 			return ;
 		}
 	}
@@ -304,6 +389,19 @@ void	Response::upload()
 			_uploadStatu = WAITING;						// so we put the _uploadStatu to WAITING 
 			return ;								   // to tell the server that we are still waiting for data
 		}
+		std::string			varName = "";
+		size_t				varNameStartPos = header.find("name=\"") + 6;
+		size_t				varNameEndPos = header.find("\"", varNameStartPos);
+		if (varNameStartPos != std::string::npos && varNameEndPos != std::string::npos
+			&& varNameEndPos > varNameStartPos)
+			varName = header.substr(varNameStartPos, varNameEndPos - varNameStartPos);
+		else
+		{
+			uploadFailed();
+			return ;
+		}
+		_headerName.push_back(varName);
+
 		/*get the name of the file in the header*/
 		size_t				filenameStartPos = header.find("filename=\"") + 10;
 		size_t				filenameEndPos = header.find("\"", filenameStartPos);
@@ -312,18 +410,17 @@ void	Response::upload()
 			_uploadFileName = header.substr(filenameStartPos, filenameEndPos - filenameStartPos);
 		else /*if there is not "filename=" in the header it means that an other type of data was send with mulit part form data so error*/
 		{
-			_code = 400;
-			_uploadStatu = STOP;
+			uploadFailed();
 			return ;
 		}
 		/*===================================*/
 		outfile.open(_uploadPath + _uploadFileName);
 		if (outfile.is_open() == false)
 		{
-			_code = 400;
-			_uploadStatu = STOP;
+			uploadFailed();
 			return ;
 		}
+		_files.push_back(_uploadFileName);
 		_controler = "";
 	}
 	    /*=============================================================*/
@@ -348,7 +445,6 @@ void	Response::upload()
 	while (yt != _content.end() && it != _content.end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
 		&& _controler.find(_boundary + "--") == std::string::npos))
 	{
-		_size++;
 		_controler += *it;//
 		_controler.erase(0, 1);//
 		outfile << *yt;
@@ -358,7 +454,7 @@ void	Response::upload()
 	/*_boundary + -- means we have completed all forms so we can stop the upload process*/
 	if (_controler.find(_boundary + "--") != std::string::npos)
 	{
-		_uploadStatu = STOP;
+		uploadSucess();
 		return ;
 	}
 	/*_boundary + \r\n means we have completed an form so we reset _uploadFilname and _cotroler*/
