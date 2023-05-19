@@ -33,13 +33,12 @@ class	Request
 		void	parseBody();
 	
 	private:
-		std::vector<std::string>	_data;
+		std::vector<std::string>			_data;
 		std::map<std::string, std::string>	_headerM;
-		std::map<std::string, std::string>	_queryM;
 
-		std::string	_requestContent;
-		std::string	_reqBody;
-		int			_ret;
+		std::string							_requestContent;
+		std::string							_reqBody;
+		int									_ret;
 
 };
 

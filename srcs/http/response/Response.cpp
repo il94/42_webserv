@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/18 12:25:27 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/19 00:05:57 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 /*=============================== Constructors ===============================*/
 Response::Response(void): _port(8000), _host("127.0.0.1"),
-	_path(""), _uploadFileName(""), _contentLength("0"), _contentType(""),
+	_path(""), _boundary(""), _uploadFileName(""), _contentLength("0"), _contentType(""),
 		_code(200), _response("") {}
 
 Response::Response(Request & request, Config & config,
-	int port, std::string host) : _port(port), _host(host), _path(""),
+	int port, std::string host) : _port(port), _host(host), _path(""), _boundary(""),
 	_uploadFileName(""), _contentLength(""), _contentType(""), _code(request.getRet()),
 		_request(request), _config(config), _response("")
 {
@@ -33,39 +33,46 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
-	if (_code == 400)
+	if (_uploadStatu == WAITING)
 	{
-		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
-		return ;
-	}
-	setPath();
-	
-	std::vector<std::string> tmpAllowedMethods = _location.getAllowedMethods();
-	
-	if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
-		== tmpAllowedMethods.end())
-			_code = 405;
-	else if (_config.getMaxBodySize() < _request.getRequestBody().size())
-		_code = 413;
-	if (_code == 405 || _code == 413)
-	{
-		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
-		return ;
-	}
-	else if (_location.getRedirection().first / 100 == 3)
-	{
-		_code = _location.getRedirection().first;
-		_response = generateHeader(_response.size(), "") + "\r\n" + _response;
-		return ;
-	}
-	if (_request.getMethod() == "GET")
-		GET();
-	else if (_request.getMethod() == "POST")
 		POST();
+	}
 	else
-		DELETE();
+	{
+		if (_code == 400)
+		{
+			_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+			_response = generateHeader(_response.size(), "") + "\r\n" + _response;
+			return ;
+		}
+		setPath();
+		
+		std::vector<std::string> tmpAllowedMethods = _location.getAllowedMethods();
+		
+		if (std::find(tmpAllowedMethods.begin(), tmpAllowedMethods.end(), _request.getMethod())\
+			== tmpAllowedMethods.end())
+				_code = 405;
+		else if (_config.getMaxBodySize() < _request.getRequestBody().size())
+			_code = 413;
+		if (_code == 405 || _code == 413)
+		{
+			_response = readErrorPage(_config.getErrorPages(to_string(_code)));
+			_response = generateHeader(_response.size(), "") + "\r\n" + _response;
+			return ;
+		}
+		else if (_location.getRedirection().first / 100 == 3)
+		{
+			_code = _location.getRedirection().first;
+			_response = generateHeader(_response.size(), "") + "\r\n" + _response;
+			return ;
+		}
+		if (_request.getMethod() == "GET")
+			GET();
+		else if (_request.getMethod() == "POST")
+			POST();
+		else
+			DELETE();
+	}
 }
 
 /*============================= HTTP Methods =================================*/
@@ -117,45 +124,50 @@ void	Response::POST(void)
 {
 	if (findCGI() == true)
 	{
-		updateContentIfBoundary();
-		std::cout << RED << _path << END << std::endl;
-		//_path = "./html/cgi_test/cgi-bin/upload.sh";
-		CGI cgi(_request);
-		cgi.setUploadInfo(_uploadFileName, _location.getUploadPath());
-		_response = cgi.execCGI(_path);
-		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
-			_response.erase(0, 1);
-		size_t	bodyPosition = _response.find("\r\n\r\n");
-		size_t	boundary = std::string::npos;
-
-		std::string			tmp;
-		std::istringstream	stream(_response);
-		
-		while (std::getline(stream, tmp))
+		/*==========================================================*/
+		upload();
+		if (_uploadStatu == WAITING)
+			return ;
+		/*==========================================================*/
+		if (_code == 200)
 		{
-			if (tmp == "")
-				break;
-			boundary = tmp.find(":");
-			if (boundary != std::string::npos)
+			CGI cgi(_request);
+			cgi.setUploadInfo(_uploadFileName, _location.getUploadPath());
+			_response = cgi.execCGI(_path);
+			while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
+				_response.erase(0, 1);
+			size_t	bodyPosition = _response.find("\r\n\r\n");
+			size_t	boundary = std::string::npos;
+
+			std::string			tmp;
+			std::istringstream	stream(_response);
+			
+			while (std::getline(stream, tmp))
 			{
-				if (boundary > bodyPosition)
+				if (tmp == "")
 					break;
-				std::string	key(tmp, 0, boundary);
-				std::string	value(tmp, boundary + 2);
-				if (key == "Status")
-					_code = std::atoi(value.c_str());
-				else if (key == "Content-Type")
-					_contentType = value;
+				boundary = tmp.find(":");
+				if (boundary != std::string::npos)
+				{
+					if (boundary > bodyPosition)
+						break;
+					std::string	key(tmp, 0, boundary);
+					std::string	value(tmp, boundary + 2);
+					if (key == "Status")
+						_code = std::atoi(value.c_str());
+					else if (key == "Content-Type")
+						_contentType = value;
+				}
 			}
+			_response = _response.substr(bodyPosition + 2);
 		}
-		_response = _response.substr(bodyPosition + 2);
 	}
 	else if (_code != 403)
 	{
 		_code = 204;
 		_response = "";
 	}
-	if (_code == 403 or _code == 500)
+	if (_code != 200 || _code != 203)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = generateHeader(_response.size(), "") + _response;
 }
@@ -232,23 +244,137 @@ std::string	Response::readErrorPage(const std::string & path)
 	return (readErrorPage(_config.getErrorPages("default_404")));
 }
 
-void	Response::updateContentIfBoundary()
-{
-	const std::string	body = _request.getRequestBody();
-	size_t				boundary = body.find("------WebKitFormBoundary");
-	if (boundary == std::string::npos)
-		return ;
-	std::string			requestContent = body.substr(boundary);
 
-	size_t				filenameStartPos = requestContent.find("filename=\"") + 10;
-	size_t				filenameEndPos = requestContent.find("\"", filenameStartPos);
-	if (filenameStartPos != std::string::npos && filenameEndPos != std::string::npos
-		&& filenameEndPos > filenameStartPos)
-		_uploadFileName = requestContent.substr(filenameStartPos, filenameEndPos - filenameStartPos);
-	
-	requestContent = requestContent.substr(requestContent.find("\r\n\r\n") + 4);
-	requestContent = requestContent.substr(0, requestContent.find("------WebKitFormBoundary") - 4);
-	_request.setRequestContent(requestContent);
+std::string	Response::getMPFD_Header()
+{
+	/*get the header of multi part form data*/
+	std::vector<unsigned char>::iterator it = _content.begin();
+
+	while (it != _content.end() && _controler.find("\r\n\r\n") == std::string::npos)
+	{
+		_size++;
+		_controler += *it;
+		it = _content.erase(it);
+	}
+	return (_controler);
+}
+
+void	Response::upload()
+{
+	/*if _uploadStatu == START set the boundary, uploadPath and controler to not redefine them next time*/
+	if (_uploadStatu == START)
+	{
+		std::string	Content_type = _request.getElInHeader("Content-Type");
+		if (Content_type.find("multipart/form-data"))
+		{
+			size_t	boundaryPos = Content_type.find("boundary=");
+			if (boundaryPos != std::string::npos)
+				_boundary = Content_type.substr(Content_type.find("boundary=" + 9));
+			else
+				return ;
+			_uploadPath = _location.getUploadPath();
+			_controler = "";
+		}
+		else
+			return ;
+	}
+	/*================================================================================================*/
+
+	/*know we need to open the file on which we gonna write the _content */
+	std::ofstream	outfile;
+
+	    /*if the _uploadFileName is already set we just open it*/
+	if (_uploadFileName != "")
+	{ 
+		outfile.open(_uploadPath + _uploadFileName, std::ios_base::app);
+		if (outfile.is_open() == false)
+		{
+			_code = 400;
+			_uploadStatu = STOP;
+			return ;
+		}
+	}
+	    /*===================================================*/
+		/*otherwise it means that we haven't read the form header yet */
+	else
+	{
+		std::string header = getMPFD_Header(); // take the header
+		if (header.find("\r\n\r\n") == std::string::npos) // if we dont have "\r\n\r\n" 
+		{												 //it means that we have not read all the content of the header 
+			_uploadStatu = WAITING;						// so we put the _uploadStatu to WAITING 
+			return ;								   // to tell the server that we are still waiting for data
+		}
+		/*get the name of the file in the header*/
+		size_t				filenameStartPos = header.find("filename=\"") + 10;
+		size_t				filenameEndPos = header.find("\"", filenameStartPos);
+		if (filenameStartPos != std::string::npos && filenameEndPos != std::string::npos
+			&& filenameEndPos > filenameStartPos)
+			_uploadFileName = header.substr(filenameStartPos, filenameEndPos - filenameStartPos);
+		else /*if there is not "filename=" in the header it means that an other type of data was send with mulit part form data so error*/
+		{
+			_code = 400;
+			_uploadStatu = STOP;
+			return ;
+		}
+		/*===================================*/
+		outfile.open(_uploadPath + _uploadFileName);
+		if (outfile.is_open() == false)
+		{
+			_code = 400;
+			_uploadStatu = STOP;
+			return ;
+		}
+		_controler = "";
+	}
+	    /*=============================================================*/
+	/*===================================================================*/
+
+	/*setup the _controler which will take boundary.size() ahead of _content to check if we reach the end of a form*/
+	std::vector<unsigned char>::iterator	it = _content.begin();
+	if (_controler.size() < (_boundary.size() + 2))
+	{
+		while (it != _content.end() && _controler.size() < (_boundary.size() + 2))
+		{
+			_controler += *it;
+			it++;
+		}
+	}
+	/*===========================================================================================================*/
+	std::vector<unsigned char>::iterator	yt = _content.begin();
+	/*in this loop while checking if we arrive at the end of _content or at the end of the all form 
+	or of a form we will increment size which will allow us to have the complete size of the body, 
+	we will also update the control while removing its first element then adding the character
+	 *it in the file in question*/
+	while (yt != _content.end() && it != _content.end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
+		&& _controler.find(_boundary + "--") == std::string::npos))
+	{
+		_size++;
+		_controler += *it;//
+		_controler.erase(0, 1);//
+		outfile << *yt;
+		yt = _content.erase(yt);
+	}
+	outfile.close();
+	/*_boundary + -- means we have completed all forms so we can stop the upload process*/
+	if (_controler.find(_boundary + "--") != std::string::npos)
+	{
+		_uploadStatu = STOP;
+		return ;
+	}
+	/*_boundary + \r\n means we have completed an form so we reset _uploadFilname and _cotroler*/
+	else if (_controler.find(_boundary + "\r\n") != std::string::npos)
+	{
+		_uploadFileName = "";
+		_controler = "";
+	}
+	/*if we reach the end of _content we set the status to waiting */
+	if (it == _content.end())
+	{
+		_uploadStatu = WAITING;
+		return ;
+	}
+	/*it means that we can continue the download process so we call upload() recursively*/
+	upload();
 }
 
 
@@ -496,6 +622,12 @@ void	Response::setPath()
 		}
 	}
 }
+
+void	Response::setContent(std::vector<unsigned char> & vec)
+{
+	_content = vec;
+}
+
 
 std::string	Response::getUploadFileName() {return _uploadFileName;}
 

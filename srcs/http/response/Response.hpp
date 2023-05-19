@@ -10,6 +10,13 @@
 #include "../../config/Config.hpp"
 #include "../../cgi/CGI.hpp"
 
+typedef enum e_uploadStatus
+{
+	START,
+	STOP,
+	WAITING
+}	t_uploadStatus;
+
 class Response
 {
 	public :
@@ -41,9 +48,14 @@ class Response
 		int	isFile(std::string path);
 		int	isDir(std::string path);
 		
-		void		updateContentIfBoundary();
 		bool		findCGI();
 		Location	findLocation();
+		
+		/*UPLOAD*/
+		void			setContent(std::vector<unsigned char> & vec);
+		void			upload();
+		std::string		getMPFD_Header();
+
 		
 		/*listing.cpp/ Listing*/
 		std::string	generateAutoIndex();
@@ -69,7 +81,13 @@ class Response
 		std::string	_path;
 
 		/*Upload*/
-		std::string	_uploadFileName;
+		t_uploadStatus				_uploadStatu;
+		size_t						_size;
+		std::string					_boundary;
+		std::string					_uploadPath;
+		std::string					_uploadFileName;
+		std::string					_controler;
+		std::vector<unsigned char>	_content;
 
 		/*Header*/
 		std::string					_contentLength;
