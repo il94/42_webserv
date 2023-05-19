@@ -9,13 +9,7 @@
 #include "../request/Request.hpp"
 #include "../../config/Config.hpp"
 #include "../../cgi/CGI.hpp"
-
-typedef enum e_uploadStatus
-{
-	START,
-	STOP,
-	WAITING
-}	t_uploadStatus;
+//#include "../../server/Client.hpp"
 
 class Response
 {
@@ -52,6 +46,7 @@ class Response
 		Location	findLocation();
 		
 		/*UPLOAD*/
+		int				getUploadStatu();
 		void			setContent(std::vector<unsigned char> & vec);
 		void			uploadFailed();
 		void			uploadSucess();
@@ -83,7 +78,7 @@ class Response
 		std::string	_path;
 
 		/*Upload*/
-		t_uploadStatus				_uploadStatu;
+		int							_uploadStatu;
 		std::string					_boundary;
 		std::string					_uploadPath;
 		std::string					_uploadFileName;

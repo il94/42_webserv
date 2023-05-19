@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 13:58:07 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/19 16:19:30 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,11 @@
 
 #include <sys/epoll.h>
 
+# include "../../include/webserv.hpp"
 #include "../config/Config.hpp"
 #include "../http/response/Response.hpp"
 #include "Server.hpp"
 
-typedef enum e_flag
-{
-	EMPTY	= 0,
-	ERROR	= 1 << 0,
-	CONTENT	= 1 << 1,
-	START	= 1 << 2,
-	STOP	= 1 << 3,
-	WAITING	= 1 << 4
-}			t_flag;
 
 class Client
 {
@@ -53,6 +45,7 @@ class Client
 		// Setters -------------------------------------------------------------
 		bool							setSocket( const int & socket );
 		void							setFlag( const int & socket, const int flag );
+		void							unSetFlag( const int & socket, const int flag );
 		void							setClassResponse( const int & socket, Config & conf, Request & req );
 
 		// Getters -------------------------------------------------------------
@@ -62,6 +55,7 @@ class Client
 		const std::string			&	getName( const int & socket )	const;
 		const int					&	getFlag( const int & socket )	const;
 		Response					&	getClassResponse( const int & socket);
+		std::vector<unsigned char>	&	getUpload( const int & socker );
 
 	private:
 		// Private attributes --------------------------------------------------

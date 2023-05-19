@@ -392,7 +392,7 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;
-	if ( client.getFlag( cliSocket ) & EMPTY )
+	if ( client.getFlag( cliSocket ) == EMPTY )
 	{
 		req.parseHeader(request);
 		if (req.getRet() == 200)
@@ -401,9 +401,12 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 		client.setClassResponse( cliSocket, _configs[0], req ); // a coder
 	}
 	rep = client.getClassResponse( cliSocket );
+	rep.setContent( client.getUpload( cliSocket ) );
 
 	rep.generate();
-	client.newResponse( cliSocket, rep.getResponse() );
+	client.setFlag(cliSocket, rep.getUploadStatu());
+	if ( client.getFlag( cliSocket ) == EMPTY || client.getFlag( cliSocket ) & STOP )
+		client.newResponse( cliSocket, rep.getResponse() );
 	return ( rep.getResponse().size() );
 }
 

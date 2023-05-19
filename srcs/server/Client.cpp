@@ -6,7 +6,7 @@
 /*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 14:35:02 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/19 16:20:38 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,9 @@ int	Client::find( const int & socket ) const
 
 bool	Client::add( const int & socket, const int & port, const std::string & name )
 {
-	struct epoll_event	ev;
-	bool				is_set	= this->setSocket( socket );
+	struct epoll_event			ev;
+	bool						is_set	= this->setSocket( socket );
+	std::vector<unsigned char>	vect;
 
 	ev.events	= EPOLLIN | EPOLLOUT;
 	ev.data.fd	= socket;
@@ -75,6 +76,7 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 		this->_flag.insert( std::pair< int, int >( socket, EMPTY ) );
 		this->_Response.insert( std::make_pair( socket, Response() ) );
 		this->_buffer.insert( std::make_pair( socket, std::vector< ustring >() ) );
+		this->_upload.insert( std::pair< int, std::vector<unsigned char> >( socket, vect ) );
 		return ( true );
 	}
 	else if ( is_set == true )
@@ -101,8 +103,9 @@ void	Client::remove( int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// check for flags keeping alive the socket
-	//if ( this->getFlag( socket ) & /*flag val*/ )
-	//	return;
+	std::cout << RED << "\t------FLAG VALUE = " << this->getFlag( socket) <<END<< std::endl;
+	if ( this->getFlag( socket ) & STOP )
+		return;
 	// delete socket client and all associated data
 	try {
 		if ( itPort != this->_port.end() )
@@ -161,7 +164,6 @@ void	Client::newResponse( const int & socket, std::string res )
 	return;
 }
 
-
 Client::ustring	Client::getResponse( const int & socket )
 {
 	ustring								response;
@@ -174,7 +176,7 @@ Client::ustring	Client::getResponse( const int & socket )
 			it = this->_buffer.at( socket ).begin();
 			this->_buffer.at( socket ).erase( it );
 			if ( this->_buffer.at( socket ).size() == 0 )
-				this->setFlag( socket, ~CONTENT );
+				this->unSetFlag( socket, CONTENT );
 		}
 		catch ( std::exception & e ) {
 			std::cerr << "\tError : couldn't access to the next response." <<std::endl;
@@ -222,6 +224,12 @@ void	Client::setFlag( const int & socket, const int flag )
 	return;
 }
 
+void	Client::unSetFlag( const int & socket, const int flag )
+{
+	this->_flag.at( socket ) &= ~flag;
+	return;
+}
+
 void	Client::setClassResponse( const int & socket, Config & conf, Request & req  )
 {
 	Response	res( req, conf, this->getPort( socket ), this->getName( socket ) );
@@ -259,4 +267,9 @@ const int &	Client::getFlag( const int & socket ) const
 Response &	Client::getClassResponse( const int & socket )
 {
 	return ( this->_Response.at( socket ) );
+}
+
+std::vector< unsigned char > &	Client::getUpload( const int & socket )
+{
+	return ( this->_upload.at( socket ) );
 }

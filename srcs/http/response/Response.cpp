@@ -22,7 +22,7 @@ Response::Response(void)
 	_path = "";
 
 	/*Upload*/
-	_uploadStatu = START;
+	_uploadStatu = EMPTY;
 	_boundary = "";
 	_uploadPath = "./";
 	_uploadFileName = "";
@@ -46,7 +46,7 @@ Response::Response(Request & request, Config & config, int port, std::string hos
 	_path = "";
 
 	/*Upload*/
-	_uploadStatu = START;
+	_uploadStatu = EMPTY;
 	_boundary = "";
 	_uploadPath = "./";
 	_uploadFileName = "";
@@ -75,7 +75,7 @@ Response::~Response(void) {}
 
 void	Response::generate()
 {
-	if (_uploadStatu == WAITING)
+	if (_uploadStatu == READ)
 	{
 		POST();
 	}
@@ -171,11 +171,11 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
-	if (_uploadStatu == WAITING || findCGI() == true)
+	if (_uploadStatu == READ || findCGI() == true)
 	{
 		/*==========================================================*/
 		upload();
-		if (_uploadStatu == WAITING)
+		if (_uploadStatu == READ)
 			return ;
 		/*==========================================================*/
 		if (_code == 200)
@@ -348,7 +348,7 @@ void	Response::uploadSucess()
 void	Response::upload()
 {
 	/*if _uploadStatu == START set the boundary, uploadPath and controler to not redefine them next time*/
-	if (_uploadStatu == START)
+	if (_uploadStatu == EMPTY)
 	{
 		std::string	Content_type = _request.getElInHeader("Content-Type");
 		if (Content_type.find("multipart/form-data"))
@@ -386,7 +386,7 @@ void	Response::upload()
 		std::string header = getMPFD_Header(); // take the header
 		if (header.find("\r\n\r\n") == std::string::npos) // if we dont have "\r\n\r\n" 
 		{												 //it means that we have not read all the content of the header 
-			_uploadStatu = WAITING;						// so we put the _uploadStatu to WAITING 
+			_uploadStatu = READ;						// so we put the _uploadStatu to WAITING 
 			return ;								   // to tell the server that we are still waiting for data
 		}
 		std::string			varName = "";
@@ -466,7 +466,7 @@ void	Response::upload()
 	/*if we reach the end of _content we set the status to waiting */
 	if (it == _content.end())
 	{
-		_uploadStatu = WAITING;
+		_uploadStatu = READ;
 		return ;
 	}
 	/*it means that we can continue the download process so we call upload() recursively*/
@@ -723,6 +723,8 @@ void	Response::setContent(std::vector<unsigned char> & vec)
 {
 	_content = vec;
 }
+
+int	Response::getUploadStatu() { return _uploadStatu ;}
 
 
 std::string	Response::getUploadFileName() {return _uploadFileName;}
