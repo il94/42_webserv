@@ -43,6 +43,8 @@ class Response
 		
 		void		updateContentIfBoundary();
 		bool		findCGI();
+		bool		findCookie();
+		void		extractCookie();
 		Location	findLocation();
 		
 		/*listing.cpp/ Listing*/

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/19 01:15:47 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/20 00:16:33 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,9 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
+	if (findCookie() == true)
+		extractCookie();
+
 	if (findCGI() == true)
 	{
 		CGI cgi(_request);
@@ -105,7 +108,7 @@ void	Response::GET(void)
 		_response = _response.substr(bodyPosition + 2);
 		_response = generateHeader(_response.size(), "") + _response;
 		return ;
-	}
+	}	
 	if (_code == 200)
 		_code = readContent();
 	else
@@ -115,6 +118,9 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
+	if (findCookie() == true)
+		extractCookie();
+	
 	if (findCGI() == true)
 	{
 		updateContentIfBoundary();
@@ -234,6 +240,30 @@ std::string	Response::readErrorPage(const std::string & path)
 	return (readErrorPage(_config.getErrorPages("default_404")));
 }
 
+void	Response::extractCookie()
+{
+	std::ofstream	cookieFile("cookie.txt");
+	std::string		cookieValue;
+	
+	std::string		head = _request.getHeaderM()["Cookie"];
+
+	std::string::iterator 	it1 = head.begin();
+	std::string::iterator 	it2 = it1;
+	size_t					findValue = head.find(';', std::distance(head.begin(), it1));
+	
+	while (findValue != std::string::npos)
+	{
+		it2 += findValue;
+		if (it1 != head.begin())
+			it1 += 2;
+		cookieValue = head.substr(std::distance(head.begin(), it1), std::distance(head.begin(), it2) - std::distance(head.begin(), it1));
+		std::cout << PURPLE << cookieValue << END << std::endl;
+		cookieFile << cookieValue << "\n";
+		it1 = it2;
+		findValue = head.find(';', std::distance(head.begin(), it1));
+	}
+}
+
 void	Response::updateContentIfBoundary()
 {
 	const std::string	body = _request.getRequestBody();
@@ -252,7 +282,6 @@ void	Response::updateContentIfBoundary()
 	requestContent = requestContent.substr(0, requestContent.find("------WebKitFormBoundary") - 4);
 	_request.setRequestContent(requestContent);
 }
-
 
 int	Response::fileExist(std::string path)
 {
@@ -339,6 +368,12 @@ bool		Response::findCGI()
 		it++;
 	}
 	return false;
+}
+
+bool		Response::findCookie()
+{
+	std::map<std::string, std::string>	header = _request.getHeaderM();
+	return (header.find("Cookie") != header.end());
 }
 
 Location	Response::findLocation()

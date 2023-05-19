@@ -49,19 +49,17 @@ if check_session():
     generate_logout_page()
 else:
     # Vérifier si les données de connexion ont été soumises
-
-
     if 'username' in form and 'password' in form:
         username = form.getvalue("username")
-        print(username)
         password = form.getvalue("password")
-        print(username)
 
         # Vérifier les informations de connexion
         if check_credentials(username, password):
             # Créer un cookie de session
             print("Content-type: text/html")
             print("Set-Cookie: session=loggedin")  # Définir le cookie de session
+            print("Set-Cookie: username=", username)  # Définir le cookie de user
+            print("Set-Cookie: password=", password)  # Définir le cookie de password
             print("")
             print("<html>")
             print("<body>")
