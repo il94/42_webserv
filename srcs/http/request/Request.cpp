@@ -58,11 +58,21 @@ void	Request::parseHeader(const std::string & req)
 
 	std::istringstream	stream(req);
 	size_t	boundary = std::string::npos;
+	size_t	bodyPosition = req.find("\r\n\r\n");
+	
+	if (bodyPosition == std::string::npos)
+	{
+		_ret = 400;
+		return;
+	}
+
 	while (std::getline(stream, tmp))
 	{
 		if (tmp == "")
 			break;
 		boundary = tmp.find(":");
+		if (boundary > bodyPosition)
+			break;
 		if (boundary != std::string::npos)
 		{
 			std::string	key(tmp, 0, boundary);
@@ -70,7 +80,6 @@ void	Request::parseHeader(const std::string & req)
 			_headerM[key] = value;
 		}
 	}
-	size_t	bodyPosition = req.find("\r\n\r\n");
 	if (bodyPosition != std::string::npos)
 		_reqBody = req.substr(bodyPosition + 4);
 }

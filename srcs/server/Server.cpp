@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 14:34:38 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/19 17:15:27 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -407,6 +407,7 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 	client.setFlag(cliSocket, rep.getUploadStatu());
 	if ( client.getFlag( cliSocket ) == EMPTY || client.getFlag( cliSocket ) & STOP )
 		client.newResponse( cliSocket, rep.getResponse() );
+	std::cout << GREEN << rep.getResponse() << END << std::endl;
 	return ( rep.getResponse().size() );
 }
 

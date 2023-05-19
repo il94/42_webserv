@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/19 14:01:20 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/19 17:31:37 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,7 @@ void	Response::POST(void)
 	if (_uploadStatu == READ || findCGI() == true)
 	{
 		/*==========================================================*/
-		//upload();
+		upload();
 		if (_uploadStatu == READ)
 			return ;
 		/*==========================================================*/
@@ -211,12 +211,12 @@ void	Response::POST(void)
 			_response = _response.substr(bodyPosition + 2);
 		}
 	}
-	else if (_code != 403)
+	else if (_code != 403 && _code != 404)
 	{
 		_code = 204;
 		_response = "";
 	}
-	if (_code != 200 && _code != 203)
+	if (_code != 200 && _code != 204)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
 	_response = generateHeader(_response.size(), "") + _response;
 }
@@ -351,6 +351,8 @@ void	Response::upload()
 	if (_uploadStatu == EMPTY)
 	{
 		std::string	Content_type = _request.getElInHeader("Content-Type");
+		std::cout << RED << Content_type << END << std::endl;
+		exit(1);
 		if (Content_type.find("multipart/form-data"))
 		{
 			size_t	boundaryPos = Content_type.find("boundary=");
@@ -417,6 +419,8 @@ void	Response::upload()
 		outfile.open(_uploadPath + _uploadFileName);
 		if (outfile.is_open() == false)
 		{
+			// std::cout << RED << ERROR << END << std::endl;
+			// exit(1);
 			uploadFailed();
 			return ;
 		}
@@ -562,6 +566,7 @@ bool		Response::findCGI()
 		}
 		it++;
 	}
+	_code = 404;
 	return false;
 }
 
