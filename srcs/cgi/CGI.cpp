@@ -17,7 +17,8 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	header["QUERY_STRING"] = _request.getRequestContent();
+	if (_request.getMethod() == "GET")
+		header["QUERY_STRING"] = _request.getRequestContent();
 	header["FILE_NAME"] = _uploadFilename;
 	header["UPLOAD_PATH"] = _uploadPath;
 

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/18 18:12:23 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/19 01:15:47 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,11 +149,8 @@ void	Response::POST(void)
 					_contentType = value;
 			}
 		}
-		std::cout << PURPLE << "HERE" << END << std::endl;
-		std::cout << PURPLE << _response << END << std::endl;
-		_response = _response.substr(bodyPosition + 2);
-		std::cout << PURPLE << "HERE" << END << std::endl;
-		std::cout << PURPLE << _response << END << std::endl;
+		if (bodyPosition != std::string::npos)
+			_response = _response.substr(bodyPosition + 2);
 	}
 	else if (_code != 403)
 	{

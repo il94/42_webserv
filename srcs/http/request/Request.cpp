@@ -38,7 +38,6 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
-		// std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");

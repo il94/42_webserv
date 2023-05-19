@@ -7,16 +7,9 @@ import os
 def generate_login_form():
     print("Content-type: text/html")
     print("")
-    print("<html>")
-    print("<body>")
-    print("<h1>Connexion</h1>")
-    print('<form method="post" action="login.cgi">')
-    print('Nom d\'utilisateur: <input type="text" name="username"><br>')
-    print('Mot de passe: <input type="password" name="password"><br>')
-    print('<input type="submit" value="Connexion">')
-    print('</form>')
-    print("</body>")
-    print("</html>")
+    with open('/home/ilandols/42/webserv/./avocat_now//cgi_test/cgi-bin/login_content/login.html', 'r') as f:
+        for ligne in f:
+            print(ligne, end='')
 
 # Fonction pour générer la page de déconnexion
 def generate_logout_page():
@@ -43,7 +36,7 @@ def check_session():
 # Vérifier les données de connexion
 def check_credentials(username, password):
     # Vérification factice des données (exemple)
-    if username == 'admin' and password == 'admin':
+    if username != 'Zbub':
         return True
     return False
 
@@ -56,9 +49,13 @@ if check_session():
     generate_logout_page()
 else:
     # Vérifier si les données de connexion ont été soumises
+
+
     if 'username' in form and 'password' in form:
-        username = form['username'].value
-        password = form['password'].value
+        username = form.getvalue("username")
+        print(username)
+        password = form.getvalue("password")
+        print(username)
 
         # Vérifier les informations de connexion
         if check_credentials(username, password):
@@ -70,13 +67,16 @@ else:
             print("<body>")
             print("<h1>Connexion réussie</h1>")
             print("<p>Bienvenue, {}!</p>".format(username))
-            print("<p><a href=\"login.cgi\">Se déconnecter</a></p>")
+            print("<p><a href=\"../../indexmini.html\">Se déconnecter</a></p>")
             print("</body>")
             print("</html>")
         else:
             # Afficher à nouveau le formulaire de connexion avec un message d'erreur
-            generate_login_form()
-            print("<p>Identifiants invalides. Veuillez réessayer.</p>")
+            print("Content-type: text/html")
+            print("")
+            with open('/home/ilandols/42/webserv/./avocat_now//cgi_test/cgi-bin/login_content/login_invalid.html', 'r') as f:
+                for ligne2 in f:
+                    print(ligne2, end='')
     else:
         # Afficher le formulaire de connexion
         generate_login_form()
