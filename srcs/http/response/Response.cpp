@@ -422,7 +422,7 @@ bool		Response::findCGI()
 	
 	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
-	std::cout << GREEN << urlFileExtension << END << std::endl;
+	// std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	if (urlFileExtension != ".py" and urlFileExtension != ".php" and urlFileExtension != ".sh")
 		return (false);
@@ -434,7 +434,7 @@ bool		Response::findCGI()
 		return false;
 	}
 
-	std::cout << GREEN << urlFileExtension << END << std::endl;
+	// std::cout << GREEN << urlFileExtension << END << std::endl;
 
 	std::vector<std::string>					cgiPaths = _location.getCGIBin();
 	std::vector<std::string>::const_iterator	it = cgiPaths.begin();
