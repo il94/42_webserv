@@ -2,14 +2,21 @@
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath(""){}
+CGI::CGI(Request &request): _request(request) {}
+
+CGI::CGI(const CGI &src)
+{
+	_request = src._request;
+	_env = src._env;
+}
 
 CGI::~CGI(){}
 
-void	CGI::setUploadInfo(std::string uploadFilename, std::string uploadPath)
+CGI	&	CGI::operator=(const CGI & src)
 {
-	_uploadFilename = uploadFilename;
-	_uploadPath = uploadPath;
+	_request = src._request;
+	_env = src._env;
+	return (*this);
 }
 
 void	CGI::setEnv()
@@ -18,8 +25,6 @@ void	CGI::setEnv()
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
 	header["QUERY_STRING"] = _request.getRequestContent();
-	header["FILE_NAME"] = _uploadFilename;
-	header["UPLOAD_PATH"] = _uploadPath;
 
 	_env = new char *[header.size() + 1];
 	int	j = 0;

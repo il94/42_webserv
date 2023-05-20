@@ -42,6 +42,7 @@ SRC = main.cpp \
 		config/Config.cpp config/Location.cpp\
 		\
 		http/request/Request.cpp http/response/Response.cpp http/response/listing.cpp\
+		http/response/upload.cpp\
 		\
 		server/Server.cpp server/Client.cpp \
 		\

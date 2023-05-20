@@ -13,7 +13,11 @@ class	Request
 {
 	public:
 		Request(void);
+		Request(const Request & src);
 		~Request(void);
+
+		Request	&	operator=(const Request & src);
+
 
 		std::string	getURL() const;
 		int			getRet() const;

@@ -3,6 +3,26 @@
 /*=============================== Constructors ===============================*/
 Request::Request(void): _requestContent(""), _reqBody(""),  _ret(200){}
 
+Request::Request(const Request & src)
+{
+	_data = src._data;
+	_headerM = src._headerM;
+	_requestContent = src._requestContent;
+	_reqBody = src._reqBody;
+	_ret = src._ret;
+}
+
+Request	&	Request::operator=(const Request & src)
+{
+	_data = src._data;
+	_headerM = src._headerM;
+	_requestContent = src._requestContent;
+	_reqBody = src._reqBody;
+	_ret = src._ret;
+	return (*this);
+}
+
+
 Request::~Request(void){}
 
 /*================================= Methods ==================================*/
