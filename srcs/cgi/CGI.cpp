@@ -2,7 +2,22 @@
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath(""){}
+CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath("")
+{
+	std::ifstream	cookieFile("cookie.txt");
+	std::string		contentCookie;
+
+	if (cookieFile)
+	{
+		std::getline(cookieFile, contentCookie);
+		std::string	contentWithCookies = _request.getRequestContent();
+		if (contentWithCookies.empty() == true)
+			_request.setRequestContent(contentCookie);
+		else
+			_request.setRequestContent(contentWithCookies + '&' + contentCookie);
+		// std::cerr << GREEN << "CGI CONTENT = " << _request.getRequestContent() << END << std::endl;
+	}
+}
 
 CGI::~CGI(){}
 
@@ -21,6 +36,7 @@ void	CGI::setEnv()
 		header["QUERY_STRING"] = _request.getRequestContent();
 	header["FILE_NAME"] = _uploadFilename;
 	header["UPLOAD_PATH"] = _uploadPath;
+
 
 	_env = new char *[header.size() + 1];
 	int	j = 0;
@@ -59,8 +75,26 @@ std::string CGI::execCGI(std::string scriptPath)
 			dup2(pipefd_output[1], STDOUT_FILENO);
 			close(pipefd_output[0]);
 
+			// int	temp = 0;
+			// while (_env[temp])
+			// {
+			// 	std::cerr << GREEN << "ENV = " << _env[temp] << END << std::endl;
+			// 	temp++;
+			// }
+
+
 			execve(scriptPath.c_str(), nll, _env);
 			std::cerr << RED << "Execve failed\n" << END << std::endl;
+
+			// std::cerr << GREEN << "SCRIPT PATH = " << scriptPath << END << std::endl;
+			// temp = 0;
+			// while (_env[temp])
+			// {
+			// 	std::cerr << RED << "ENV = " << _env[temp] << END << std::endl;
+			// 	temp++;
+			// }
+
+
 			write(pipefd_output[1], failedSTR, strlen(failedSTR));
 			close(pipefd_input[0]);
 			close(pipefd_output[1]);
@@ -73,6 +107,8 @@ std::string CGI::execCGI(std::string scriptPath)
 		{
 			// parent process
 			close(pipefd_input[0]);
+			std::cerr << GREEN << "CONTENT = " << _request.getRequestContent().c_str() << END << std::endl;
+
 			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
 			close(pipefd_input[1]);
 
