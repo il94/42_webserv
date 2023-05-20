@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/19 17:31:37 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/20 17:19:28 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ Response::Response(void)
 	_uploadPath = "./";
 	_uploadFileName = "";
 	_controler = "";
+	_content = NULL;
 	/*=====*/
 
 	/*Header*/
@@ -51,6 +52,7 @@ Response::Response(Request & request, Config & config, int port, std::string hos
 	_uploadPath = "./";
 	_uploadFileName = "";
 	_controler = "";
+	_content = NULL;
 	/*=====*/
 
 	/*Header*/
@@ -70,6 +72,12 @@ Response::Response(Request & request, Config & config, int port, std::string hos
 
 Response::~Response(void) {}
 
+/*================================= Operators ==================================*/
+
+// Response &	Response::operator=(const Response & rep)
+// {
+	
+// }
 
 /*================================= Methods ==================================*/
 
@@ -208,7 +216,10 @@ void	Response::POST(void)
 						_contentType = value;
 				}
 			}
-			_response = _response.substr(bodyPosition + 2);
+			if (bodyPosition == std::string::npos)
+				_code = 500;
+			else
+				_response = _response.substr(bodyPosition + 2);
 		}
 	}
 	else if (_code != 403 && _code != 404)
@@ -297,12 +308,12 @@ std::string	Response::readErrorPage(const std::string & path)
 std::string	Response::getMPFD_Header()
 {
 	/*get the header of multi part form data*/
-	std::vector<unsigned char>::iterator it = _content.begin();
+	std::vector<unsigned char>::iterator it = (*_content).begin();
 
-	while (it != _content.end() && _controler.find("\r\n\r\n") == std::string::npos)
+	while (it != (*_content).end() && _controler.find("\r\n\r\n") == std::string::npos)
 	{
 		_controler += *it;
-		it = _content.erase(it);
+		it = (*_content).erase(it);
 	}
 	return (_controler);
 }
@@ -313,7 +324,8 @@ void	Response::uploadFailed()
 	std::string	path;
 
 	_code = 400;
-	_uploadStatu = STOP;
+	//_uploadStatu = STOP;
+	_uploadStatu = EMPTY;
 	while (it != _files.end())
 	{
 		path = _uploadPath + *it;
@@ -342,7 +354,8 @@ void	Response::uploadSucess()
 	if (newRequestContent[0] == '&')
 		newRequestContent.erase(0, 1);
 	_request.setRequestContent(newRequestContent);
-	_uploadStatu = STOP;
+	//_uploadStatu = STOP;
+	_uploadStatu = EMPTY;
 }
 
 void	Response::upload()
@@ -351,13 +364,15 @@ void	Response::upload()
 	if (_uploadStatu == EMPTY)
 	{
 		std::string	Content_type = _request.getElInHeader("Content-Type");
-		std::cout << RED << Content_type << END << std::endl;
-		exit(1);
-		if (Content_type.find("multipart/form-data"))
+		if (Content_type.find("multipart/form-data") != std::string::npos)
 		{
 			size_t	boundaryPos = Content_type.find("boundary=");
 			if (boundaryPos != std::string::npos)
-				_boundary = Content_type.substr(Content_type.find("boundary=") + 9);
+			{
+				_boundary = Content_type.substr(boundaryPos + 9);
+				if (_boundary[_boundary.size() - 1] == '\r')
+					_boundary.erase(_boundary.size() - 1, 1);
+			}
 			else
 				return ;
 			_uploadPath = _location.getUploadPath();
@@ -366,6 +381,7 @@ void	Response::upload()
 		else
 			return ;
 	}
+
 	/*================================================================================================*/
 
 	/*know we need to open the file on which we gonna write the _content */
@@ -419,8 +435,6 @@ void	Response::upload()
 		outfile.open(_uploadPath + _uploadFileName);
 		if (outfile.is_open() == false)
 		{
-			// std::cout << RED << ERROR << END << std::endl;
-			// exit(1);
 			uploadFailed();
 			return ;
 		}
@@ -431,28 +445,31 @@ void	Response::upload()
 	/*===================================================================*/
 
 	/*setup the _controler which will take boundary.size() ahead of _content to check if we reach the end of a form*/
-	std::vector<unsigned char>::iterator	it = _content.begin();
-	if (_controler.size() < (_boundary.size() + 2))
+	std::vector<unsigned char>::iterator	it = (*_content).begin();
+	if (_controler.size() < (_boundary.size() + 4))
 	{
-		while (it != _content.end() && _controler.size() < (_boundary.size() + 2))
+		while (it != (*_content).end() && _controler.size() < (_boundary.size() + 4))
 		{
-			_controler += *it;
+			_controler.push_back(*it);
 			it++;
 		}
 	}
 	/*===========================================================================================================*/
-	std::vector<unsigned char>::iterator	yt = _content.begin();
+	std::vector<unsigned char>::iterator	yt = (*_content).begin();
 	/*in this loop while checking if we arrive at the end of _content or at the end of the all form 
 	or of a form we will increment size which will allow us to have the complete size of the body, 
 	we will also update the control while removing its first element then adding the character
 	 *it in the file in question*/
-	while (yt != _content.end() && it != _content.end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
+	while (yt != (*_content).end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
 		&& _controler.find(_boundary + "--") == std::string::npos))
 	{
-		_controler += *it;//
-		_controler.erase(0, 1);//
+		if (it != (*_content).end())
+		{
+			_controler.push_back(*it);//
+			_controler.erase(0, 1);//
+		}
 		outfile << *yt;
-		yt = _content.erase(yt);
+		yt = (*_content).erase(yt);
 	}
 	outfile.close();
 	/*_boundary + -- means we have completed all forms so we can stop the upload process*/
@@ -468,7 +485,7 @@ void	Response::upload()
 		_controler = "";
 	}
 	/*if we reach the end of _content we set the status to waiting */
-	if (it == _content.end())
+	if (it == (*_content).end())
 	{
 		_uploadStatu = READ;
 		return ;
@@ -724,13 +741,12 @@ void	Response::setPath()
 	}
 }
 
-void	Response::setContent(std::vector<unsigned char> & vec)
+void	Response::setContent(std::vector<unsigned char> * vec)
 {
 	_content = vec;
 }
 
 int	Response::getUploadStatu() { return _uploadStatu ;}
-
 
 std::string	Response::getUploadFileName() {return _uploadFileName;}
 

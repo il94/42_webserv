@@ -18,6 +18,7 @@ class Response
 		Response(Request & request, Config & config, int port, std::string host);
 		~Response(void);
 
+		//Response			 &	operator=(const Response & rep);
 
 		/*Methods*/
 		void	generate();
@@ -47,7 +48,7 @@ class Response
 		
 		/*UPLOAD*/
 		int				getUploadStatu();
-		void			setContent(std::vector<unsigned char> & vec);
+		void			setContent(std::vector<unsigned char> * vec);
 		void			uploadFailed();
 		void			uploadSucess();
 		void			upload();
@@ -69,7 +70,7 @@ class Response
 		std::string	writeHeader(void);
 		std::string	generateHeader(size_t size, std::string path);
 		/*------*/
-	
+
 	private :
 
 		int			_port;
@@ -85,7 +86,7 @@ class Response
 		std::string					_controler;
 		std::vector<std::string>	_files;
 		std::vector<std::string>	_headerName;
-		std::vector<unsigned char>	_content;
+		std::vector<unsigned char>	* _content;
 
 		/*Header*/
 		std::string					_contentLength;

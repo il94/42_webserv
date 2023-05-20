@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: halvarez <halvarez@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 16:23:50 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/20 16:42:15 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void	Client::remove( int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// check for flags keeping alive the socket
-	if ( this->getFlag( socket ) & STOP )
+	if ( this->getFlag( socket ) & READ )
 		return;
 	// delete socket client and all associated data
 	try {
@@ -268,7 +268,17 @@ Response &	Client::getClassResponse( const int & socket )
 	return ( this->_Response.at( socket ) );
 }
 
+Response *	Client::getClassResponsePTR( const int & socket)
+{
+	return ( &( this->_Response.at( socket ) ) );
+}
+
 std::vector< unsigned char > &	Client::getUpload( const int & socket )
 {
 	return ( this->_upload.at( socket ) );
+}
+
+std::vector< unsigned char > *	Client::getUploadPTR( const int & socket )
+{
+	return ( &(this->_upload.at( socket )) );
 }

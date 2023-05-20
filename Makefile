@@ -9,7 +9,7 @@ NAME = webserv
 #==============================================================================#
 
 CXX = c++ -g3
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
+#CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory

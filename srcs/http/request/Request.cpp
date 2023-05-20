@@ -56,23 +56,22 @@ void	Request::parseHeader(const std::string & req)
 	if (badFirstLine() == true)
 		return ;
 
-	std::istringstream	stream(req);
-	size_t	boundary = std::string::npos;
 	size_t	bodyPosition = req.find("\r\n\r\n");
-	
 	if (bodyPosition == std::string::npos)
 	{
 		_ret = 400;
 		return;
 	}
 
+	std::string	header = req.substr(0, bodyPosition + 4);
+	size_t	boundary = std::string::npos;
+	std::istringstream	stream(header);
+
 	while (std::getline(stream, tmp))
 	{
 		if (tmp == "")
 			break;
 		boundary = tmp.find(":");
-		if (boundary > bodyPosition)
-			break;
 		if (boundary != std::string::npos)
 		{
 			std::string	key(tmp, 0, boundary);

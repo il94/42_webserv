@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 16:19:30 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/20 16:39:01 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,10 @@ class Client
 		const std::string			&	getName( const int & socket )	const;
 		const int					&	getFlag( const int & socket )	const;
 		Response					&	getClassResponse( const int & socket);
+		Response					*	getClassResponsePTR( const int & socket);
 		std::vector<unsigned char>	&	getUpload( const int & socker );
+		std::vector< unsigned char > *	getUploadPTR( const int & socket );
+
 
 	private:
 		// Private attributes --------------------------------------------------

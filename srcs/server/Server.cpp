@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/19 17:15:27 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/20 17:25:29 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -372,9 +372,12 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		request[ bytes ] = '\0';
 		request.resize( bytes );
 	}
-	if ( request.find( "\r\n\r\n" ) != std::string::npos )
+	if ( client.getFlag( cliSocket ) & READ || request.find( "\r\n\r\n" ) != std::string::npos )
 	{
-		strUpload = request.substr( request.find( "\r\n\r\n" ) + 4 );
+		if (client.getFlag( cliSocket ) & READ)
+			strUpload = request;
+		else
+			strUpload = request.substr( request.find( "\r\n\r\n" ) + 4 );
 		client.str2upload( cliSocket, strUpload );
 	}
 	if ( DBG )
@@ -388,7 +391,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
 	Request	req;
-	Response rep;
+	Response  *rep = NULL;
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;
@@ -400,15 +403,22 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 		// client.setFlag( cliSocket, flag_value );
 		client.setClassResponse( cliSocket, _configs[0], req ); // a coder
 	}
-	rep = client.getClassResponse( cliSocket );
-	rep.setContent( client.getUpload( cliSocket ) );
 
-	rep.generate();
-	client.setFlag(cliSocket, rep.getUploadStatu());
+	rep = client.getClassResponsePTR( cliSocket );
+	/*if (rep == NULL) to add */
+	
+	(*rep).setContent( client.getUploadPTR( cliSocket ));
+
+	(*rep).generate();
+
+	if ((*rep).getUploadStatu() == READ)
+		client.unSetFlag(cliSocket, READ);
+	if ((*rep).getUploadStatu() == EMPTY) /*tmp*/
+		client.unSetFlag(cliSocket, READ);
+	client.setFlag(cliSocket, (*rep).getUploadStatu());
 	if ( client.getFlag( cliSocket ) == EMPTY || client.getFlag( cliSocket ) & STOP )
-		client.newResponse( cliSocket, rep.getResponse() );
-	std::cout << GREEN << rep.getResponse() << END << std::endl;
-	return ( rep.getResponse().size() );
+		client.newResponse( cliSocket, (*rep).getResponse() );
+	return ( (*rep).getResponse().size() );
 }
 
 void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )
