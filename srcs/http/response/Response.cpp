@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/20 23:25:47 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/21 14:31:59 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,37 +201,39 @@ void	Response::GET(void)
 		_response = cgi.execCGI(_path);
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 			_response.erase(0, 1);
+			
 		size_t	bodyPosition = _response.find("\r\n\r\n");
-		size_t	boundary = std::string::npos;
-
-		std::string			tmp;
-		std::istringstream	stream(_response);
-		
-		while (std::getline(stream, tmp))
-		{
-			if (tmp == "")
-				break;
-			boundary = tmp.find(":");
-			if (boundary != std::string::npos)
-			{
-				if (boundary > bodyPosition)
-					break;
-				std::string	key(tmp, 0, boundary);
-				std::string	value(tmp, boundary + 2);
-				if (key == "Status")
-					_code = std::atoi(value.c_str());
-				else if (key == "Content-Type")
-					_contentType = value;
-			}
-		}
 		if (bodyPosition == std::string::npos)
 				_code = 500;
 		else
 		{
+			size_t	boundary = std::string::npos;
+
+			std::string			tmp;
+			std::istringstream	stream(_response);
+			
+			while (std::getline(stream, tmp))
+			{
+				if (tmp == "")
+					break;
+				boundary = tmp.find(":");
+				if (boundary != std::string::npos)
+				{
+					if (boundary > bodyPosition)
+						break;
+					std::string	key(tmp, 0, boundary);
+					std::string	value(tmp, boundary + 2);
+					if (key == "Status")
+						_code = std::atoi(value.c_str());
+					else if (key == "Content-Type")
+						_contentType = value;
+				}
+			}
+
 			_response = _response.substr(bodyPosition + 2);
 			_response = generateHeader(_response.size(), "") + _response;
+			return ;
 		}
-		return ;
 	}
 	if (_code == 200)
 		_code = readContent();
@@ -256,32 +258,33 @@ void	Response::POST(void)
 			while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 				_response.erase(0, 1);
 			size_t	bodyPosition = _response.find("\r\n\r\n");
-			size_t	boundary = std::string::npos;
-
-			std::string			tmp;
-			std::istringstream	stream(_response);
-			
-			while (std::getline(stream, tmp))
-			{
-				if (tmp == "")
-					break;
-				boundary = tmp.find(":");
-				if (boundary != std::string::npos)
-				{
-					if (boundary > bodyPosition)
-						break;
-					std::string	key(tmp, 0, boundary);
-					std::string	value(tmp, boundary + 2);
-					if (key == "Status")
-						_code = std::atoi(value.c_str());
-					else if (key == "Content-Type")
-						_contentType = value;
-				}
-			}
 			if (bodyPosition == std::string::npos)
 				_code = 500;
 			else
+			{
+				size_t	boundary = std::string::npos;
+				std::string			tmp;
+				std::istringstream	stream(_response);
+				
+				while (std::getline(stream, tmp))
+				{
+					if (tmp == "")
+						break;
+					boundary = tmp.find(":");
+					if (boundary != std::string::npos)
+					{
+						if (boundary > bodyPosition)
+							break;
+						std::string	key(tmp, 0, boundary);
+						std::string	value(tmp, boundary + 2);
+						if (key == "Status")
+							_code = std::atoi(value.c_str());
+						else if (key == "Content-Type")
+							_contentType = value;
+					}
+				}
 				_response = _response.substr(bodyPosition + 2);
+			}
 		}
 	}
 	else if (_code != 403 && _code != 404)
@@ -312,22 +315,11 @@ void	Response::DELETE(void)
 
 		// Configuration methods
 
-void	Response::setRequest(Request &request)
-{
-	_code = request.getRet();
-	_request = request;
-}
+void	Response::setRequest(Request &request) { request = request; }
 
-void	Response::setConfig(Config &config)
-{
-	_config = config;
-	_location = findLocation();
-}
+void	Response::setConfig(Config &config) { _config = config; }
 
-void	Response::setContent(std::vector<unsigned char> * vec)
-{
-	_content = vec;
-}
+void	Response::setContent(std::vector<unsigned char> * vec) { _content = vec; }
 
 void	Response::setPath()
 {

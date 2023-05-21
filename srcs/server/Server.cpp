@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/20 17:25:29 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/21 16:12:39 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,6 +366,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		client.remove( cliSocket );
 		cliSocket = -1;
 		std::cerr << "\tRead bytes = " << bytes << std::endl;
+		return ( request );
 	}
 	else
 	{
@@ -390,8 +391,8 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 
 int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
-	Request	req;
-	Response  *rep = NULL;
+	Request		req;
+	Response	*rep = NULL;
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;

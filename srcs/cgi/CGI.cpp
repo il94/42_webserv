@@ -24,8 +24,8 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	header["QUERY_STRING"] = _request.getRequestContent();
-
+	if (header["REQUEST_METHOD"] == "GET")
+		header["QUERY_STRING"] = _request.getRequestContent();
 	_env = new char *[header.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = header.begin(); i!= header.end(); i++)
