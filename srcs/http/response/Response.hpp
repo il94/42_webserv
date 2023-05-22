@@ -94,6 +94,7 @@ class Response
 		std::string					_contentType;
 		std::map<int, std::string>	_statusMsg;
 		int			_code;
+		std::vector<std::string>	_cookies;
 		/*------*/
 		
 		Request		_request;

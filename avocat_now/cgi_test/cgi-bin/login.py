@@ -6,7 +6,7 @@ import os.path
 
 # Fonction pour générer le formulaire de connexion
 def generate_login_form():
-    print("Content-type: text/html")
+    print("Content-Type: text/html\r\n\r\n")
     print("")
     with open('avocat_now/cgi_test/cgi-bin/login_content/login.html', 'r') as f:
         for ligne in f:
@@ -14,18 +14,19 @@ def generate_login_form():
 
 # Fonction pour générer la page de déconnexion
 def generate_logout_page():
-    print("Content-type: text/html")
+    print("Content-Type: text/html")
  
     print("Set-Cookie: session=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
     print("Set-Cookie: username=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
-    print("Set-Cookie: password=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
+    print("Set-Cookie: password=; expires=Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n")
     print("")
  
     print("<html>")
     print("<body>")
     print("<h1>Déconnexion</h1>")
     print("<p>Vous êtes déconnecté.</p>")
-    print("<p><a href=\"indexmini.html\">Login</a></p>")
+    print("<p><a href=\"../../indexmini.html\">Index</a></p>")
+    print("<p><a href=\"login.py\">Login</a></p>")
     print("</body>")
     print("</html>")
 
@@ -71,10 +72,10 @@ else:
             # print('======================== CREATION DE COOKIE ==================================')
            
             # Créer un cookie de session
-            print("Content-type: text/html")
+            print("Content-Type: text/html")
             print("Set-Cookie: session=loggedin")  # Définir le cookie de session
             print("Set-Cookie: username=", username)  # Définir le cookie de user
-            print("Set-Cookie: password=", password)  # Définir le cookie de password
+            print("Set-Cookie: password=", password, "\r\n\r\n")  # Définir le cookie de password
             print("")
 
             # with open('avocat_now/cgi_test/cgi-bin/login_content/session_active.html', 'r') as f:
@@ -92,7 +93,7 @@ else:
             print("</html>")
         else:
             # Afficher à nouveau le formulaire de connexion avec un message d'erreur
-            print("Content-type: text/html")
+            print("Content-Type: text/html\r\n\r\n")
             print("")
             with open('avocat_now/cgi_test/cgi-bin/login_content/login_invalid.html', 'r') as f:
                 for ligne2 in f:

@@ -84,7 +84,12 @@ void	Response::upload()
 
 	    /*if the _uploadFileName is already set we just open it*/
 	if (_uploadFileName != "")
-	{ 
+	{
+		if (isFile(_uploadPath + _uploadFileName) == false)
+		{
+			uploadFailed();
+			return ;
+		}
 		outfile.open(_uploadPath + _uploadFileName, std::ios_base::app);
 		if (outfile.is_open() == false)
 		{

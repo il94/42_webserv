@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/22 15:23:26 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/22 18:54:26 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ Response::Response(const Response & src)
 	_contentType = src._contentType;
 	_statusMsg = src._statusMsg;
 	_code = src._code;
+	_cookies = src._cookies;
 	/*=====*/
 
 	_request = src._request;
@@ -131,6 +132,7 @@ Response &	Response::operator=(const Response & src)
 	_contentType = src._contentType;
 	_statusMsg = src._statusMsg;
 	_code = src._code;
+	_cookies = src._cookies;
 	/*=====*/
 
 	_request = src._request;
@@ -209,7 +211,7 @@ void	Response::GET(void)
 			
 		size_t	bodyPosition = _response.find("\r\n\r\n");
 		if (bodyPosition == std::string::npos)
-				_code = 500;
+			_code = 500;
 		else
 		{
 			size_t	boundary = std::string::npos;
@@ -232,6 +234,8 @@ void	Response::GET(void)
 						_code = std::atoi(value.c_str());
 					else if (key == "Content-Type")
 						_contentType = value;
+					else if (key == "Set-Cookie")
+						_cookies.push_back(value);
 				}
 			}
 
@@ -268,6 +272,7 @@ void	Response::POST(void)
 			while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 				_response.erase(0, 1);
 			size_t	bodyPosition = _response.find("\r\n\r\n");
+
 			if (bodyPosition == std::string::npos)
 				_code = 500;
 			else
@@ -291,9 +296,12 @@ void	Response::POST(void)
 							_code = std::atoi(value.c_str());
 						else if (key == "Content-Type")
 							_contentType = value;
+						else if (key == "Set-Cookie")
+							_cookies.push_back(value);
 					}
 				}
 				_response = _response.substr(bodyPosition + 2);
+
 			}
 		}
 	}
@@ -664,6 +672,12 @@ std::string	Response::writeHeader(void)
 		header += "Content-Length: " + _contentLength + "\r\n";
 	if (!_contentType.empty())
 		header += "Content-Type: " + _contentType + "\r\n";
+
+	for (std::vector<std::string>::iterator	it = _cookies.begin();
+			it != _cookies.end(); it++)
+		header += "Set-Cookie: " + *it + "\r\n";
+
+		
 	return (header);
 }
 
