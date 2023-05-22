@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 19:09:34 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/22 15:12:12 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,20 +356,30 @@ int	Server::_acceptConnection(const int & j, Client & client )
 
 std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string & request)
 {
-	int	bytes = 0;
+	int			bytes = 0;
+	std::string	strUpload;
 
 	bytes = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
-	if ( bytes == 0 || bytes == -1 )
+	if ( ( bytes == 0 || bytes == -1 ) && ( client.getFlag( cliSocket ) & READ ) == 0 )
 	{
 		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
 		client.remove( cliSocket );
 		cliSocket = -1;
 		std::cerr << "\tRead bytes = " << bytes << std::endl;
+		return ( request );
 	}
 	else
 	{
 		request[ bytes ] = '\0';
 		request.resize( bytes );
+	}
+	if ( cliSocket != -1 && ( client.getFlag( cliSocket ) & READ || request.find( "\r\n\r\n" ) != std::string::npos ) )
+	{
+		if (client.getFlag( cliSocket ) & READ)
+			strUpload = request;
+		else
+			strUpload = request.substr( request.find( "\r\n\r\n" ) + 4 );
+		client.str2upload( cliSocket, strUpload );
 	}
 	if ( DBG )
 	{
@@ -381,18 +391,35 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 
 int	Server::_storeResponse( Client & client, const int & cliSocket, std::string & request )
 {
-	Request	req;
+	Request		req;
+	Response	*rep = NULL;
 
 	if ( DBG )
 		std::cout << YELLOW << request << END << std::endl;
-	req.parseHeader(request);
-	if (req.getRet() == 200)
-		req.parseBody();								
+	if ( client.getFlag( cliSocket ) == EMPTY )
+	{
+		req.parseHeader(request);
+		if (req.getRet() == 200)
+			req.parseBody();
+		// client.setFlag( cliSocket, flag_value );
+		client.setClassResponse( cliSocket, _configs[0], req ); // a coder
+	}
 
-	Response	rep(req, _configs[0], client.getPort( cliSocket ), client.getName( cliSocket ) );
-	rep.generate();
-	client.newResponse( cliSocket, rep.getResponse() );
-	return ( rep.getResponse().size() );
+	rep = client.getClassResponsePTR( cliSocket );
+	/*if (rep == NULL) to add */
+	
+	(*rep).setContent( client.getUploadPTR( cliSocket ));
+
+	(*rep).generate();
+
+	if ((*rep).getUploadStatu() == READ)
+		client.unSetFlag(cliSocket, READ);
+	if ((*rep).getUploadStatu() == EMPTY) /*tmp*/
+		client.unSetFlag(cliSocket, READ);
+	client.setFlag(cliSocket, (*rep).getUploadStatu());
+	if ( client.getFlag( cliSocket ) == EMPTY || client.getFlag( cliSocket ) & STOP )
+		client.newResponse( cliSocket, (*rep).getResponse() );
+	return ( (*rep).getResponse().size() );
 }
 
 void	Server::_sendResponse( int & cliSocket, Client & client, size_t size )

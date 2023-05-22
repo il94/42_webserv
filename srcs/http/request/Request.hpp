@@ -13,7 +13,11 @@ class	Request
 {
 	public:
 		Request(void);
+		Request(const Request & src);
 		~Request(void);
+
+		Request	&	operator=(const Request & src);
+
 
 		std::string	getURL() const;
 		int			getRet() const;
@@ -23,7 +27,6 @@ class	Request
 		std::string	getRequestContent() const;
 		std::string	getElInHeader(const std::string & key);
 		std::map<std::string, std::string>	getHeaderM();
-		std::map<std::string, std::string>	getQueryMap() const;
 
 		void	setRequestContent(std::string str);
 		bool	badFirstLine();
@@ -33,13 +36,12 @@ class	Request
 		void	parseBody();
 	
 	private:
-		std::vector<std::string>	_data;
+		std::vector<std::string>			_data;
 		std::map<std::string, std::string>	_headerM;
-		std::map<std::string, std::string>	_queryM;
 
-		std::string	_requestContent;
-		std::string	_reqBody;
-		int			_ret;
+		std::string							_requestContent;
+		std::string							_reqBody;
+		int									_ret;
 
 };
 

@@ -16,17 +16,15 @@ class CGI
 	public:
 		CGI();
 		CGI(Request &request);
+		CGI(const CGI &src);
 		~CGI();
-		
-		
-		void	setUploadInfo(std::string uploadFilename, std::string uploadPath);
+
+		CGI	&	operator=(const CGI & src);
+
 		void	setEnv();
 		std::string	execCGI(std::string scriptName);
 	private:
 		Request			_request;
-		std::string		_uploadFilename;
-		std::string		_uploadPath;
-
 		char				**_env;
 };
 

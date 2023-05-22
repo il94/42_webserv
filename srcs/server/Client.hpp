@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
+/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/18 11:37:15 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/20 16:39:01 by auzun            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,11 @@
 
 #include <sys/epoll.h>
 
+# include "../../include/webserv.hpp"
 #include "../config/Config.hpp"
 #include "../http/response/Response.hpp"
 #include "Server.hpp"
 
-typedef enum e_flag
-{
-	EMPTY	= 0,
-	ERROR	= 1 << 0,
-	CONTENT	= 1 << 1
-}			t_flag;
 
 class Client
 {
@@ -45,10 +40,13 @@ class Client
 		void							newResponse( const int & socket, std::string res );
 		ustring 						getResponse( const int & socket );
 		size_t							responseSize( const int & socket )	const;
+		void							str2upload( const int & socket, std::string & str );
 
 		// Setters -------------------------------------------------------------
 		bool							setSocket( const int & socket );
 		void							setFlag( const int & socket, const int flag );
+		void							unSetFlag( const int & socket, const int flag );
+		void							setClassResponse( const int & socket, Config & conf, Request & req );
 
 		// Getters -------------------------------------------------------------
 		const int					&	getEpollFd( void )				const;
@@ -56,6 +54,11 @@ class Client
 		const int					&	getPort( const int & socket )	const;
 		const std::string			&	getName( const int & socket )	const;
 		const int					&	getFlag( const int & socket )	const;
+		Response					&	getClassResponse( const int & socket);
+		Response					*	getClassResponsePTR( const int & socket);
+		std::vector<unsigned char>	&	getUpload( const int & socker );
+		std::vector< unsigned char > *	getUploadPTR( const int & socket );
+
 
 	private:
 		// Private attributes --------------------------------------------------
@@ -64,7 +67,9 @@ class Client
 		std::map	< int, int						>	_port;
 		std::map	< int, std::string				>	_name;
 		std::map	< int, int						>	_flag;
+		std::map	< int, Response					>	_Response;
 		std::map	< int, std::vector< ustring	>	>	_buffer;
+		std::map	< int, std::vector<unsigned char>>	_upload;
 
 		// Private functions ---------------------------------------------------
 										Client( void );

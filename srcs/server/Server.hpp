@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 
+# include "../../include/webserv.hpp"
 #include "../config/Config.hpp"
 #include "Client.hpp"
 

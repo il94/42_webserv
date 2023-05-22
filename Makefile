@@ -9,7 +9,7 @@ NAME = webserv
 #==============================================================================#
 
 CXX = c++ -g3
-CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
+#CXXFLAGS = -Wall -Wextra -Werror -Wpedantic -pedantic-errors -MMD -MP #-fsanitize=address
 MKDIR = mkdir -p
 RM = rm -f
 MAKE_SILENT = make --no-print-directory
@@ -42,6 +42,7 @@ SRC = main.cpp \
 		config/Config.cpp config/Location.cpp\
 		\
 		http/request/Request.cpp http/response/Response.cpp http/response/listing.cpp\
+		http/response/upload.cpp\
 		\
 		server/Server.cpp server/Client.cpp \
 		\

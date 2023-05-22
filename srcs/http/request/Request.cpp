@@ -3,6 +3,26 @@
 /*=============================== Constructors ===============================*/
 Request::Request(void): _requestContent(""), _reqBody(""),  _ret(200){}
 
+Request::Request(const Request & src)
+{
+	_data = src._data;
+	_headerM = src._headerM;
+	_requestContent = src._requestContent;
+	_reqBody = src._reqBody;
+	_ret = src._ret;
+}
+
+Request	&	Request::operator=(const Request & src)
+{
+	_data = src._data;
+	_headerM = src._headerM;
+	_requestContent = src._requestContent;
+	_reqBody = src._reqBody;
+	_ret = src._ret;
+	return (*this);
+}
+
+
 Request::~Request(void){}
 
 /*================================= Methods ==================================*/
@@ -38,7 +58,6 @@ std::vector<std::string>	Request::splitURL()
 
 	do
 	{
-		// std::cout << PURPLE << URL << END << std::endl;
 		splitedURL.push_back(URL);
 		URL = URL.substr(0, rfind(URL, "/"));
 	} while (URL != "");
@@ -57,8 +76,17 @@ void	Request::parseHeader(const std::string & req)
 	if (badFirstLine() == true)
 		return ;
 
-	std::istringstream	stream(req);
+	size_t	bodyPosition = req.find("\r\n\r\n");
+	if (bodyPosition == std::string::npos)
+	{
+		_ret = 400;
+		return;
+	}
+
+	std::string	header = req.substr(0, bodyPosition + 4);
 	size_t	boundary = std::string::npos;
+	std::istringstream	stream(header);
+
 	while (std::getline(stream, tmp))
 	{
 		if (tmp == "")
@@ -71,7 +99,6 @@ void	Request::parseHeader(const std::string & req)
 			_headerM[key] = value;
 		}
 	}
-	size_t	bodyPosition = req.find("\r\n\r\n");
 	if (bodyPosition != std::string::npos)
 		_reqBody = req.substr(bodyPosition + 4);
 }
@@ -91,22 +118,10 @@ void	Request::parseBody()
 		queryString = URL.substr(queryPos + 1);
 	}
 	else if (getMethod() == "POST")
-	{
 		queryString = _reqBody;
-		// queryString = queryString.substr(2);
-	}
 	else
 		return ;
 	_requestContent = queryString;
-	while (queryString != "")
-	{
-		std::string	subQuery = queryString.substr(0, queryString.find("&"));
-		_queryM[subQuery.substr(0, subQuery.find("="))] = subQuery.substr(subQuery.find("=") + 1);
-		if (queryString.find("&") != std::string::npos)
-			queryString = queryString.substr(queryString.find("&") + 1);
-		else
-			queryString = "";
-	}
 }
 
 /*================================ Accessors =================================*/
