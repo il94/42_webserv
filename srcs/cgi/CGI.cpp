@@ -2,7 +2,28 @@
 
 CGI::CGI(){}
 
-CGI::CGI(Request &request): _request(request) {}
+CGI::CGI(Request &request): _request(request)
+{
+	std::vector<std::pair<std::string,std::string> >	cookies = extractCookieFileContent();
+
+	if (cookies.empty() == false)
+	{
+		std::string	requestWithCookies;
+		
+		if (_request.getRequestContent().empty() == false)
+			requestWithCookies = _request.getRequestContent() + '&';
+
+		for (std::vector<std::pair<std::string,std::string> >::iterator it = cookies.begin();
+			it != cookies.end(); it++)
+		{
+			requestWithCookies += it->first + '=';
+			requestWithCookies += it->second;
+			if (it + 1 != cookies.end())
+				requestWithCookies += '&';
+		}
+		_request.setRequestContent(requestWithCookies);
+	}
+}
 
 CGI::CGI(const CGI &src)
 {
@@ -24,7 +45,7 @@ void	CGI::setEnv()
 	std::map<std::string, std::string>	header = _request.getHeaderM();
 	header["REQUEST_METHOD"] = _request.getMethod();
 	header["SERVER_PROTOCOL"] = "HTTP/1.1";
-	if (header["REQUEST_METHOD"] == "GET")
+	if (_request.getMethod() == "GET")
 		header["QUERY_STRING"] = _request.getRequestContent();
 	_env = new char *[header.size() + 1];
 	int	j = 0;
@@ -65,6 +86,7 @@ std::string CGI::execCGI(std::string scriptPath)
 
 			execve(scriptPath.c_str(), nll, _env);
 			std::cerr << RED << "Execve failed\n" << END << std::endl;
+
 			write(pipefd_output[1], failedSTR, strlen(failedSTR));
 			close(pipefd_input[0]);
 			close(pipefd_output[1]);
@@ -77,6 +99,7 @@ std::string CGI::execCGI(std::string scriptPath)
 		{
 			// parent process
 			close(pipefd_input[0]);
+
 			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
 			close(pipefd_input[1]);
 
@@ -98,4 +121,27 @@ std::string CGI::execCGI(std::string scriptPath)
 			delete[] _env[i];
 		delete[] _env;
 		return output;
+}
+
+std::vector<std::pair<std::string,std::string> >	CGI::extractCookieFileContent()
+{
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	std::ifstream										file("cookies.txt");
+
+	if (file.is_open())
+	{
+		std::string								line;
+		std::pair<std::string,std::string>		element;
+
+		while (std::getline(file, line))
+		{
+			element.first = line;
+			std::getline(file, line);
+			element.second = line;
+			std::getline(file, line);
+			cookies.push_back(element);
+		}
+		file.close();
+	}
+	return (cookies);
 }

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/21 14:31:59 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/22 15:23:26 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,7 +195,12 @@ void	Response::generate()
 
 void	Response::GET(void)
 {
-	if (findCGI() == true)
+	if (findCookie() == true)
+		extractCookie();
+	else
+		std::remove("cookies.txt");
+
+	if (findCGI() == true and _code != 500)
 	{
 		CGI cgi(_request);
 		_response = cgi.execCGI(_path);
@@ -244,7 +249,12 @@ void	Response::GET(void)
 
 void	Response::POST(void)
 {
-	if (_uploadStatu == READ || findCGI() == true)
+	if (findCookie() == true)
+		extractCookie();
+	else
+		std::remove("cookies.txt");
+
+	if (_code != 500 && (_uploadStatu == READ || findCGI() == true))
 	{
 		/*==========================================================*/
 		upload();
@@ -287,7 +297,7 @@ void	Response::POST(void)
 			}
 		}
 	}
-	else if (_code != 403 && _code != 404)
+	else if (_code == 200)
 	{
 		_code = 204;
 		_response = "";
@@ -449,6 +459,32 @@ std::string	Response::readErrorPage(const std::string & path)
 	return (readErrorPage(_config.getErrorPages("default_404")));
 }
 
+void	Response::extractCookie()
+{
+	std::remove("cookies.txt");
+
+	std::ofstream	file("cookies.txt");
+	if (file.is_open() == false)
+	{
+		_code = 500;
+		return ;
+	}
+
+	std::string											header = _request.getHeaderM()["Cookie"];
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	cookies = splitCookieHeader(header);
+
+	for (std::vector<std::pair<std::string,std::string> >::iterator it = cookies.begin();
+		it != cookies.end(); it++)
+	{
+		file << it->first << '\n';
+		file << it->second << '\n';
+		file << '\n';
+	}	
+	
+	file.close();
+}
+
 int	Response::fileExist(std::string path)
 {
 	struct stat	stats;
@@ -480,6 +516,34 @@ int	Response::isDir(std::string path)
 			return 1;
 	}
 	return 0;
+}
+
+
+std::vector<std::pair<std::string,std::string> >	Response::splitCookieHeader(const std::string &src)
+{
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	std::pair<std::string,std::string>					pair;
+	std::string											element;
+	
+	for (std::string::const_iterator it = src.begin(); it != src.end(); it++)
+	{
+		if (*it == '=')
+		{
+			pair.first = element;
+			element.clear();
+		}
+		else if (it + 1 == src.end() or *it == ';')
+		{
+			pair.second = element;		
+			cookies.push_back(pair);
+			if (*it == ';')
+				it++;
+			element.clear();
+		}
+		else
+			element.push_back(*it);
+	}
+	return (cookies);
 }
 
 bool		Response::findCGI()
@@ -531,6 +595,12 @@ bool		Response::findCGI()
 	}
 	_code = 404;
 	return false;
+}
+
+bool		Response::findCookie()
+{
+	std::map<std::string, std::string>	header = _request.getHeaderM();
+	return (header.find("Cookie") != header.end());
 }
 
 Location	Response::findLocation()

@@ -7,9 +7,6 @@ std::string	Response::generateAutoIndex()
 	std::vector<std::string>	hosts = _config.getHost();
 	std::vector<int>			ports = _config.getPort();
 
-	// std::cout << GREEN << "SHIT = " << path << END << std::endl;
-	// std::cout << GREEN << "PATH = " << _path << END << std::endl;		
-
 	if (dir == NULL)
 	{
 		std::cerr << RED << "Error : AutoIndex cannot processed, \n "<<

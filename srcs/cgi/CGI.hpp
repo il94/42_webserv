@@ -23,6 +23,7 @@ class CGI
 
 		void	setEnv();
 		std::string	execCGI(std::string scriptName);
+		std::vector<std::pair<std::string,std::string> >	extractCookieFileContent();
 	private:
 		Request			_request;
 		char				**_env;

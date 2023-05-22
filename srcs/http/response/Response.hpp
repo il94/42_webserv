@@ -51,7 +51,11 @@ class Response
 		int			fileExist(std::string path);
 		int			isFile(std::string path);
 		int			isDir(std::string path);
+    std::vector<std::pair<std::string,std::string> >	splitCookieHeader(const std::string &src);
+
 		bool		findCGI();
+		bool		findCookie();
+		void		extractCookie();
 		Location	findLocation();
 
 		// Upload management methods
