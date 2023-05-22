@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/20 20:24:28 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/22 15:23:26 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,13 @@ void	Response::GET(void)
 {
 	if (findCookie() == true)
 		extractCookie();
+	else
+		std::remove("cookies.txt");
 
 	if (findCGI() == true and _code != 500)
 	{
 		CGI cgi(_request);
 		_response = cgi.execCGI(_path);
-		// _response = cgi.execCGI("./html/cgi_test/" + _request.getURL());
-		// std::cout << YELLOW << _response << END << std::endl;
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 			_response.erase(0, 1);
 		size_t	bodyPosition = _response.find("\r\n\r\n");
@@ -121,11 +121,12 @@ void	Response::POST(void)
 {
 	if (findCookie() == true)
 		extractCookie();
+	else
+		std::remove("cookies.txt");
 	
 	if (findCGI() == true and _code != 500)
 	{
 		updateContentIfBoundary();
-		//_path = "./html/cgi_test/cgi-bin/upload.sh";
 		CGI cgi(_request);
 		cgi.setUploadInfo(_uploadFileName, _location.getUploadPath());
 		
@@ -243,51 +244,28 @@ std::string	Response::readErrorPage(const std::string & path)
 
 void	Response::extractCookie()
 {
-	std::string		cookieResult;
-	
-	// std::ifstream	inputFile("cookie.txt");
-	// if (inputFile.is_open() == true)
-	// {
-	// 	std::getline(inputFile, cookieResult);
-	// 	inputFile.close();
-	// }
-	
-	std::ofstream	cookieFile("cookie.txt");
-	if (cookieFile.is_open() == false)
+	std::remove("cookies.txt");
+
+	std::ofstream	file("cookies.txt");
+	if (file.is_open() == false)
 	{
 		_code = 500;
 		return ;
 	}
 
-	std::string		cookieValue;
-	std::string		head = _request.getHeaderM()["Cookie"];
+	std::string											header = _request.getHeaderM()["Cookie"];
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	cookies = splitCookieHeader(header);
 
-	std::string::iterator 	it1 = head.begin();
-	std::string::iterator 	it2 = it1;
-	size_t					findValue = head.find(';', std::distance(head.begin(), it1));
-	
-	std::cout << PURPLE << "COOKIE RESULT = \n" << cookieResult + '\n' << END << std::endl;
-	std::cout << PURPLE << "COOKIE HEAD = \n" << head + '\n' << END << std::endl;
-	while (findValue != std::string::npos)
+	for (std::vector<std::pair<std::string,std::string> >::iterator it = cookies.begin();
+		it != cookies.end(); it++)
 	{
-		it2 = head.begin() + findValue;
-		
-		cookieValue = head.substr(std::distance(head.begin(), it1), std::distance(head.begin(), it2) - std::distance(head.begin(), it1));
-		std::cout << PURPLE << cookieValue << END << std::endl;
-
-		cookieResult += cookieValue + '&';
-		it2 += 2;
-		it1 = it2;
-		findValue = head.find(';', std::distance(head.begin(), it1));
-	}
-		
-	cookieValue = head.substr(std::distance(head.begin(), it1), std::distance(head.begin(), head.end()) - std::distance(head.begin(), it1));
-	std::cout << PURPLE << cookieValue << END << std::endl;
-
-	cookieResult += cookieValue;
-
-	cookieFile << cookieResult;
-	cookieFile.close();
+		file << it->first << '\n';
+		file << it->second << '\n';
+		file << '\n';
+	}	
+	
+	file.close();
 }
 
 void	Response::updateContentIfBoundary()
@@ -340,6 +318,34 @@ int	Response::isDir(std::string path)
 			return 1;
 	}
 	return 0;
+}
+
+
+std::vector<std::pair<std::string,std::string> >	Response::splitCookieHeader(const std::string &src)
+{
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	std::pair<std::string,std::string>					pair;
+	std::string											element;
+	
+	for (std::string::const_iterator it = src.begin(); it != src.end(); it++)
+	{
+		if (*it == '=')
+		{
+			pair.first = element;
+			element.clear();
+		}
+		else if (it + 1 == src.end() or *it == ';')
+		{
+			pair.second = element;		
+			cookies.push_back(pair);
+			if (*it == ';')
+				it++;
+			element.clear();
+		}
+		else
+			element.push_back(*it);
+	}
+	return (cookies);
 }
 
 bool		Response::findCGI()

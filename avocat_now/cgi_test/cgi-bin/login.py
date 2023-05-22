@@ -16,47 +16,25 @@ def generate_login_form():
 def generate_logout_page():
     print("Content-type: text/html")
  
-    print("Set-Cookie: session=expires")  # Supprimer le cookie de session
-    print("Set-Cookie: password=expires")  # Supprimer le cookie de password
+    print("Set-Cookie: session=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
+    print("Set-Cookie: username=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
+    print("Set-Cookie: password=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
     print("")
+ 
     print("<html>")
     print("<body>")
     print("<h1>Déconnexion</h1>")
     print("<p>Vous êtes déconnecté.</p>")
-    print("<p><a href=\"login.py\">Login</a></p>")
+    print("<p><a href=\"indexmini.html\">Login</a></p>")
     print("</body>")
     print("</html>")
 
 # Vérifier si le cookie de session existe
 
 def check_session():
-    if os.path.isfile('cookie.txt'):
-        with open('cookie.txt', 'r') as f:
-            output = f.read()
-            if output.find("session=loggedin") != -1:
-                return True
-            return False
+    if os.path.isfile('cookies.txt'):
+        return True
     return False
-
-
-    # if 'HTTP_COOKIE' in os.environ:
-    #     cookies = os.environ['HTTP_COOKIE'].split(';')
-    #     for cookie in cookies:
-    #         name, value = cookie.strip().split('=')
-    #         if name == 'session' and value == 'loggedin':
-    #             return True
-    # return False
-
-
-
-# def check_session():
-#     if 'HTTP_COOKIE' in os.environ:
-#         cookies = os.environ['HTTP_COOKIE'].split(';')
-#         for cookie in cookies:
-#             name, value = cookie.strip().split('=')
-#             if name == 'session' and value == 'loggedin':
-#                 return True
-#     return False
 
 # Vérifier les données de connexion
 def check_credentials(username, password):

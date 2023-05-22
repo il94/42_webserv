@@ -4,18 +4,24 @@ CGI::CGI(){}
 
 CGI::CGI(Request &request): _request(request), _uploadFilename(""), _uploadPath("")
 {
-	std::ifstream	cookieFile("cookie.txt");
-	std::string		contentCookie;
+	std::vector<std::pair<std::string,std::string> >	cookies = extractCookieFileContent();
 
-	if (cookieFile)
+	if (cookies.empty() == false)
 	{
-		std::getline(cookieFile, contentCookie);
-		std::string	contentWithCookies = _request.getRequestContent();
-		if (contentWithCookies.empty() == true)
-			_request.setRequestContent(contentCookie);
-		else
-			_request.setRequestContent(contentWithCookies + '&' + contentCookie);
-		// std::cerr << GREEN << "CGI CONTENT = " << _request.getRequestContent() << END << std::endl;
+		std::string	requestWithCookies;
+		
+		if (_request.getRequestContent().empty() == false)
+			requestWithCookies = _request.getRequestContent() + '&';
+
+		for (std::vector<std::pair<std::string,std::string> >::iterator it = cookies.begin();
+			it != cookies.end(); it++)
+		{
+			requestWithCookies += it->first + '=';
+			requestWithCookies += it->second;
+			if (it + 1 != cookies.end())
+				requestWithCookies += '&';
+		}
+		_request.setRequestContent(requestWithCookies);
 	}
 }
 
@@ -75,25 +81,8 @@ std::string CGI::execCGI(std::string scriptPath)
 			dup2(pipefd_output[1], STDOUT_FILENO);
 			close(pipefd_output[0]);
 
-			// int	temp = 0;
-			// while (_env[temp])
-			// {
-			// 	std::cerr << GREEN << "ENV = " << _env[temp] << END << std::endl;
-			// 	temp++;
-			// }
-
-
 			execve(scriptPath.c_str(), nll, _env);
 			std::cerr << RED << "Execve failed\n" << END << std::endl;
-
-			// std::cerr << GREEN << "SCRIPT PATH = " << scriptPath << END << std::endl;
-			// temp = 0;
-			// while (_env[temp])
-			// {
-			// 	std::cerr << RED << "ENV = " << _env[temp] << END << std::endl;
-			// 	temp++;
-			// }
-
 
 			write(pipefd_output[1], failedSTR, strlen(failedSTR));
 			close(pipefd_input[0]);
@@ -107,7 +96,6 @@ std::string CGI::execCGI(std::string scriptPath)
 		{
 			// parent process
 			close(pipefd_input[0]);
-			std::cerr << GREEN << "CONTENT = " << _request.getRequestContent().c_str() << END << std::endl;
 
 			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
 			close(pipefd_input[1]);
@@ -130,4 +118,27 @@ std::string CGI::execCGI(std::string scriptPath)
 			delete[] _env[i];
 		delete[] _env;
 		return output;
+}
+
+std::vector<std::pair<std::string,std::string> >	CGI::extractCookieFileContent()
+{
+	std::vector<std::pair<std::string,std::string> >	cookies;
+	std::ifstream										file("cookies.txt");
+
+	if (file.is_open())
+	{
+		std::string								line;
+		std::pair<std::string,std::string>		element;
+
+		while (std::getline(file, line))
+		{
+			element.first = line;
+			std::getline(file, line);
+			element.second = line;
+			std::getline(file, line);
+			cookies.push_back(element);
+		}
+		file.close();
+	}
+	return (cookies);
 }

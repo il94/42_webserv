@@ -22,6 +22,7 @@ class CGI
 		void	setUploadInfo(std::string uploadFilename, std::string uploadPath);
 		void	setEnv();
 		std::string	execCGI(std::string scriptName);
+		std::vector<std::pair<std::string,std::string> >	extractCookieFileContent();
 	private:
 		Request			_request;
 		std::string		_uploadFilename;
