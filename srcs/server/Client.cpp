@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/20 22:34:43 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/22 08:48:35 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void	Client::remove( int & socket )
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
 	// check for flags keeping alive the socket
-	if ( this->getFlag( socket ) & READ )
+	if ( socket == -1 || this->getFlag( socket ) & READ )
 		return;
 	// delete socket client and all associated data
 	try {
@@ -130,13 +130,13 @@ void	Client::remove( int & socket )
 		// remove from socket vector
 		if ( itSock != this->_socket.end() )
 			this->_socket.erase( itSock );
+		// close socket
+		if ( close( socket ) == -1 )
+			std::cerr << "\tError: closing client socket" << std::endl;
+		socket = -1;
 	} catch ( std::exception & e ) {
 		std::cerr << "\t" << e.what() << std::endl;
 	}
-	// close socket
-	if ( close( socket ) == -1 )
-		std::cerr << "\tError: closing client socket" << std::endl;
-	socket = -1;
 	return;
 }
 
@@ -260,9 +260,9 @@ const std::string &	Client::getName( const int & socket ) const
 
 const int &	Client::getFlag( const int & socket ) const
 {
-	if (this->_flag.find(socket) != this->_flag.end())
+	//if (this->_flag.find(socket) != this->_flag.end())
 		return( this->_flag.at( socket ) );
-	return (EMPTY);
+	//return (EMPTY);
 }
 
 Response &	Client::getClassResponse( const int & socket )
