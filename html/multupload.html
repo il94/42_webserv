@@ -10,11 +10,17 @@
              Show a file-select field which allows
              only one file to be chosen:
          </h3>
-          <form action="/cgi_test/cgi-bin/upload.py"
+          <form action="/cgi_test/cgi-bin/upload.sh"
              enctype="multipart/form-data" method = "post">
 
              <label for="myfile">Select a file:</label>
              <input type="file" id="myfile" name="myfile" />
+             <br /><br />
+			 <label for="myfile2">Select a file:</label>
+             <input type="file" id="myfile2" name="myfile2" />
+             <br /><br />
+			 <label for="myfile3">Select a file:</label>
+             <input type="file" id="myfile3" name="myfile3" />
              <br /><br />
              <input type="submit" />
          </form>

@@ -28,4 +28,13 @@
 # define YELLOW "\033[33m"
 # define END "\033[0m"
 
+typedef enum e_flag
+{
+	EMPTY	= 0,
+	ERROR	= 1 << 0,
+	CONTENT	= 1 << 1,
+    READ	= 1 << 2,
+	STOP	= 1 << 3
+}			t_flag;
+
 #endif
