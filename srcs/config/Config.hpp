@@ -82,7 +82,7 @@ class Config
 	std::vector<std::string>			_host;			//listen *
 	std::string							_name;			//server_name
 	long 								_maxBodySize;	//client_max_body_size
-	std::map<std::string, std::string>	_errorPages;	//error_page
+	std::map<std::string, std::string>	_errorPages;	//error_page *
 
 	Location						_defaultLocation;
 	std::map<std::string, Location>	_locations;

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/22 18:50:16 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/23 15:26:30 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,6 +213,8 @@ void	Server::setConfigs( char **av )
 	_nbSrv = _ports.size();
 }
 
+extern bool running;
+
 void	Server::run(void)
 {
 	int				cliSocket	= -1;
@@ -227,7 +229,7 @@ void	Server::run(void)
 	// Creates sockets if they don't exist
 	if ( this->_srvfd.size() == 0 )
 		this->_initSrv();
-	while ( 1 )
+	while ( running )
 	{
 		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
 		if ( nbEvents == -1 )

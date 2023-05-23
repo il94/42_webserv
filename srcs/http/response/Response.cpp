@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/22 18:54:26 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/23 15:35:08 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -333,7 +333,7 @@ void	Response::DELETE(void)
 
 		// Configuration methods
 
-void	Response::setRequest(Request &request) { request = request; }
+void	Response::setRequest(Request &request) { _request = request; }
 
 void	Response::setConfig(Config &config) { _config = config; }
 
@@ -564,7 +564,7 @@ bool		Response::findCGI()
 	std::vector<std::string>	allowedCGI = _location.getAllowedCGI();
 	std::string		urlFileExtension = url.substr(rfind(url, "."));
 
-	if (urlFileExtension != ".py" and urlFileExtension != ".php" and urlFileExtension != ".sh")
+	if (urlFileExtension != ".py" and urlFileExtension != ".php")
 		return (false);
 	
 	if (std::find(allowedCGI.begin(), allowedCGI.end(), urlFileExtension)\

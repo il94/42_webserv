@@ -1,4 +1,5 @@
 #include "Response.hpp"
+extern bool running;
 
 std::string	Response::extractMPFD_Header()
 {
@@ -160,8 +161,8 @@ void	Response::upload()
 	or of a form we will increment size which will allow us to have the complete size of the body, 
 	we will also update the control while removing its first element then adding the character
 	 *it in the file in question*/
-	while (yt != (*_content).end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
-		&& _controler.find(_boundary + "--") == std::string::npos))
+	while (running && (yt != (*_content).end() && (_controler.find(_boundary + "\r\n") == std::string::npos 
+		&& _controler.find(_boundary + "--") == std::string::npos)))
 	{
 		if (it != (*_content).end())
 		{
@@ -172,6 +173,8 @@ void	Response::upload()
 		yt = (*_content).erase(yt);
 	}
 	outfile.close();
+	if (running == false)
+		return ;
 	/*_boundary + -- means we have completed all forms so we can stop the upload process*/
 	if (_controler.find(_boundary + "--") != std::string::npos)
 	{
