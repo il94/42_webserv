@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 15:26:30 by ilandols          #+#    #+#             */
-/*   Updated: 2023/05/24 16:15:36 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/24 20:22:09 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,10 +406,8 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 		if (req.getRet() == 200)
 			req.parseBody();
 		// client.setFlag( cliSocket, flag_value );
-
-		std::string host = req.getElInHeader("Host");
-		int	port = std::atoi(host.substr(host.find(':') + 1).c_str());
-		client.setClassResponse( cliSocket, getConfig(port), req );
+		int port = client.getPort(cliSocket);
+		client.setClassResponse( cliSocket, getConfig(port), req);
 	}
 
 	rep = client.getClassResponsePTR( cliSocket );
