@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/24 14:25:37 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/24 15:59:12 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Client
 		bool							setSocket( const int & socket );
 		void							setFlag( const int & socket, const int flag );
 		void							unSetFlag( const int & socket, const int flag );
-		void							setClassResponse( const int & socket, Config & conf, Request & req );
+		void							setClassResponse( const int & socket, const Config & conf, Request & req );
 		void							checkClock( void );
 		void							resetClock( const int & socket );
 

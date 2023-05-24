@@ -115,6 +115,8 @@ class Server
 		void				_setSockaddr(void);
 		void				_setEplevs(void);
 		t_vvString			getContent( void )				const ;
+		t_vConfig			getConfigs( void )				const ;
+		Config				getConfig( int & port )			const ;
 
 		void				setContent( const t_vvString & );
 

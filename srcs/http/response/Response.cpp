@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/23 15:35:08 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:00:47 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ Response::Response(void)
 	_response = "";
 }
 
-Response::Response(Request & request, Config & config, int port, std::string host)
+Response::Response(Request & request, const Config & config, int port, std::string host)
 {
 	_port = port;
 	_host = host;

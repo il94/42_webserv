@@ -16,7 +16,7 @@ class Response
 	public :
 		// Constructors/Destructor
 		Response(void);
-		Response(Request &request, Config &config, int port, std::string host);
+		Response(Request &request, const Config &config, int port, std::string host);
 		Response(const Response &src);
 		~Response(void);
 

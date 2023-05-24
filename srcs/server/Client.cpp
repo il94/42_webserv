@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/24 14:26:21 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:15:16 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,7 +233,7 @@ void	Client::unSetFlag( const int & socket, const int flag )
 	return;
 }
 
-void	Client::setClassResponse( const int & socket, Config & conf, Request & req  )
+void	Client::setClassResponse( const int & socket, const Config & conf, Request & req  )
 {
 	Response	res( req, conf, this->getPort( socket ), this->getName( socket ) );
 

@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 15:26:30 by ilandols          #+#    #+#             */
-/*   Updated: 2023/05/24 15:15:01 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:15:36 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,7 +406,10 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 		if (req.getRet() == 200)
 			req.parseBody();
 		// client.setFlag( cliSocket, flag_value );
-		client.setClassResponse( cliSocket, _configs[0], req ); // a coder
+
+		std::string host = req.getElInHeader("Host");
+		int	port = std::atoi(host.substr(host.find(':') + 1).c_str());
+		client.setClassResponse( cliSocket, getConfig(port), req );
 	}
 
 	rep = client.getClassResponsePTR( cliSocket );
@@ -501,6 +504,30 @@ const Server::t_epollEv &	Server::_getEpollEv(const size_t & i) const
 std::vector<std::vector <std::string> >	Server::getContent( void ) const {
 	return (_content);
 }
+
+typedef	std::vector	< Config >	t_vConfig;
+typedef	std::vector < int >		t_vInt;
+
+t_vConfig	Server::getConfigs( void )	const {
+	return (_configs);
+}
+
+Config	Server::getConfig( int & port )	const
+{
+	t_vConfig	configs = getConfigs();
+	t_vInt		ports;
+	t_vConfig::iterator it = configs.begin();
+
+	while (it != configs.end())
+	{
+		ports = it->getPort();
+		if (std::find(ports.begin(), ports.end(), port) != ports.end())
+			break ;
+		it++;
+	}
+	return (*it);
+}
+
 
 // Setters ================================================================== //
 void	Server::_setName(const std::string & name)
