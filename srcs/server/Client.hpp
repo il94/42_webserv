@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/20 16:39:01 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/24 14:25:37 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define CLIENT_HPP
 
 #include <sys/epoll.h>
+#include <ctime>
 
 # include "../../include/webserv.hpp"
 #include "../config/Config.hpp"
@@ -47,6 +48,8 @@ class Client
 		void							setFlag( const int & socket, const int flag );
 		void							unSetFlag( const int & socket, const int flag );
 		void							setClassResponse( const int & socket, Config & conf, Request & req );
+		void							checkClock( void );
+		void							resetClock( const int & socket );
 
 		// Getters -------------------------------------------------------------
 		const int					&	getEpollFd( void )				const;
@@ -58,6 +61,7 @@ class Client
 		Response					*	getClassResponsePTR( const int & socket);
 		std::vector<unsigned char>	&	getUpload( const int & socker );
 		std::vector< unsigned char > *	getUploadPTR( const int & socket );
+		const std::clock_t			&	getClock( const int & socket );
 
 
 	private:
@@ -70,6 +74,7 @@ class Client
 		std::map	< int, Response					>	_Response;
 		std::map	< int, std::vector< ustring	>	>	_buffer;
 		std::map	< int, std::vector<unsigned char>>	_upload;
+		std::map	< int, clock_t					>	_time;
 
 		// Private functions ---------------------------------------------------
 										Client( void );
