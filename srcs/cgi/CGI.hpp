@@ -1,5 +1,6 @@
 #ifndef CGI_HPP
 # define CGI_HPP
+# define TIMEOUT_CGI 5
 
 # include "../http/request/Request.hpp"
 # include <vector>
@@ -8,6 +9,11 @@
 # include <string.h>
 # include <sys/wait.h>
 # include <stdlib.h>
+# include <ctime>
+# include <fcntl.h>
+# include <csignal>
+
+
 
 # define	CGI_BUFSIZE 42424
 

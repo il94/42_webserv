@@ -98,27 +98,30 @@ std::string CGI::execCGI(std::string scriptPath)
 		else if (pid > 0)
 		{
 			// parent process
-			std::cerr << __LINE__ << std::endl;
 			close(pipefd_input[0]);
-			std::cerr << __LINE__ << std::endl;
 
 			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
 			close(pipefd_input[1]);
-			std::cerr << __LINE__ << std::endl;
 
 			close(pipefd_output[1]);
+
+			fcntl(pipefd_output[0], F_SETFL, O_NONBLOCK);
+			clock_t	start = clock();
 			char buffer[1024] = {0};
-			std::cerr << __LINE__ << std::endl;
-			int rd;
-			while (( rd = read(pipefd_output[0], buffer, 1023) )  > 0) {
-				std::cerr << "rd = " << rd << std::endl;
-				output += buffer;
+
+			while (1) 
+			{
+				if (read(pipefd_output[0], buffer, 1023) > 0)
+					output += buffer;
+				if (waitpid(-1, NULL, WNOHANG) == -1) 
+					break ;
+				else if (static_cast<float>((std::clock() - start) / CLOCKS_PER_SEC)  >= TIMEOUT_CGI)
+				{
+					kill(pid, SIGTERM);
+					break ;
+				}
 			}
-			std::cerr << __LINE__ << std::endl;
 			close(pipefd_output[0]);
-			std::cerr << "avant waitpid" << std::endl;
-			waitpid(-1, NULL, WNOHANG );
-			std::cerr << "Waitpid la vie d'artiste" << std::endl;
 
 		}
 		else

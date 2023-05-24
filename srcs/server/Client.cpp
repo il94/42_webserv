@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/24 16:15:16 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/24 19:46:00 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,7 +252,6 @@ void	Client::checkClock( void )
 		socket = this->_socket.at( i );
 		this->_time[ socket ] = std::clock() - this->_time[ socket ];	
 		time_s = static_cast<float>( this->_time[ socket ] ) / CLOCKS_PER_SEC;
-		std::cout << "time = " << time_s << std::endl;
 		if ( time_s >= TIMEOUT )
 			this->remove( socket );
 		//else
