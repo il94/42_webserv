@@ -11,6 +11,10 @@
 
 #define DBG 0
 
+#ifndef TIMEOUT
+#define TIMEOUT 5
+#endif
+
 typedef struct s_config
 {
 	size_t						size;

@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/22 14:54:32 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/24 14:26:21 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@
 
 // Constructors ============================================================= //
 Client::Client( void ) : _eplfd( ), _socket( ), _port(  ), _name(  ), _flag( ),
-	_Response( ), _buffer(  ) 
+	_Response( ), _buffer(  ), _time( )
 {
 	return;
 }
 
 Client::Client( const int & eplfd ) : _eplfd( eplfd ), _socket( ), _port(  ),
-	_name(  ),  _flag( ), _Response( ), _buffer(  ) 
+	_name(  ),  _flag( ), _Response( ), _buffer(  ), _time( )
 {
 	return;
 }
@@ -77,6 +77,7 @@ bool	Client::add( const int & socket, const int & port, const std::string & name
 		this->_Response.insert( std::make_pair( socket, Response() ) );
 		this->_buffer.insert( std::make_pair( socket, std::vector< ustring >() ) );
 		this->_upload.insert( std::pair< int, std::vector<unsigned char> >( socket, vect ) );
+		this->_time.insert( std::pair< int, clock_t >( socket, std::clock() ) );
 		return ( true );
 	}
 	else if ( is_set == true )
@@ -99,6 +100,7 @@ void	Client::remove( int & socket )
 	std::map< int, Response >::iterator					itRes  = this->_Response.find( socket );
 	std::map< int, std::vector< ustring >>::iterator	itBuf  = this->_buffer.find( socket );
 	std::map< int, std::vector< unsigned char >>::iterator itUp = this->_upload.find( socket );
+	std::map<int, clock_t >::iterator					itClk = this->_time.find( socket );
 
 	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = socket;
@@ -124,6 +126,8 @@ void	Client::remove( int & socket )
 		// delete upload buffer
 		if ( itUp != this->_upload.end() )
 			this->_upload.erase( socket );
+		if ( itClk != this->_time.end() )
+			this->_time.erase( socket );
 		// remove from epoll instance
 		if ( epoll_ctl( this->getEpollFd(), EPOLL_CTL_DEL, socket, &ev) == -1 )
 			std::cerr << "\tError: remove client socket from epoll instance failed" << std::endl;
@@ -237,6 +241,33 @@ void	Client::setClassResponse( const int & socket, Config & conf, Request & req 
 	return;
 }
 
+void	Client::checkClock( void )
+{
+	int		socket;
+	float	time_s;
+	size_t	i		= 0;
+
+	while ( i < this->_socket.size() )
+	{
+		socket = this->_socket.at( i );
+		this->_time[ socket ] = std::clock() - this->_time[ socket ];	
+		time_s = static_cast<float>( this->_time[ socket ] ) / CLOCKS_PER_SEC;
+		std::cout << "time = " << time_s << std::endl;
+		if ( time_s >= TIMEOUT )
+			this->remove( socket );
+		//else
+		//	this->_time[ socket ] = std::clock();
+		i++;
+	}
+	return;
+}
+
+void	Client::resetClock( const int & socket )
+{
+	this->_time[ socket ] = std::clock();
+	return;
+}
+
 // Getters ---------------------------------------------------------------------
 const int &	Client::getEpollFd( void ) const
 {
@@ -281,4 +312,9 @@ std::vector< unsigned char > &	Client::getUpload( const int & socket )
 std::vector< unsigned char > *	Client::getUploadPTR( const int & socket )
 {
 	return ( &(this->_upload.at( socket )) );
+}
+
+const std::clock_t &	Client::getClock( const int & socket )
+{
+	return ( this->_time.at( socket ) );
 }

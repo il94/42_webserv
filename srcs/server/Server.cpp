@@ -1,4 +1,3 @@
-/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
@@ -231,9 +230,10 @@ void	Server::run(void)
 		this->_initSrv();
 	while ( running )
 	{
-		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, -1);
+		nbEvents = epoll_wait( this->_getEplFd( ), cliEvents, MAX_EVENTS, TIMEOUT );
 		if ( nbEvents == -1 )
-			this->_displayError( __func__, __LINE__, "run/epoll_wait" );
+			this->_displayError( __func__, __LINE__, "what)run/epoll_wait" );
+		client.checkClock();
 		for (int i = 0; i < nbEvents; i++)
 		{
 			cliSocket = -1;
@@ -242,6 +242,7 @@ void	Server::run(void)
 				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
 					cliSocket = cliEvents[i].data.fd;
+					client.resetClock( cliSocket );
 					if ( cliSocket != -1 && cliEvents[i].events & EPOLLOUT && client.getFlag( cliSocket ) == CONTENT )
 					{
 						// send response

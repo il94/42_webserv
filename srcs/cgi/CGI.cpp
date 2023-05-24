@@ -98,19 +98,28 @@ std::string CGI::execCGI(std::string scriptPath)
 		else if (pid > 0)
 		{
 			// parent process
+			std::cerr << __LINE__ << std::endl;
 			close(pipefd_input[0]);
+			std::cerr << __LINE__ << std::endl;
 
 			write(pipefd_input[1], _request.getRequestContent().c_str(), _request.getRequestContent().size());
 			close(pipefd_input[1]);
+			std::cerr << __LINE__ << std::endl;
 
 			close(pipefd_output[1]);
 			char buffer[1024] = {0};
-			while (read(pipefd_output[0], buffer, 1023) > 0) {
+			std::cerr << __LINE__ << std::endl;
+			int rd;
+			while (( rd = read(pipefd_output[0], buffer, 1023) )  > 0) {
+				std::cerr << "rd = " << rd << std::endl;
 				output += buffer;
 			}
+			std::cerr << __LINE__ << std::endl;
 			close(pipefd_output[0]);
+			std::cerr << "avant waitpid" << std::endl;
+			waitpid(-1, NULL, WNOHANG );
+			std::cerr << "Waitpid la vie d'artiste" << std::endl;
 
-			wait(NULL);
 		}
 		else
 		{
