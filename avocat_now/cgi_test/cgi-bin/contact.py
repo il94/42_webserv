@@ -2,9 +2,6 @@
 
 import cgi
 
-while 1:
-	pass
-
 print("Content-Type: text/html\r\n\r\n")
 print("<html><head><title>Reponse du serveur</title></head><body>")
 print("<h1>Reponse du serveur</h1>")
