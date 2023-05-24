@@ -14,12 +14,18 @@
 <body>
     <!-- Header -->
     <header>
-        <nav class="d-flex">
-            <img src="img/Logo.png" alt="">
-            <div>
-                <input id="avocat" type="button" value="Êtes-vous avocat ?">
-                <button id="connexion"><img src="img/connexion.png" alt=""> Connexion</button>
-            </div>
+		<nav class="d-flex">
+			<img src="img/Logo.png" alt="">
+            <div class="boutons">
+                <form method="post" action="cgi_test/cgi-bin/login.py">
+                    <input id="avocat" type="button" value="Êtes-vous avocat ?">
+                    <button id="button" href=""> Connexion</button>
+                </form>
+				<a href="upload.html"><button id="button">Upload</button></a>
+				<a href="multupload.html"><button id="button">Multi Upload</button></a>
+				<a href="cgi_test/indexpy.html"><button id="button">Contact PY</button></a>
+				<a href="cgi_test/indexphp.html"><button id="button">Contact PHP</button></a>
+			</div>
         </nav>
         <section>
 			<div class="formulaire">

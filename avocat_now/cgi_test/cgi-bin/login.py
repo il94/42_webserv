@@ -25,7 +25,7 @@ def generate_logout_page():
     print("<body>")
     print("<h1>Déconnexion</h1>")
     print("<p>Vous êtes déconnecté.</p>")
-    print("<p><a href=\"../../indexmini.html\">Index</a></p>")
+    print("<p><a href=\"../../index.html\">Index</a></p>")
     print("<p><a href=\"login.py\">Login</a></p>")
     print("</body>")
     print("</html>")
