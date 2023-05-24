@@ -1,15 +1,15 @@
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/23 15:26:30 by ilandols         ###   ########.fr       */
+/*   Created: 2023/05/23 15:26:30 by ilandols          #+#    #+#             */
+/*   Updated: 2023/05/24 15:15:01 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
@@ -201,10 +201,11 @@ void	Server::setConfigs( char **av )
 	{
 		for (size_t j = i + 1; j < _ports.size(); j++)
 		{
-			while (_ports[j] == _ports[i])
+			if (_ports[j] == _ports[i])
 			{
 				_ports.erase(_ports.begin() + j);
 				_names.erase(_names.begin() + j);
+				j--;
 			}
 		}
 	}
