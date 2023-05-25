@@ -25,7 +25,12 @@ body{
 .data{
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	width: 100%;
+}
+
+.data > p{
+	text-align: center;
 }
 
 .data > input{

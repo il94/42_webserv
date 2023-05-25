@@ -20,15 +20,9 @@ def generate_logout_page():
     print("Set-Cookie: username=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
     print("Set-Cookie: password=; expires=Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n")
     print("")
- 
-    print("<html>")
-    print("<body>")
-    print("<h1>Déconnexion</h1>")
-    print("<p>Vous êtes déconnecté.</p>")
-    print("<p><a href=\"../../index.html\">Index</a></p>")
-    print("<p><a href=\"login.py\">Login</a></p>")
-    print("</body>")
-    print("</html>")
+    with open('avocat_now/cgi_test/cgi-bin/login_content/logout.html', 'r') as f:
+        for ligne in f:
+            print(ligne, end='')
 
 # Vérifier si le cookie de session existe
 
@@ -40,7 +34,7 @@ def check_session():
 # Vérifier les données de connexion
 def check_credentials(username, password):
     # Vérification factice des données (exemple)
-    if username != 'Zbub':
+    if username != 'invalid':
         return True
     return False
 
@@ -78,19 +72,22 @@ else:
             print("Set-Cookie: password=", password, "\r\n\r\n")  # Définir le cookie de password
             print("")
 
-            # with open('avocat_now/cgi_test/cgi-bin/login_content/session_active.html', 'r') as f:
-            #     for ligne in f:
-            #         print(ligne, end='')
+            with open('avocat_now/cgi_test/cgi-bin/login_content/session_active.html', 'r') as f:
+                for ligne in f:
+                    if "{username}" in ligne:
+                        print(ligne.replace("{username}", username))
+                    else:
+                        print(ligne, end='')
 
 
 
-            print("<html>")
-            print("<body>")
-            print("<h1>Connexion réussie</h1>")
-            print("<p>Bienvenue, {}!</p>".format(username))
-            print("<p><a href=\"login.py\">Se déconnecter</a></p>")
-            print("</body>")
-            print("</html>")
+            # print("<html>")
+            # print("<body>")
+            # print("<h1>Connexion réussie</h1>")
+            # print("<p>Bienvenue, {}!</p>".format(username))
+            # print("<p><a href=\"login.py\">Se déconnecter</a></p>")
+            # print("</body>")
+            # print("</html>")
         else:
             # Afficher à nouveau le formulaire de connexion avec un message d'erreur
             print("Content-Type: text/html\r\n\r\n")
