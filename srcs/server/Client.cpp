@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/22 08:48:35 by halvarez         ###   ########.fr       */
+/*   Updated: 2023/05/27 09:43:07 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -260,9 +260,13 @@ const std::string &	Client::getName( const int & socket ) const
 
 const int &	Client::getFlag( const int & socket ) const
 {
+<<<<<<< HEAD
 	//if (this->_flag.find(socket) != this->_flag.end())
 		return( this->_flag.at( socket ) );
 	//return (EMPTY);
+=======
+	return( this->_flag.at( socket ) );
+>>>>>>> 56304ce51492642163d74fb63e22136d76b6ae43
 }
 
 Response &	Client::getClassResponse( const int & socket )

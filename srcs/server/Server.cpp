@@ -6,7 +6,7 @@
 /*   By: auzun <auzun@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:57:03 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/21 16:12:39 by auzun            ###   ########.fr       */
+/*   Updated: 2023/05/22 15:12:12 by halvarez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -360,7 +360,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 	std::string	strUpload;
 
 	bytes = recv(cliSocket, reinterpret_cast<void*>(const_cast<char*>(request.data())), request.size() - 1, 0);
-	if ( bytes == 0 || bytes == -1 )
+	if ( ( bytes == 0 || bytes == -1 ) && ( client.getFlag( cliSocket ) & READ ) == 0 )
 	{
 		this->_displayError( __func__, __LINE__, "_readRequest/recv" );
 		client.remove( cliSocket );
@@ -373,7 +373,7 @@ std::string &	Server::_readRequest(Client & client, int & cliSocket, std::string
 		request[ bytes ] = '\0';
 		request.resize( bytes );
 	}
-	if ( client.getFlag( cliSocket ) & READ || request.find( "\r\n\r\n" ) != std::string::npos )
+	if ( cliSocket != -1 && ( client.getFlag( cliSocket ) & READ || request.find( "\r\n\r\n" ) != std::string::npos ) )
 	{
 		if (client.getFlag( cliSocket ) & READ)
 			strUpload = request;
