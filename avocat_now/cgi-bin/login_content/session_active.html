@@ -9,14 +9,14 @@
 
 <body>
 	<div class="formulaire">
-		<h1>Connexion réussie</h1>
+		<h1>Session active</h1>
 			<div class="data">
 				<p>
 					Bienvenue {username}
 				</p>
 			</div>
-			<form method="post" action="login.py">
-				<a href="login.py"><button id="connexion">Déconnexion</button></a>
+			<form method="get" action="login.py">
+				<a id="deconnexion" href="login.py?log=logout&">Déconnexion</a>
 			</form>
 			<a href="../../index.html"><button id="connexion">Index</button></a>
 		</div>

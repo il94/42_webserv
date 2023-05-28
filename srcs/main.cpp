@@ -19,12 +19,18 @@ void	sigquitHandler(int signum __attribute__((unused))){
 
 int	main(int ac __attribute__((unused)), char **av __attribute__((unused)))
 {		
+	if (ac > 2)
+	{
+		std::cerr << "To many arguments" << std::endl;
+		return (EXIT_FAILURE);
+	}
 	Server	server;
 
 	std::signal(SIGINT, sigquitHandler);
 
 	server.setConfigs(av);
 	//server.display();
-	server.run();
-	return ( 0 );
+	if (running)
+		server.run();
+	return ( EXIT_SUCCESS );
 }

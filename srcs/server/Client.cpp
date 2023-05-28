@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/16 21:22:29 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/24 19:46:00 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 22:14:17 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,8 +288,10 @@ const std::string &	Client::getName( const int & socket ) const
 	return ( this->_name.at( socket ) );
 }
 
-const int &	Client::getFlag( const int & socket ) const
+const int	Client::getFlag( const int & socket ) const
 {
+	if (this->_flag.find(socket) == this->_flag.end())
+		return (-1);
 	return( this->_flag.at( socket ) );
 }
 

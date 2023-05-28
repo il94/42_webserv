@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/28 17:54:50 by halvarez          #+#    #+#             */
-/*   Updated: 2023/05/24 15:59:12 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 22:14:25 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class Client
 		size_t							size( void )					const;
 		const int					&	getPort( const int & socket )	const;
 		const std::string			&	getName( const int & socket )	const;
-		const int					&	getFlag( const int & socket )	const;
+		const int						getFlag( const int & socket )	const;
 		Response					&	getClassResponse( const int & socket);
 		Response					*	getClassResponsePTR( const int & socket);
 		std::vector<unsigned char>	&	getUpload( const int & socker );

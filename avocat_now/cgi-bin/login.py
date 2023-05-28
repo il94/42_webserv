@@ -24,6 +24,28 @@ def generate_logout_page():
         for ligne in f:
             print(ligne, end='')
 
+def generate_session_active_page():
+
+    bool = 0
+    with open('cookies.txt', 'r') as f:
+        for ligne in f:
+            if bool == 1:
+                username = ligne
+                bool = 0
+            if "username" in ligne:
+                bool = 1
+
+    print("Content-Type: text/html\r\n\r\n")
+ 
+    print("")
+    with open('avocat_now/cgi-bin/login_content/session_active.html', 'r') as f:
+        for ligne in f:
+            if "{username}" in ligne:
+                print(ligne.replace("{username}", username))
+            else:
+                print(ligne, end='')
+
+
 # Vérifier si le cookie de session existe
 
 def check_session():
@@ -46,8 +68,11 @@ if check_session() == True :
     # Afficher la page de déconnexion si l'utilisateur est déjà connecté
         
     # print('======================== COOKIE EXISTE ==================================')
-
-    generate_logout_page()
+    log = form.getvalue("log")
+    if log and log == "logout":
+        generate_logout_page()
+    else:
+        generate_session_active_page()
 else:
  
     # print('======================== COOKIE EXISTE PAS ==================================')

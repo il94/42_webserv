@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
 #include <string>
 #include <vector>
@@ -26,6 +27,7 @@ bool	openBrace(std::string &src, const int index);
 std::string					findInFileContent(const std::vector<std::string> &, const std::string &);
 std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string> &, const std::string &);
 
+int		isFile(std::string path);
 bool	isValidIP( const std::string & );
 
 template <typename T>

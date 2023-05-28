@@ -25,10 +25,14 @@ std::string	Response::generateAutoIndex()
 		<p>\n";
 
 	struct dirent	*readedDir = readdir(dir);
+
+	std::string URL = _request.getURL();
+	URL = URL.back() != '/' ? URL += '/' : URL;
+
 	while (readedDir)
 	{
 		autoIndex += "\t\t<p><a href=\"http://" + std::string("localhost") \
-			+ ":" + to_string(_port) +  _request.getURL() + "/" + std::string(readedDir->d_name)\
+			+ ":" + to_string(_port) + URL + std::string(readedDir->d_name)\
 			+ "\">" + std::string(readedDir->d_name) + "</a></p>\n";
 		readedDir = readdir(dir);
 	}

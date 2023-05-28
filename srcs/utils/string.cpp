@@ -25,6 +25,7 @@ std::string	to_string(size_t n)
 	return tmp.str();
 }
 
+extern bool running;
 std::vector<std::string> fileToVector( std::string path )
 {
 	std::vector<std::string>	result;
@@ -34,16 +35,18 @@ std::vector<std::string> fileToVector( std::string path )
 
 	std::ifstream	toRead(path.c_str());
 
-	if	(!toRead.good())
+	if	(!isFile(path) or !toRead.good() or path.find(".conf") == std::string::npos)
 	{
-		std::cout << "Invalid path file" << std::endl;
-		quick_exit(EXIT_FAILURE);
+		std::cerr << "Invalid path file" << std::endl;
+		running = false;
 	}
+	else
+	{
+		std::string 				buffer;
 
-	std::string 				buffer;
-
-	while (std::getline(toRead, buffer))
-		result.push_back(buffer);
+		while (std::getline(toRead, buffer))
+			result.push_back(buffer);
+	}
 	toRead.close();
 	return (result);
 }
@@ -136,6 +139,18 @@ std::vector<std::string>	multipleFindInFileContent(const std::vector<std::string
 		}
 	}
 	return (result);
+}
+
+int	isFile(std::string path)
+{
+	struct stat	stats;
+
+	if (stat(path.c_str(), &stats) == 0)
+	{
+		if (S_ISREG(stats.st_mode))
+			return 1;
+	}
+	return 0;
 }
 
 bool	isValidIP( const std::string &src )
