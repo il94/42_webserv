@@ -8,7 +8,7 @@ import os.path
 def generate_login_form():
     print("Content-Type: text/html\r\n\r\n")
     print("")
-    with open('avocat_now/cgi_test/cgi-bin/login_content/login.html', 'r') as f:
+    with open('avocat_now/cgi-bin/login_content/login.html', 'r') as f:
         for ligne in f:
             print(ligne, end='')
 
@@ -20,7 +20,7 @@ def generate_logout_page():
     print("Set-Cookie: username=; expires=Thu, 01 Jan 1970 00:00:00 GMT")
     print("Set-Cookie: password=; expires=Thu, 01 Jan 1970 00:00:00 GMT\r\n\r\n")
     print("")
-    with open('avocat_now/cgi_test/cgi-bin/login_content/logout.html', 'r') as f:
+    with open('avocat_now/cgi-bin/login_content/logout.html', 'r') as f:
         for ligne in f:
             print(ligne, end='')
 
@@ -72,7 +72,7 @@ else:
             print("Set-Cookie: password=", password, "\r\n\r\n")  # Définir le cookie de password
             print("")
 
-            with open('avocat_now/cgi_test/cgi-bin/login_content/session_active.html', 'r') as f:
+            with open('avocat_now/cgi-bin/login_content/session_active.html', 'r') as f:
                 for ligne in f:
                     if "{username}" in ligne:
                         print(ligne.replace("{username}", username))
@@ -92,7 +92,7 @@ else:
             # Afficher à nouveau le formulaire de connexion avec un message d'erreur
             print("Content-Type: text/html\r\n\r\n")
             print("")
-            with open('avocat_now/cgi_test/cgi-bin/login_content/login_invalid.html', 'r') as f:
+            with open('avocat_now/cgi-bin/login_content/login_invalid.html', 'r') as f:
                 for ligne2 in f:
                     print(ligne2, end='')
     else:

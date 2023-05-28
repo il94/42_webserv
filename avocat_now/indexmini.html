@@ -1,33 +1,29 @@
 <!DOCTYPE html>
-<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="css/stylemini.css">
-    <title>AvocatNow</title>
 </head>
 
 <body>
-    <header>
-        <nav class="d-flex">
-            <div>
-                <form method="post" action="cgi_test/cgi-bin/login.py">
-                    <input id="avocat" type="button" value="Êtes-vous avocat ?">
-                    <button id="connexion" href=""> Connexion</button>
-                </form>
-            </div>
-        </nav>
-        <section>
-			<div class="formulaire">
-				<h1>Trouvez un rendez-vous</h1>
-				<input id="secteur_dactivite" type="text" placeholder="Secteur d'activité">
-				<input id="expertise" type="text" placeholder="Expertise">
-				<input id="rechercher" type="button" value="RECHERCHER">
-			</div>
-        </section>
-    </header>
+    <nav class="d-flex">
+        <div class="buttons">
+            <input id="avocat" type="button" value="Êtes-vous avocat ?">
+            <a href="cgi-bin/login.py"><button id="button">Connexion</button></a>
+            <a href="cgi-bin/upload_content/upload.html"><button id="button">Upload</button></a>
+            <a href="cgi-bin/upload_content/multiupload.html"><button id="button">Multi Upload</button></a>
+            <a href="cgi-bin/contact_content/contact_py.html"><button id="button">Contact PY</button></a>
+            <a href="cgi-bin/contact_content/contact_php.html"><button id="button">Contact PHP</button></a>
+        </div>
+    </nav>
+    <section>
+        <div class="formulaire">
+            <h1>Trouvez un rendez-vous</h1>
+            <input id="secteur_dactivite" type="text" placeholder="Secteur d'activité">
+            <input id="expertise" type="text" placeholder="Expertise">
+            <input id="rechercher" type="button" value="RECHERCHER">
+        </div>
+    </section>
 </body>
 </html>

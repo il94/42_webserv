@@ -5,12 +5,13 @@ body{
 }
 
 nav{
-    justify-content: space-between;
+	display: flex;
+	justify-content: space-between;
     align-items: center;
     margin: 0 2em;
 }
 
-nav img{
+nav > img{
     height: 3em;
 }
 

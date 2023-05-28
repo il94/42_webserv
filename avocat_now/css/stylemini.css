@@ -16,7 +16,7 @@ nav input{
     font-weight: bold;
 }
 
-#connexion{
+#button{
     text-align: center;
     border: 1px solid #2F54F2;
     padding: 0.6em 1em;
@@ -67,13 +67,8 @@ section{
 	height: 40px;
 	border: 0px;
 	background-color: rgba(226, 226, 225, 0.902);
-	/* color:#BBB; */
 	box-shadow: 0px 1px 2px 0px #656565;
 	text-align: center;
-	font-size: 95%;
-	display: block;
-	background-position-y: 50%;
-	background-repeat: no-repeat;
 }
 
 #rechercher{
