@@ -2,9 +2,6 @@
 
 import cgi
 
-while 1:
-	pass
-
 form = cgi.FieldStorage()
 
 username = form.getvalue("username")
