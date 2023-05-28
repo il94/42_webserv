@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/24 16:00:47 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 20:34:07 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,8 +239,8 @@ void	Response::GET(void)
 				}
 			}
 
-			_response = _response.substr(bodyPosition + 2);
-			_response = generateHeader(_response.size(), "") + _response;
+			_response = _response.substr(bodyPosition + 4);
+			_response = generateHeader(_response.size(), "") + "\r\n" + _response;
 			return ;
 		}
 	}
@@ -300,7 +300,7 @@ void	Response::POST(void)
 							_cookies.push_back(value);
 					}
 				}
-				_response = _response.substr(bodyPosition + 2);
+				_response = _response.substr(bodyPosition + 4);
 
 			}
 		}
@@ -312,7 +312,7 @@ void	Response::POST(void)
 	}
 	if (_code != 200 && _code != 204)
 		_response = readErrorPage(_config.getErrorPages(to_string(_code)));
-	_response = generateHeader(_response.size(), "") + _response;
+	_response = generateHeader(_response.size(), "") + "\r\n" + _response;
 }
 
 void	Response::DELETE(void)
