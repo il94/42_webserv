@@ -16,6 +16,7 @@ Config::Config() : _error(false) {
 	_errorPages.insert(std::pair<std::string, std::string>("413", "default_files/413.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("422", "default_files/422.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("500", "default_files/500.html"));
+	_errorPages.insert(std::pair<std::string, std::string>("504", "default_files/504.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("default", "default_files/defaultError.html"));
 	_errorPages.insert(std::pair<std::string, std::string>("default_404", "default_files/404.html"));
 	_defaultLocation.setIndex("default_files/index.html");

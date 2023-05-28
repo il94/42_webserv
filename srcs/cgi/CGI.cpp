@@ -67,7 +67,8 @@ std::string CGI::execCGI(std::string scriptPath)
 		int				pipefd_output[2];
 
 		std::string		output = "";
-		const char		*failedSTR = "Status: 500\r\n\r\n";
+		const char		*internalError = "Status: 500\r\n\r\n";
+		const char		*timeOutError = "Status: 504\r\n\r\n";
 
 		setEnv();
 		pipe(pipefd_input);
@@ -88,7 +89,7 @@ std::string CGI::execCGI(std::string scriptPath)
 			execve(scriptPath.c_str(), nll, _env);
 			std::cerr << RED << "Execve failed\n" << END << std::endl;
 
-			write(pipefd_output[1], failedSTR, strlen(failedSTR));
+			write(pipefd_output[1], internalError, strlen(internalError));
 			close(pipefd_input[0]);
 			close(pipefd_output[1]);
 			for (size_t i = 0; _env[i]; i++)
@@ -119,6 +120,7 @@ std::string CGI::execCGI(std::string scriptPath)
 					break ;
 				else if (static_cast<float>((std::clock() - start) / CLOCKS_PER_SEC)  >= TIMEOUT_CGI)
 				{
+					output = timeOutError;
 					kill(pid, SIGTERM);
 					break ;
 				}
@@ -129,7 +131,7 @@ std::string CGI::execCGI(std::string scriptPath)
 		else
 		{
 			std::cerr << RED << "Fork failed\n" << END << std::endl;
-			return std::string(failedSTR);
+			return std::string(internalError);
 		}
 		for (size_t i = 0; _env[i]; i++)
 			delete[] _env[i];

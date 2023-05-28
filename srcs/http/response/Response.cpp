@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/28 21:03:23 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 21:25:41 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -699,4 +699,5 @@ void	Response::initStatusMsg()
 	_statusMsg[405] = "Method Not Allowed";
 	_statusMsg[422] = "Unprocessable Entity";
 	_statusMsg[500] = "Internal Server Error";
+	_statusMsg[504] = "Gateway Timeout";
 }
