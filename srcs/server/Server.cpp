@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 15:26:30 by ilandols          #+#    #+#             */
-/*   Updated: 2023/05/24 20:22:09 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 21:09:55 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,10 +235,10 @@ void	Server::run(void)
 		if ( nbEvents == -1 )
 			this->_displayError( __func__, __LINE__, "what)run/epoll_wait" );
 		client.checkClock();
-		for (int i = 0; i < nbEvents; i++)
+		for (int i = 0; running and i < nbEvents; i++)
 		{
 			cliSocket = -1;
-			for ( size_t j = 0; j < client.size(); j++ )
+			for ( size_t j = 0; running and j < client.size(); j++ )
 			{
 				if ( client.find( cliEvents[i].data.fd ) != -1 )
 				{
@@ -268,7 +268,7 @@ void	Server::run(void)
 					}
 				}
 			}
-			for (size_t k = 0; k < this->_getNbSrv(); k++)
+			for (size_t k = 0; running and k < this->_getNbSrv(); k++)
 			{
 				if ( cliEvents[i].data.fd == this->_getSrvFd( k ) )
 				{
@@ -411,16 +411,20 @@ int	Server::_storeResponse( Client & client, const int & cliSocket, std::string 
 	}
 
 	rep = client.getClassResponsePTR( cliSocket );
-	/*if (rep == NULL) to add */
+	if (rep == NULL)
+	{
+		running = false;
+		return (0);
+	}
 	
 	(*rep).setContent( client.getUploadPTR( cliSocket ));
 
 	(*rep).generate();
 
-	if ((*rep).getUploadStatu() == READ)
-		client.unSetFlag(cliSocket, READ);
-	if ((*rep).getUploadStatu() == EMPTY) /*tmp*/
-		client.unSetFlag(cliSocket, READ);
+	if (running == false)
+		return (0);
+
+	client.unSetFlag(cliSocket, READ);
 	client.setFlag(cliSocket, (*rep).getUploadStatu());
 	if ( client.getFlag( cliSocket ) == EMPTY || client.getFlag( cliSocket ) & STOP )
 		client.newResponse( cliSocket, (*rep).getResponse() );

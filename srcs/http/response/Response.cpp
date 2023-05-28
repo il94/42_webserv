@@ -6,7 +6,7 @@
 /*   By: ilandols <ilandols@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/31 13:44:27 by auzun             #+#    #+#             */
-/*   Updated: 2023/05/28 20:34:07 by ilandols         ###   ########.fr       */
+/*   Updated: 2023/05/28 21:03:23 by ilandols         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,7 @@ void	Response::generate()
 	}
 }
 
+extern bool running;
 void	Response::GET(void)
 {
 	if (findCookie() == true)
@@ -206,6 +207,8 @@ void	Response::GET(void)
 	{
 		CGI cgi(_request);
 		_response = cgi.execCGI(_path);
+		if (running == false)
+			return ;
 		while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 			_response.erase(0, 1);
 			
@@ -269,6 +272,8 @@ void	Response::POST(void)
 		{
 			CGI cgi(_request);
 			_response = cgi.execCGI(_path);
+			if (running == false)
+				return ;
 			while (!_response.empty() && (_response[0] == '\n' || _response[0] == '\r'))
 				_response.erase(0, 1);
 			size_t	bodyPosition = _response.find("\r\n\r\n");

@@ -59,6 +59,7 @@ void	CGI::setEnv()
 	_env[j] = NULL;
 }
 
+extern bool running;
 std::string CGI::execCGI(std::string scriptPath)
 {
 		pid_t			pid;
@@ -93,7 +94,8 @@ std::string CGI::execCGI(std::string scriptPath)
 			for (size_t i = 0; _env[i]; i++)
 				delete[] _env[i];
 			delete[] _env;
-			exit(EXIT_FAILURE);
+			running = false;
+			return (output);
 		}
 		else if (pid > 0)
 		{
