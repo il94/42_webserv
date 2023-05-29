@@ -469,6 +469,11 @@ std::string	Response::readErrorPage(const std::string & path)
 		_contentType = "text/html";
 		return (buffer.str());
 	}
+	else if (path == "default_files/404.html")
+	{
+		_contentType = "text/plain";
+		return ("Error: default error pages corrupted.");
+	}
 	return (readErrorPage(_config.getErrorPages("default_404")));
 }
 
